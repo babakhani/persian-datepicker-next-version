@@ -16,21 +16,20 @@ const preprocess = sveltePreprocess({
   },
 })
 const production = !process.env.ROLLUP_WATCH
-export default {
-  input: 'src/main.js',
+export default { input: 'src/main.js',
   output: {
     sourcemap: true,
     format: 'iife',
     extend: true,
     name: pkg.name,
-    file: `public/zerounip.js`,
+    file: `dist/zerounip.js`,
   },
   plugins: [
     svelte({
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`public/zerounip.css`)
+        css.write(`dist/zerounip.css`)
       },
     }),
     resolve({
@@ -40,7 +39,7 @@ export default {
     }),
     commonjs(),
     !production && rollup_start_dev,
-    !production && livereload('public'),
+    !production && livereload('dist'),
     production && terser(),
     banner(`
 <%= pkg.name %>
@@ -51,6 +50,9 @@ license <%= pkg.license %>
     `),
   ],
   watch: {
+    chokidar: {
+      usePolling: true
+    },
     clearScreen: false,
-  },
+  }
 }

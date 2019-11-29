@@ -12,7 +12,7 @@ const preprocess = sveltePreprocess({
   },
   postcss: {
     plugins: [require('autoprefixer')],
-  },
+  }
 })
 const production = !process.env.ROLLUP_WATCH
 export default {
@@ -22,14 +22,14 @@ export default {
     format: 'esm',
     extend: true,
     name: pkg.name,
-    file: `public/zerounip-vue.js`,
+    file: `dist/zerounip-vue.js`,
   },
   plugins: [
     svelte({
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`public/zerounip.css`)
+        css.write(`dist/zerounip.css`)
       },
     }),
     resolve({
@@ -48,6 +48,9 @@ license <%= pkg.license %>
     `),
   ],
   watch: {
+    chokidar: {
+      usePolling: true
+    },
     clearScreen: false,
-  },
+  }
 }

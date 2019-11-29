@@ -22,14 +22,14 @@ export default {
     format: 'iife',
     extend: true,
     name: 'zerounip',
-    file: `public/zerounip-iife.js`,
+    file: `dist/zerounip-iife.js`,
   },
   plugins: [
     svelte({
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`public/zerounip.css`)
+        css.write(`dist/zerounip.css`)
       },
     }),
     resolve({
@@ -48,6 +48,9 @@ license <%= pkg.license %>
     `),
   ],
   watch: {
+    chokidar: {
+      usePolling: true
+    },
     clearScreen: false,
   },
 }

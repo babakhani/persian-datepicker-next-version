@@ -23,14 +23,14 @@ export default {
     format: 'esm',
     extend: true,
     name: pkg.name,
-    file: `public/zerounip-react.js`,
+    file: `dist/zerounip-react.js`,
   },
   plugins: [
     svelte({
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`public/zerounip.css`)
+        css.write(`dist/zerounip.css`)
       },
     }),
     resolve({
@@ -50,6 +50,9 @@ license <%= pkg.license %>
     cleanup(),
   ],
   watch: {
+    chokidar: {
+      usePolling: true
+    },
     clearScreen: false,
   },
 }

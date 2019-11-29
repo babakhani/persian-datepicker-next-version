@@ -2,7 +2,7 @@
   <div id="app">
     <img
       alt="Vue logo"
-      src="./logo.png"
+      src="../public/logo.png"
     />
     <SveltePlugin
       :options="{
@@ -14,9 +14,9 @@
   </div>
 </template>
 <script>
-import SveltePlugin from '../../../public/zerounip-vue.js'
+import SveltePlugin from '../../../dist/zerounip-vue.js'
 // eslint-disable-next-line no-unused-vars
-import styles from '../../../public/zerounip.css'
+import styles from '../../../dist/zerounip.css'
 export default {
   name: 'App',
   components: { SveltePlugin },
@@ -32,6 +32,10 @@ export default {
 </script>
 
 <style>
+html {
+  font-family: 'Open Sans', sans-serif;
+}
+
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

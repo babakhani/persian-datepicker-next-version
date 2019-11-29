@@ -1,19 +1,18 @@
 import { writable, readable, derived } from 'svelte/store'
 
 // Readable Example
-export const time = readable(new Date(), function start(set) {
+export const time = readable(new Date(), function start (set) {
   const interval = setInterval(() => {
     set(new Date())
   }, 1000)
 
-  return function stop() {
+  return function stop () {
     clearInterval(interval)
   }
 })
 
 // Writable Example
 export const count = writable(0)
-
 // Derived Example
 const start = new Date()
 export const elapsed = derived(time, $time =>
@@ -21,13 +20,13 @@ export const elapsed = derived(time, $time =>
 )
 
 // Custom Store
-export const countable = (function() {
+export const countable = (function () {
   const { subscribe, set, update } = writable(0)
   return {
     set: input => update(() => input),
     subscribe,
     increment: () => update(n => n + 1),
     decrement: () => update(n => n - 1),
-    reset: () => set(0),
+    reset: () => set(0)
   }
 })()
