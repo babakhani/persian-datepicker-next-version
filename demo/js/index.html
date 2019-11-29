@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>zerounip</title>
+  <link rel="stylesheet" href="zerounip.css">
+  <script type="text/javascript" src="./zerounip-iife.js" ></script>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    html {
+      font-family: 'Open Sans', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <img width="200" src="https://i.pinimg.com/originals/63/d0/8d/63d08d548b8215a571ff61f56e4f47c0.jpg" />
+  <h1> zerounip Pure javascript usage example </h1>
+  <div id="container" />
+  <script>
+    var container = document.getElementById('container')
+    var options = {
+      sampleConfig: 'Overwrite by plugin user',
+      onSampleEvent: function (args) {
+        console.log('onSampleEvent passed from applicaiton')
+      }
+    }
+    zerounip(container, options)
+  </script>
+</body>
+</html>
