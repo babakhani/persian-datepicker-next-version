@@ -3,9 +3,9 @@ import resolve from 'rollup-plugin-node-resolve'
 import commonjs from 'rollup-plugin-commonjs'
 import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
-import rollup_start_dev from './rollup_start_dev'
+import rollup_start_dev from '../rollup_start_dev'
 import banner from 'rollup-plugin-banner'
-import pkg from './package.json'
+import pkg from '../package.json'
 import sveltePreprocess from 'svelte-preprocess'
 const preprocess = sveltePreprocess({
   scss: {
@@ -16,7 +16,7 @@ const preprocess = sveltePreprocess({
   },
 })
 const production = !process.env.ROLLUP_WATCH
-export default { input: 'src/main.js',
+export default { input: 'adapter/main.js',
   output: {
     sourcemap: true,
     format: 'iife',

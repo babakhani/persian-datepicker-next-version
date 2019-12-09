@@ -49,7 +49,7 @@
     "clear": "kill-port --port 8000,8001,8002,8003",
     "svelte:build": "rollup -c",
     "build": "npm run lint; npm-run-all -p svelte:build vue:build react:build iife:build",
-    "dev": "rollup -c ./rollup.config.js  -w",
+    "dev": "rollup -c ./adapter/rollup.svelte.js  -w",
     "install-vue": "cd ./demo/vue; npm install; cd ../../",
     "vue:build": "rollup -c ./adapter/rollup.vue.js",
     "vue:dev": "rollup -c ./adapter/rollup.vue.js -w",
@@ -89,5 +89,8 @@
     "svelteSortOrder": "markup-scripts-styles",
     "svelteStrictMode": true,
     "singleQuote": true
+  },
+  "dependencies": {
+    "persian-date": "^1.1.0"
   }
 }

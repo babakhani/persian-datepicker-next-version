@@ -1,109 +1,112 @@
-<!-- 
-UNIP_NOTE: this is just an example to start writing your own amazing plugin,
-none of this codes are necessary
--->
-<div class="plugvelte-container">
-  <h1 class="center"> ZeroUnip Project </h1>
-  <div class="container">
-    <h2>Store Readable demo</h2>
-    <p>{dateFormatter.format($time)}</p>
-    <h2>Store Derived demo</h2>
-    <h3>{$elapsed}</h3>
-    <h5>Elapsed time after page loading:</h5>
-    <h2>Store Derived demo</h2>
-    <h3>{$countable}</h3>
-    <button on:click="{countable.decrement}">-</button>
-    <input type="number" bind:value="{$countable}" />
-    <button on:click="{countable.increment}">+</button>
-    <div class="spacer"></div>
-    <input type="range" min="0" max="1000" bind:value="{$countable}" />
-    <div class="spacer"></div>
-    <h2>Plugin Event Example</h2>
-    <div class="section">
-      <button on:mouseover="{onSampleEventOver}" on:click="{onSampleEvent}">
-        Add Count
-      </button>
-    </div>
-  </div>
+<div class="pwt-datepicker" >
+	<button on:click={today} > Today </button>
+	<button on:click={navNext} > Next </button>
+	<button on:click={navPrev} > Prev </button>
+	<Navigator
+	   bind:currentUnix={currentUnix} />
+	<br/>
+	<YearView
+       on:select="{ onSelectYear }"
+	   bind:currentUnix={currentUnix} />
+	<br/>
+	<MonthView
+       on:select="{ onSelectMonth }"
+	   bind:currentUnix={currentUnix} />
+	<br/>
+	<TimeView
+	   bind:currentUnix={currentUnix} />
+	<br/>
+	<DateView 
+       on:selectDate="{ onSelectDate }"
+	   bind:todayUnix={todayUnix}
+	   bind:selectedUnix={currentUnix}
+	   bind:currentUnix={currentUnix} />
 </div>
-
 <script>
+	import { createEventDispatcher } from 'svelte'
+    import persianDate from 'persian-date'
+    import YearView from './components/YearView.svelte'
+    import MonthView from './components/MonthView.svelte'
+    import DateView from './components/DateView.svelte'
+    import TimeView from './components/TimeView.svelte'
+    import Navigator from './components/Navigator.svelte'
+    import config from './config.js'
 
-import { createEventDispatcher } from 'svelte'
+    import { time, elapsed, countable } from './stores.js'
+	// Public props
+    export let options
 
-// UNIP_NOTE: Place your plugin configuration in this file
-import Options from './options'
+    // Merge default options with given options
+    if (!options) {
+      //options = Options
+    } else {
+      //options = Object.assign(Options, options)
+	}
 
-// UNIP_NOTE: States that imported from store
-import { time, elapsed, countable } from './stores'
+	let currentDate =  new persianDate()
+	let currentUnix = currentDate.unix() * 1000
+	let todayUnix =  new persianDate().unix() * 1000
 
-// UNIP_NOTE: Public props
-export let options
+    // Public events
+    const dispatch = createEventDispatcher()
+    const dispatcher = function(input) {
+      if (options[input]) {
+        return event => options[input](event)
+      } else {
+        return event => dispatch(input, event)
+      }
+	}
 
-// UNIP_NOTE: Merge default options with given options
-if (!options) {
-  options = Options
-} else {
-  options = Object.assign(Options, options)
-}
+    const onSelectDate = function (payload) {
+		console.log('on select date')
+		console.log(payload.detail.payload)
+		currentDate = payload.detail.payload
+	    currentUnix = currentDate.unix() * 1000
+       //dispatcher('onSampleEvent')()
+	}
 
-// UNIP_NOTE: Public events
-const dispatch = createEventDispatcher()
-const dispatcher = function (input) {
-  if (options[input]) {
-    return event => options[input](event)
-  } else {
-    return event => dispatch(input, event)
-  }
-}
+    const onSelectMonth = function (payload) {
+		console.log('on select month')
+		console.log(payload)
+		currentDate = currentDate.month(payload.detail.payload)
+	    currentUnix = currentDate.unix() * 1000
+       //dispatcher('onSelectYear')()
+	}
 
-// UNIP_NOTE: Formatter
-const dateFormatter = new Intl.DateTimeFormat('en', {
-  hour12: true,
-  hour: 'numeric',
-  minute: '2-digit',
-  second: '2-digit'
-})
+    const onSelectYear = function (payload) {
+		console.log('on select year')
+		console.log(payload.detail.payload)
+		currentDate = currentDate.year(payload.detail.payload)
+	    currentUnix = currentDate.unix() * 1000
+       //dispatcher('onSelectYear')()
+	}
 
-// UNIP_NOTE: Private event
-const onSampleEventOver = function () {
-  dispatcher('onSampleEventOver')()
-}
-const onSampleEvent = function () {
-  countable.increment(n => n + 1)
-  dispatcher('onSampleEvent')()
-}
+	let navNext = () => {
+		currentDate = currentDate.add('month', 1)
+	    currentUnix = currentDate.unix() * 1000
+	}
+
+	let today = () => {
+	    currentUnix = new persianDate()
+	}
+
+	let navPrev = () => {
+		currentDate = currentDate.subtract('month', 1)
+	    currentUnix = currentDate.unix() * 1000
+	 }
 </script>
 
-<style global lang="scss">
-  /*
-   UNIP_NOTE: You can write your styles either in  each component file or in
-   seperated files
-  */
-  @import './theme.scss';
-  .plugvelte-container {
-    color: $primarycolor;
-    .center {
-      text-align: center;
-    }
-    .spacer {
-      display: block;
-      width: 100%;
-      height: 20px;
-    }
-    .container {
-      width: 450px;
-      margin: auto;
-      border-radius: 8px;
-      padding: 2rem;
-      background: $globalBackgroundColor;
-    }
-
-    h3,
-    h2 {
-      margin-bottom: 10px;
-      margin-top: 0;
-      padding-top: 0;
-    }
-  }
+<style>
+	body {
+        font-size: 12px;
+	 }
+	*{
+   direction: rtl;
+	}
+	td {
+	width: 40px;
+	height: 80px;
+      padding: 2em;
+	}
 </style>
+
