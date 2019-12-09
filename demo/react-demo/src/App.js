@@ -10,7 +10,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <SveltePlugin
-          onSvelteclick={handleClick}
+          onOnSampleEvent={handleClick}
           name="(attr passed from react js to svlete)"
         />
       </header>
