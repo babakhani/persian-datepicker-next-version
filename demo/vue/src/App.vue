@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <img
+      class="vue-logo"
       alt="Vue logo"
       src="../public/logo.png"
     />
@@ -36,10 +37,12 @@ html {
   font-family: 'Open Sans', sans-serif;
 }
 
+.vue-logo { 
+  display: block;
+  margin: 0 auto;
+}
+
 #app {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   margin-top: 60px;
 }

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "webpack": "4.41.0",
     "react-app-rewired": "^2.1.5",
     "customize-cra": "^0.9.1",
     "react": "^16.11.0",
