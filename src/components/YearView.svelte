@@ -10,6 +10,7 @@
 	import { time, elapsed, countable } from '../stores.js'
 	import persianDate from 'persian-date'
 	export let currentUnix
+	export let currentViewUnix
     import { createEventDispatcher } from 'svelte'
     const dispatch = createEventDispatcher()
     function select(payload) {
@@ -17,7 +18,7 @@
       	  payload: payload
         })
     }
-	$: currentUnixDate =  new persianDate(currentUnix).format('MMMM')
+	$: currentViewDate =  new persianDate(currentViewUnix).format('MMMM')
 	$: currentYear =  new persianDate(currentUnix).year()
 	let yearRange
 	let startYear

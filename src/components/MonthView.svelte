@@ -12,6 +12,7 @@
 	import persianDate from 'persian-date'
     import { createEventDispatcher } from 'svelte'
 	export let currentUnix
+	export let currentViewUnix
     const dispatch = createEventDispatcher()
     function select(payload) {
         dispatch('select', {
@@ -19,7 +20,7 @@
         })
     }
     let monthRange = new persianDate().rangeName().months
-	$: currentUnixDate =  new persianDate(currentUnix).format('MMMM')
+	$: currentUnixDate =  new persianDate(currentViewUnix).format('MMMM')
 	$: currentMonth =  new persianDate(currentUnix).month()
 
 </script>

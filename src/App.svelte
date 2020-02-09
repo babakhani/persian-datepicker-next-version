@@ -3,24 +3,26 @@
 	<button on:click={navNext} > Next </button>
 	<button on:click={navPrev} > Prev </button>
 	<Navigator
-	   bind:currentUnix={currentUnix} />
+	   currentUnix={currentUnix} />
 	<br/>
 	<YearView
        on:select="{ onSelectYear }"
-	   bind:currentUnix={currentUnix} />
+	   currentViewUnix={currentUnix}
+	   currentUnix={currentUnix} />
 	<br/>
 	<MonthView
        on:select="{ onSelectMonth }"
-	   bind:currentUnix={currentUnix} />
+	   currentViewUnix={currentUnix}
+	   currentUnix={currentUnix} />
 	<br/>
 	<TimeView
-	   bind:currentUnix={currentUnix} />
+	   currentUnix={currentUnix} />
 	<br/>
 	<DateView 
        on:selectDate="{ onSelectDate }"
-	   bind:todayUnix={todayUnix}
-	   bind:selectedUnix={currentUnix}
-	   bind:currentUnix={currentUnix} />
+	   todayUnix={todayUnix}
+	   selectedUnix={currentUnix}
+	   currentUnix={currentUnix} />
 </div>
 <script>
 	import { createEventDispatcher } from 'svelte'
@@ -43,8 +45,10 @@
       //options = Object.assign(Options, options)
 	}
 
+
 	let currentDate =  new persianDate()
-	let currentUnix = currentDate.unix() * 1000
+	$: currentUnix = currentDate.unix() * 1000
+
 	let todayUnix =  new persianDate().unix() * 1000
 
     // Public events
@@ -61,7 +65,7 @@
 		console.log('on select date')
 		console.log(payload.detail.payload)
 		currentDate = payload.detail.payload
-	    currentUnix = currentDate.unix() * 1000
+	    //currentUnix = currentDate.unix() * 1000
        //dispatcher('onSampleEvent')()
 	}
 
@@ -69,7 +73,7 @@
 		console.log('on select month')
 		console.log(payload)
 		currentDate = currentDate.month(payload.detail.payload)
-	    currentUnix = currentDate.unix() * 1000
+	    //currentUnix = currentDate.unix() * 1000
        //dispatcher('onSelectYear')()
 	}
 
@@ -77,22 +81,22 @@
 		console.log('on select year')
 		console.log(payload.detail.payload)
 		currentDate = currentDate.year(payload.detail.payload)
-	    currentUnix = currentDate.unix() * 1000
+	    //currentUnix = currentDate.unix() * 1000
        //dispatcher('onSelectYear')()
 	}
 
 	let navNext = () => {
 		currentDate = currentDate.add('month', 1)
-	    currentUnix = currentDate.unix() * 1000
+	    //currentUnix = currentDate.unix() * 1000
 	}
 
 	let today = () => {
-	    currentUnix = new persianDate()
+	    currentDate = new persianDate()
 	}
 
 	let navPrev = () => {
 		currentDate = currentDate.subtract('month', 1)
-	    currentUnix = currentDate.unix() * 1000
+	    //currentUnix = currentDate.unix() * 1000
 	 }
 </script>
 
