@@ -67,27 +67,19 @@
 
     const onSelectDate = function (payload) {
 		console.log('on select date')
-		console.log(payload.detail.payload)
-		currentDate = payload.detail.payload
-	    //currentUnix = currentDate.unix() * 1000
-       //dispatcher('onSampleEvent')()
+		dispatcher("onSelectDate")(payload);
 	}
 
     const onSelectMonth = function (payload) {
 		console.log('on select month in app')
 		currentDate = currentDate.month(payload.detail.payload)
-	    //currentUnix = currentDate.unix() * 1000
-			 //dispatcher('onSelectYear')()
 		dispatcher("onSelectMonth")(payload);
 		
 	}
 
     const onSelectYear = function (payload) {
-		console.log('on select year')
-		console.log(payload.detail.payload)
-		currentDate = currentDate.year(payload.detail.payload)
-	    //currentUnix = currentDate.unix() * 1000
-       //dispatcher('onSelectYear')()
+		console.log('on select year', payload.detail.payload)
+		dispatcher("onSelectMonth")(payload);
 	}
 
 	let navNext = () => {

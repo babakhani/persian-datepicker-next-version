@@ -37,6 +37,7 @@ export class Store {
     this.updateIsDirty(true);
   }
   setYear(year) {
+    // currentDate.year(year)
     selectedDate.set(
       new Date(
         new persianDate(get(selectedDate))
