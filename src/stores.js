@@ -1,5 +1,5 @@
 import persianDate from "persian-date";
-import { writable, get } from "svelte/store";
+import { writable, readable, derived, get } from "svelte/store";
 export const isDirty = writable(false);
 export const selectedDate = writable(null);
 export const selectedViewMode = writable("month"); // [date, month, year]
@@ -9,7 +9,7 @@ export const minDate = writable(null);
 export const maxDate = writable(null);
 export const selectedCalendar = writable("persian"); // [perisna, gregorian]
 
-export default class Store {
+export class Store {
   onSelectDate(date) {
     this.setSelectedDate(date);
     this.updateIsDirty(true);
@@ -19,7 +19,6 @@ export default class Store {
   }
   onSelectMonth(month) {
     console.log("onSelectMonth...", month);
-
     // this.setMonth(month);
     // this.setViewMode("day");
     this.updateIsDirty(true);

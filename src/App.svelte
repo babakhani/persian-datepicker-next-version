@@ -33,10 +33,12 @@
     import TimeView from './components/TimeView.svelte'
     import Navigator from './components/Navigator.svelte'
     import config from './config.js'
+		import { Store } from './stores.js'
 
-    import { time, elapsed, countable } from './stores.js'
+		const store = new Store();
+
 	// Public props
-    export let options
+    export let options = {}
 
     // Merge default options with given options
     if (!options) {
@@ -55,9 +57,11 @@
     const dispatch = createEventDispatcher()
     const dispatcher = function(input) {
       if (options[input]) {
-        return event => options[input](event)
+				return event => options[input](event)
       } else {
-        return event => dispatch(input, event)
+        return event => {
+					store[input](event.detail.payload)
+				}
       }
 	}
 
@@ -70,11 +74,12 @@
 	}
 
     const onSelectMonth = function (payload) {
-		console.log('on select month')
-		console.log(payload)
+		console.log('on select month in app')
 		currentDate = currentDate.month(payload.detail.payload)
 	    //currentUnix = currentDate.unix() * 1000
-       //dispatcher('onSelectYear')()
+			 //dispatcher('onSelectYear')()
+		dispatcher("onSelectMonth")(payload);
+		
 	}
 
     const onSelectYear = function (payload) {
