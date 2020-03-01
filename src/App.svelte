@@ -33,9 +33,7 @@
     import TimeView from './components/TimeView.svelte'
     import Navigator from './components/Navigator.svelte'
     import config from './config.js'
-		import { Store } from './stores.js'
-
-		const store = new Store();
+		import { actions } from './stores.js'
 
 	// Public props
     export let options = {}
@@ -60,7 +58,7 @@
 				return event => options[input](event)
       } else {
         return event => {
-					store[input](event.detail.payload)
+					actions[input](event.detail.payload)
 				}
       }
 	}
@@ -79,7 +77,7 @@
 
     const onSelectYear = function (payload) {
 		console.log('on select year', payload.detail.payload)
-		dispatcher("onSelectMonth")(payload);
+		dispatcher("onSelectYear")(payload);
 	}
 
 	let navNext = () => {
