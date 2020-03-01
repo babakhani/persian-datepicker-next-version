@@ -3,19 +3,19 @@
   <button on:click="{navNext}">Next</button>
   <button on:click="{navPrev}">Prev</button>
   <!-- navigator -->
-  <Navigator {selectedUnix} />
+  <Navigator selectedUnix="{$selectedUnix}" />
   <br />
   <!-- year view -->
   <YearView
     on:select="{onSelectYear}"
-    currentViewUnix="{selectedUnix}"
-    {selectedUnix} />
+    viewUnix="{$viewUnix}"
+    selectedUnix="{$selectedUnix}" />
   <br />
   <!-- month view -->
   <MonthView
     on:select="{onSelectMonth}"
-    currentViewUnix="{selectedUnix}"
-    {selectedUnix} />
+    viewUnix="{$viewUnix}"
+    selectedUnix="{$selectedUnix}" />
   <br />
   <!-- time view -->
   <TimeView {selectedUnix} />
@@ -24,8 +24,8 @@
   <DateView
     on:selectDate="{onSelectDate}"
     {todayUnix}
-    {selectedUnix}
-    {viewUnix} />
+    selectedUnix="{$selectedUnix}"
+    viewUnix="{$viewUnix}" />
 </div>
 
 <script>
@@ -37,8 +37,8 @@
   import TimeView from './components/TimeView.svelte'
   import Navigator from './components/Navigator.svelte'
   import config from './config.js'
-  import { actions, selectedUnix, viewUnix } from './stores.js'
   import { persianDateToUnix } from './helpers.js'
+  import { actions, selectedUnix, viewUnix } from './stores.js'
 
   // Public props
   export let options = {}

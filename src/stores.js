@@ -1,9 +1,12 @@
 import persianDate from 'persian-date'
 import { persianDateToUnix } from './helpers.js'
 import { writable, get } from 'svelte/store'
+
+const nowUnix = persianDateToUnix(new persianDate())
 export const isDirty = writable(false)
-export const selectedUnix = writable(null)
-export const viewUnix = writable(new Date())
+// TODO get default value from config by more priority
+export const selectedUnix = writable(nowUnix)
+export const viewUnix = writable(nowUnix)
 export const viewMode = writable('month') // [date, month, year]
 export const isOpen = writable(false)
 export const minUnix = writable(null)
