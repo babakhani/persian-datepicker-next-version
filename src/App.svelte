@@ -3,29 +3,29 @@
   <button on:click="{navNext}">Next</button>
   <button on:click="{navPrev}">Prev</button>
   <!-- navigator -->
-  <Navigator {currentUnix} />
+  <Navigator {selectedUnix} />
   <br />
   <!-- year view -->
   <YearView
     on:select="{onSelectYear}"
-    currentViewUnix="{currentUnix}"
-    {currentUnix} />
+    currentViewUnix="{selectedUnix}"
+    {selectedUnix} />
   <br />
   <!-- month view -->
   <MonthView
     on:select="{onSelectMonth}"
-    currentViewUnix="{currentUnix}"
-    {currentUnix} />
+    currentViewUnix="{selectedUnix}"
+    {selectedUnix} />
   <br />
   <!-- time view -->
-  <TimeView {currentUnix} />
+  <TimeView {selectedUnix} />
   <br />
   <!-- date view -->
   <DateView
     on:selectDate="{onSelectDate}"
     {todayUnix}
-    selectedUnix="{currentUnix}"
-    {currentUnix} />
+    {selectedUnix}
+    {viewUnix} />
 </div>
 
 <script>
@@ -37,7 +37,7 @@
   import TimeView from './components/TimeView.svelte'
   import Navigator from './components/Navigator.svelte'
   import config from './config.js'
-  import { actions } from './stores.js'
+  import { actions, selectedUnix, viewUnix } from './stores.js'
 
   // Public props
   export let options = {}
@@ -48,11 +48,6 @@
   } else {
     //options = Object.assign(Options, options)
   }
-
-  let currentDate = new persianDate()
-  $: currentUnix = currentDate.unix() * 1000
-
-  let todayUnix = new persianDate().unix() * 1000
 
   // Public events
   const dispatch = createEventDispatcher()
@@ -67,7 +62,6 @@
   }
 
   const onSelectDate = function(payload) {
-    console.log('on select date')
     dispatcher('onSelectDate')(payload)
   }
 
@@ -83,7 +77,7 @@
 
   let navNext = () => {
     currentDate = currentDate.add('month', 1)
-    //currentUnix = currentDate.unix() * 1000
+    //selectedUnix = currentDate.unix() * 1000
   }
 
   let today = () => {
@@ -92,7 +86,7 @@
 
   let navPrev = () => {
     currentDate = currentDate.subtract('month', 1)
-    //currentUnix = currentDate.unix() * 1000
+    //selectedUnix = currentDate.unix() * 1000
   }
 </script>
 

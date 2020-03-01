@@ -1,21 +1,28 @@
 import persianDate from 'persian-date'
-import { writable, readable, derived, get } from 'svelte/store'
+import { writable, get } from 'svelte/store'
 export const isDirty = writable(false)
-export const selectedDate = writable(null)
-export const selectedViewMode = writable('month') // [date, month, year]
-export const selectedViewDate = writable(new Date())
+export const selectedUnix = writable(null)
+export const viewUnix = writable(new Date())
+export const viewMode = writable('month') // [date, month, year]
 export const isOpen = writable(false)
-export const minDate = writable(null)
-export const maxDate = writable(null)
-export const selectedCalendar = writable('persian') // [persian, gregorian]
+export const minUnix = writable(null)
+export const maxUnix = writable(null)
+export const currentCalendar = writable('persian') // [persian, gregorian]
+
+const helpers = {
+  toUnix(pDate) {
+    return pDate.unix() * 1000
+  },
+}
 
 export const actions = {
-  onSelectDate(date) {
-    this.setSelectedDate(date)
+  onSelectDate(pDate) {
+    this.setSelectedDate(pDate)
     this.updateIsDirty(true)
   },
-  setSelectedDate(date) {
-    selectedDate.set(date)
+  setSelectedDate(pDate) {
+    const unix = helpers.toUnix(pDate)
+    selectedUnix.set(unix)
   },
   onSelectMonth(month) {
     console.log('onSelectMonth...', month)
@@ -37,63 +44,57 @@ export const actions = {
     this.updateIsDirty(true)
   },
   setYear(year) {
-    // currentDate.year(year)
-    selectedDate.set(
-      new Date(
-        new persianDate(get(selectedDate))
-          .toCalendar(get(selectedCalendar))
+    selectedUnix.set(
+      helpers.toUnix(
+        new persianDate(get(selectedUnix))
+          .toCalendar(get(currentCalendar))
           .year(year)
-          .unix() * 1000
       )
     )
   },
   setMonth(month) {
-    selectedDate.set(
-      new Date(
-        new persianDate(get(selectedDate))
-          .toCalendar(get(selectedCalendar))
+    selectedUnix.set(
+      helpers.toUnix(
+        new persianDate(get(selectedUnix))
+          .toCalendar(get(currentCalendar))
           .month(month)
-          .unix() * 1000
       )
     )
   },
-  setDate(dayOfMonth) {
-    selectedDate.set(
-      new Date(
-        new persianDate(get(selectedDate))
-          .toCalendar(get(selectedCalendar))
-          .date(dayOfMonth)
-          .unix() * 1000
+  /* @param {number} date - day of month */
+  setDate(date) {
+    selectedUnix.set(
+      helpers.toUnix(
+        new persianDate(get(selectedUnix))
+          .toCalendar(get(currentCalendar))
+          .date(date)
       )
     )
   },
   setHour(hour) {
-    selectedDate.set(
-      new Date(
-        new persianDate(get(selectedDate))
-          .toCalendar(get(selectedCalendar))
+    selectedUnix.set(
+      helpers.toUnix(
+        new persianDate(get(selectedUnix))
+          .toCalendar(get(currentCalendar))
           .hour(hour)
-          .unix() * 1000
       )
     )
   },
   setMinute(minute) {
-    selectedDate.set(
-      new Date(
-        new persianDate(get(selectedDate))
-          .toCalendar(get(selectedCalendar))
+    selectedUnix.set(
+      helpers.toUnix(
+        new persianDate(get(selectedUnix))
+          .toCalendar(get(currentCalendar))
           .minute(minute)
-          .unix() * 1000
       )
     )
   },
   setSecond(second) {
-    selectedDate.set(
-      new Date(
-        new persianDate(get(selectedDate))
-          .toCalendar(get(selectedCalendar))
+    selectedUnix.set(
+      helpers.toUnix(
+        new persianDate(get(selectedUnix))
+          .toCalendar(get(currentCalendar))
           .second(second)
-          .unix() * 1000
       )
     )
   },
@@ -102,44 +103,38 @@ export const actions = {
     this.setViewMode(viewMode)
   },
   setViewMode(viewMode) {
-    selectedViewMode.set(viewMode)
+    viewMode.set(viewMode)
   },
   updateIsDirty(value) {
     isDirty.set(value)
   },
-  setMinDate(date) {
-    minDate.set(date)
-    this.setSelectedDate(Math.max(get(selectedDate), get(minDate)))
+  setMinUnix(date) {
+    minUnix.set(date)
+    this.setSelectedDate(Math.max(get(selectedUnix), get(minUnix)))
   },
-  setMaxDate(date) {
-    maxDate.set(date)
-    this.setSelectedDate(Math.min(get(selectedDate), get(maxDate)))
+  setMaxUnix(date) {
+    maxUnix.set(date)
+    this.setSelectedDate(Math.min(get(selectedUnix), get(maxUnix)))
   },
   onSelectCalendar(calendar) {
     this.setCalendar(calendar)
   },
   setCalendar(calendar) {
-    selectedCalendar.set(calendar)
+    currentCalendar.set(calendar)
   },
   onSelectNextView() {
     console.log('on next view')
-    // this.setViewDate(this.selectedViewDate + n * this.selectedViewMode)
+    // this.setViewUnix(this.viewUnix + n * this.viewMode)
   },
   onSelectPreviousView() {
     console.log('on previous view')
-    // this.setViewDate(this.selectedViewDate - n * this.selectedViewMode)
+    // this.setViewUnix(this.viewUnix - n * this.viewMode)
   },
-  setViewDate(date) {
-    selectedViewDate.set(date)
+  setViewUnix(pDate) {
+    viewUnix.set(helpers.toUnix(pDate))
   },
   goToday(date) {
-    const now = new persianDate(new Date())
-      .toCalendar(get(selectedCalendar))
-      .hour(0)
-      .minute(0)
-      .second(0)
-      .millisecond(0)
-    selectedViewDate.set(new Date(now))
+    viewUnix.set(new persianDate().unix())
   },
   onClickInput() {
     this.setOpen(!isOpen)
