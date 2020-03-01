@@ -1,4 +1,5 @@
 import persianDate from 'persian-date'
+import { persianDateToUnix } from './helpers.js'
 import { writable, get } from 'svelte/store'
 export const isDirty = writable(false)
 export const selectedUnix = writable(null)
@@ -9,19 +10,13 @@ export const minUnix = writable(null)
 export const maxUnix = writable(null)
 export const currentCalendar = writable('persian') // [persian, gregorian]
 
-const helpers = {
-  toUnix(pDate) {
-    return pDate.unix() * 1000
-  },
-}
-
 export const actions = {
   onSelectDate(pDate) {
     this.setSelectedDate(pDate)
     this.updateIsDirty(true)
   },
   setSelectedDate(pDate) {
-    const unix = helpers.toUnix(pDate)
+    const unix = persianDateToUnix(pDate)
     selectedUnix.set(unix)
   },
   onSelectMonth(month) {
@@ -45,7 +40,7 @@ export const actions = {
   },
   setYear(year) {
     selectedUnix.set(
-      helpers.toUnix(
+      persianDateToUnix(
         new persianDate(get(selectedUnix))
           .toCalendar(get(currentCalendar))
           .year(year)
@@ -54,7 +49,7 @@ export const actions = {
   },
   setMonth(month) {
     selectedUnix.set(
-      helpers.toUnix(
+      persianDateToUnix(
         new persianDate(get(selectedUnix))
           .toCalendar(get(currentCalendar))
           .month(month)
@@ -64,7 +59,7 @@ export const actions = {
   /* @param {number} date - day of month */
   setDate(date) {
     selectedUnix.set(
-      helpers.toUnix(
+      persianDateToUnix(
         new persianDate(get(selectedUnix))
           .toCalendar(get(currentCalendar))
           .date(date)
@@ -73,7 +68,7 @@ export const actions = {
   },
   setHour(hour) {
     selectedUnix.set(
-      helpers.toUnix(
+      persianDateToUnix(
         new persianDate(get(selectedUnix))
           .toCalendar(get(currentCalendar))
           .hour(hour)
@@ -82,7 +77,7 @@ export const actions = {
   },
   setMinute(minute) {
     selectedUnix.set(
-      helpers.toUnix(
+      persianDateToUnix(
         new persianDate(get(selectedUnix))
           .toCalendar(get(currentCalendar))
           .minute(minute)
@@ -91,7 +86,7 @@ export const actions = {
   },
   setSecond(second) {
     selectedUnix.set(
-      helpers.toUnix(
+      persianDateToUnix(
         new persianDate(get(selectedUnix))
           .toCalendar(get(currentCalendar))
           .second(second)
@@ -131,7 +126,7 @@ export const actions = {
     // this.setViewUnix(this.viewUnix - n * this.viewMode)
   },
   setViewUnix(pDate) {
-    viewUnix.set(helpers.toUnix(pDate))
+    viewUnix.set(persianDateToUnix(pDate))
   },
   goToday(date) {
     viewUnix.set(new persianDate().unix())

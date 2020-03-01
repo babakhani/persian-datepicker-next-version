@@ -38,9 +38,12 @@
   import Navigator from './components/Navigator.svelte'
   import config from './config.js'
   import { actions, selectedUnix, viewUnix } from './stores.js'
+  import { persianDateToUnix } from './helpers.js'
 
   // Public props
   export let options = {}
+
+  const todayUnix = persianDateToUnix(new persianDate())
 
   // Merge default options with given options
   if (!options) {
