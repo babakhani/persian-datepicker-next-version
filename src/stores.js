@@ -23,9 +23,8 @@ export const actions = {
     selectedUnix.set(unix)
   },
   onSelectMonth(month) {
-    console.log('onSelectMonth...', month)
-    // this.setMonth(month);
-    // this.setViewMode("day");
+    this.setMonth(month);
+    this.setViewMode("day");
     this.updateIsDirty(true)
   },
   onSelectYear(year) {
@@ -100,8 +99,8 @@ export const actions = {
     // click on center of toolbar
     this.setViewMode(viewMode)
   },
-  setViewMode(viewMode) {
-    viewMode.set(viewMode)
+  setViewMode(mode) {
+    viewMode.set(mode)
   },
   updateIsDirty(value) {
     isDirty.set(value)
@@ -131,8 +130,8 @@ export const actions = {
   setViewUnix(pDate) {
     viewUnix.set(persianDateToUnix(pDate))
   },
-  goToday(date) {
-    viewUnix.set(new persianDate().unix())
+  onSelectToday() {
+    viewUnix.set(persianDateToUnix(new persianDate()))
   },
   onClickInput() {
     this.setOpen(!isOpen)

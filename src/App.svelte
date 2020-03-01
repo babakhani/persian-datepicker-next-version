@@ -64,32 +64,30 @@
     }
   }
 
-  const onSelectDate = function(payload) {
-    dispatcher('onSelectDate')(payload)
+  const onSelectDate = function(event) {
+    dispatcher('onSelectDate')(event)
   }
 
-  const onSelectMonth = function(payload) {
-    console.log('on select month in app')
-    currentDate = currentDate.month(payload.detail.payload)
-    dispatcher('onSelectMonth')(payload)
+  const onSelectMonth = function(event) {
+    dispatcher('onSelectMonth')(event)
   }
 
-  const onSelectYear = function(payload) {
-    dispatcher('onSelectYear')(payload)
+  const onSelectYear = function(event) {
+    dispatcher('onSelectYear')(event)
   }
 
-  let navNext = () => {
-    currentDate = currentDate.add('month', 1)
-    //selectedUnix = currentDate.unix() * 1000
+  const navNext = () => {
+		// TODO
+		// currentDate = currentDate.add('month', 1)
   }
 
-  let today = () => {
-    currentDate = new persianDate()
+  const today = (event) => {
+		dispatcher('onSelectToday')(event)
   }
 
-  let navPrev = () => {
-    currentDate = currentDate.subtract('month', 1)
-    //selectedUnix = currentDate.unix() * 1000
+  const navPrev = (event) => {
+		// TODO
+    // currentDate = currentDate.subtract('month', 1)
   }
 </script>
 
