@@ -18,7 +18,7 @@
     selectedUnix="{$selectedUnix}" />
   <br />
   <!-- time view -->
-  <TimeView {selectedUnix} />
+  <TimeView selectedUnix="{$selectedUnix}" />
   <br />
   <!-- date view -->
   <DateView
