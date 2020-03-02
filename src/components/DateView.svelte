@@ -24,6 +24,7 @@
 
 <script>
   import { time, elapsed, countable } from '../stores.js'
+  import { afterUpdate } from 'svelte';
   import persianDate from 'persian-date'
   const isSameDate = (a, b) => {
     return a.format('YYYY/MM/DD') === b.format('YYYY/MM/DD')
@@ -39,8 +40,11 @@
       payload: payload,
     })
   }
+  let selectedDay = new persianDate(selectedUnix).startOf('day');
+  afterUpdate(async () => {
+    selectedDay = new persianDate(selectedUnix).startOf('day')
+	});
 
-  let selectedDay = new persianDate(selectedUnix).startOf('day')
   let today = new persianDate(todayUnix)
   let groupedDay = []
 
