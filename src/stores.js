@@ -1,5 +1,5 @@
 import persianDate from 'persian-date'
-import { persianDateToUnix } from './helpers.js'
+import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
 import { writable, get } from 'svelte/store'
 
 const nowUnix = persianDateToUnix(new persianDate())
@@ -15,6 +15,11 @@ export const currentCalendar = writable('persian') // [persian, gregorian]
 
 export const actions = {
   onSelectDate(pDate) {
+    const { hour, minute, second } = getHourMinuteSecond(get(selectedUnix))
+    pDate
+      .hour(hour)
+      .minute(minute)
+      .second(second)
     this.setSelectedDate(pDate)
     this.updateIsDirty(true)
   },
@@ -23,8 +28,8 @@ export const actions = {
     selectedUnix.set(unix)
   },
   onSelectMonth(month) {
-    this.setMonth(month);
-    this.setViewMode("day");
+    this.setMonth(month)
+    this.setViewMode('day')
     this.updateIsDirty(true)
   },
   onSelectYear(year) {
