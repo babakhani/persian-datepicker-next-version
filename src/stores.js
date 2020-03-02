@@ -125,18 +125,16 @@ export const actions = {
     currentCalendar.set(calendar)
   },
   onSelectNextView() {
-    console.log('on next view')
-    // this.setViewUnix(this.viewUnix + n * this.viewMode)
+    viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
   },
-  onSelectPreviousView() {
-    console.log('on previous view')
-    // this.setViewUnix(this.viewUnix - n * this.viewMode)
+  onSelectPrevView() {
+    viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
   },
   setViewUnix(pDate) {
     viewUnix.set(persianDateToUnix(pDate))
   },
   onSelectToday() {
-    viewUnix.set(persianDateToUnix(new persianDate()))
+    viewUnix.set(persianDateToUnix(new persianDate().startOf('day')))
   },
   onClickInput() {
     this.setOpen(!isOpen)

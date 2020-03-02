@@ -76,18 +76,16 @@
     dispatcher('onSelectYear')(event)
   }
 
-  const navNext = () => {
-		// TODO
-		// currentDate = currentDate.add('month', 1)
+  const navNext = event => {
+    dispatcher('onSelectNextView')(event)
   }
 
-  const today = (event) => {
-		dispatcher('onSelectToday')(event)
+  const today = event => {
+    dispatcher('onSelectToday')(event)
   }
 
-  const navPrev = (event) => {
-		// TODO
-    // currentDate = currentDate.subtract('month', 1)
+  const navPrev = event => {
+    dispatcher('onSelectPrevView')(event)
   }
 </script>
 
