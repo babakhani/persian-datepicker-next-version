@@ -5208,6 +5208,7 @@ this['persian-datepicker-next-version'] = (function () {
       setConfig (payload) {
         config.set(payload);
         viewMode.set(payload.viewMode);
+        this.onSetCalendar(get_store_value(config).calendarType);
       },
       onSelectDate(pDate) {
         const date = pDate.detail;
@@ -5888,7 +5889,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (6:6) {#if groupedDay[0]}
-    function create_if_block(ctx) {
+    function create_if_block_1(ctx) {
     	let each_1_anchor;
     	let each_value_2 = ctx.groupedDay[0];
     	let each_blocks = [];
@@ -5944,7 +5945,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block.name,
+    		id: create_if_block_1.name,
     		type: "if",
     		source: "(6:6) {#if groupedDay[0]}",
     		ctx
@@ -5988,11 +5989,78 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
-    // (14:8) {#each week as day}
+    // (14:4) {#if week.length > 1}
+    function create_if_block(ctx) {
+    	let each_1_anchor;
+    	let each_value_1 = ctx.week;
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			each_1_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(target, anchor);
+    			}
+
+    			insert_dev(target, each_1_anchor, anchor);
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.currentViewMonth || changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
+    				each_value_1 = ctx.week;
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(changed, child_ctx);
+    					} else {
+    						each_blocks[i] = create_each_block_1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_1.length;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(each_1_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(14:4) {#if week.length > 1}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (15:8) {#each week as day}
     function create_each_block_1(ctx) {
     	let td;
-    	let t_value = ctx.day.format("D") + "";
-    	let t;
+    	let t0_value = ctx.day.format("D") + "";
+    	let t0;
+    	let t1;
     	let dispose;
 
     	function click_handler(...args) {
@@ -6002,11 +6070,13 @@ this['persian-datepicker-next-version'] = (function () {
     	const block = {
     		c: function create() {
     			td = element("td");
-    			t = text(t_value);
+    			t0 = text(t0_value);
+    			t1 = space();
+    			toggle_class(td, "othermonth", ctx.currentViewMonth !== ctx.day.month());
     			toggle_class(td, "disable", ctx.isDisable(ctx.day));
     			toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
     			toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
-    			add_location(td, file$2, 14, 10, 311);
+    			add_location(td, file$2, 15, 10, 334);
 
     			dispose = listen_dev(
     				td,
@@ -6021,11 +6091,16 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
-    			append_dev(td, t);
+    			append_dev(td, t0);
+    			append_dev(td, t1);
     		},
     		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
-    			if (changed.groupedDay && t_value !== (t_value = ctx.day.format("D") + "")) set_data_dev(t, t_value);
+    			if (changed.groupedDay && t0_value !== (t0_value = ctx.day.format("D") + "")) set_data_dev(t0, t0_value);
+
+    			if (changed.currentViewMonth || changed.groupedDay) {
+    				toggle_class(td, "othermonth", ctx.currentViewMonth !== ctx.day.month());
+    			}
 
     			if (changed.isDisable || changed.groupedDay) {
     				toggle_class(td, "disable", ctx.isDisable(ctx.day));
@@ -6049,7 +6124,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(14:8) {#each week as day}",
+    		source: "(15:8) {#each week as day}",
     		ctx
     	});
 
@@ -6060,60 +6135,37 @@ this['persian-datepicker-next-version'] = (function () {
     function create_each_block$2(ctx) {
     	let tr;
     	let t;
-    	let each_value_1 = ctx.week;
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
-    	}
+    	let if_block = ctx.week.length > 1 && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
     			tr = element("tr");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
+    			if (if_block) if_block.c();
     			t = space();
-    			add_location(tr, file$2, 12, 6, 268);
+    			add_location(tr, file$2, 12, 3, 265);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(tr, null);
-    			}
-
+    			if (if_block) if_block.m(tr, null);
     			append_dev(tr, t);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.isDisable || changed.groupedDay || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
-    				each_value_1 = ctx.week;
-    				let i;
-
-    				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(changed, child_ctx);
-    					} else {
-    						each_blocks[i] = create_each_block_1(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(tr, t);
-    					}
+    			if (ctx.week.length > 1) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    				} else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					if_block.m(tr, t);
     				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value_1.length;
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(tr);
-    			destroy_each(each_blocks, detaching);
+    			if (if_block) if_block.d();
     		}
     	};
 
@@ -6133,7 +6185,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let table;
     	let tr;
     	let t;
-    	let if_block = ctx.groupedDay[0] && create_if_block(ctx);
+    	let if_block = ctx.groupedDay[0] && create_if_block_1(ctx);
     	let each_value = ctx.groupedDay;
     	let each_blocks = [];
 
@@ -6179,7 +6231,7 @@ this['persian-datepicker-next-version'] = (function () {
     				if (if_block) {
     					if_block.p(changed, ctx);
     				} else {
-    					if_block = create_if_block(ctx);
+    					if_block = create_if_block_1(ctx);
     					if_block.c();
     					if_block.m(tr, null);
     				}
@@ -6188,7 +6240,7 @@ this['persian-datepicker-next-version'] = (function () {
     				if_block = null;
     			}
 
-    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
+    			if (changed.groupedDay || changed.currentViewMonth || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
     				each_value = ctx.groupedDay;
     				let i;
 
@@ -6304,6 +6356,7 @@ this['persian-datepicker-next-version'] = (function () {
     			groupedDay,
     			$config,
     			$dateObject,
+    			currentViewMonth,
     			viewUnixDate
     		};
     	};
@@ -6317,46 +6370,45 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
     		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("currentViewMonth" in $$props) $$invalidate("currentViewMonth", currentViewMonth = $$props.currentViewMonth);
     		if ("viewUnixDate" in $$props) viewUnixDate = $$props.viewUnixDate;
     	};
 
+    	let currentViewMonth;
     	let viewUnixDate;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, groupedDay: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1 }) => {
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 $$invalidate("currentViewMonth", currentViewMonth = new $dateObject(viewUnix).month());
+    		}
+
     		if (changed.$dateObject || changed.viewUnix) {
     			 viewUnixDate = new $dateObject(viewUnix).format("MMMM YYYY");
     		}
 
-    		if (changed.$dateObject || changed.viewUnix || changed.groupedDay) {
+    		if (changed.$dateObject || changed.viewUnix || changed.$config || changed.groupedDay) {
     			 {
     				$$invalidate("groupedDay", groupedDay = []);
     				let days = [];
     				let dateObj = new $dateObject(viewUnix);
+    				$dateObject.toCalendar("persian");
     				let day = dateObj.startOf("month");
     				let daysInMonth = dateObj.daysInMonth();
-    				let monthFirstDate = dateObj.startOf("month");
-    				let monthLastDate = dateObj.endOf("month");
-    				let monthVisualBeforeSpan = day.day();
-    				let monthVisualAfterSpan = 8 - monthLastDate.clone().add("m", 1).startOf("month").day();
+    				let startVisualDelta = dateObj.startOf("month").day();
+
+    				if ($config.calendarType === "persian") {
+    					startVisualDelta -= 1;
+    				}
+
+    				let endVisualDelta = 8 - dateObj.endOf("month").day();
+    				let visualLenght = daysInMonth + startVisualDelta + endVisualDelta;
+    				let firstVisualDate = day.subtract("day", startVisualDelta);
+    				let startDateOfView = day.subtract("day", startVisualDelta);
     				let i = 0;
 
-    				while (i < daysInMonth) {
+    				while (i < visualLenght - 1) {
+    					days.push(firstVisualDate.hour(12).add("day", i));
     					i++;
-    					days.push(new $dateObject([day.year(), day.month(), i]));
-    				}
-
-    				let j = 1;
-
-    				while (j < monthVisualBeforeSpan) {
-    					days.unshift(monthFirstDate.subtract("day", j));
-    					j++;
-    				}
-
-    				let f = 1;
-
-    				while (f <= monthVisualAfterSpan) {
-    					days.push(monthLastDate.add("day", f));
-    					f++;
     				}
 
     				let weekindex = 0;
@@ -6386,6 +6438,7 @@ this['persian-datepicker-next-version'] = (function () {
     		selectedDay,
     		today,
     		groupedDay,
+    		currentViewMonth,
     		click_handler
     	};
     }
@@ -6599,7 +6652,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (23:2) {#if viewMode === 'month'}
-    function create_if_block_1(ctx) {
+    function create_if_block_1$1(ctx) {
     	let button;
     	let t;
     	let dispose;
@@ -6627,7 +6680,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1.name,
+    		id: create_if_block_1$1.name,
     		type: "if",
     		source: "(23:2) {#if viewMode === 'month'}",
     		ctx
@@ -6696,7 +6749,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let path1;
     	let dispose;
     	let if_block0 = ctx.viewMode === "year" && create_if_block_2(ctx);
-    	let if_block1 = ctx.viewMode === "month" && create_if_block_1(ctx);
+    	let if_block1 = ctx.viewMode === "month" && create_if_block_1$1(ctx);
     	let if_block2 = ctx.viewMode === "date" && create_if_block$1(ctx);
 
     	const block = {
@@ -6780,7 +6833,7 @@ this['persian-datepicker-next-version'] = (function () {
     				if (if_block1) {
     					if_block1.p(changed, ctx);
     				} else {
-    					if_block1 = create_if_block_1(ctx);
+    					if_block1 = create_if_block_1$1(ctx);
     					if_block1.c();
     					if_block1.m(div0, t2);
     				}
@@ -6959,7 +7012,7 @@ this['persian-datepicker-next-version'] = (function () {
     const file$5 = "src/components/Infobox.svelte";
 
     // (3:1) {#if visbility}
-    function create_if_block_1$1(ctx) {
+    function create_if_block_1$2(ctx) {
     	let span;
     	let t;
     	let span_intro;
@@ -7016,7 +7069,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$1.name,
+    		id: create_if_block_1$2.name,
     		type: "if",
     		source: "(3:1) {#if visbility}",
     		ctx
@@ -7084,7 +7137,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let t1;
     	let t2;
     	let current;
-    	let if_block0 = ctx.visbility && create_if_block_1$1(ctx);
+    	let if_block0 = ctx.visbility && create_if_block_1$2(ctx);
     	let if_block1 = !ctx.visbility && create_if_block$2(ctx);
 
     	const block = {
@@ -7121,7 +7174,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block0.p(changed, ctx);
     					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_1$1(ctx);
+    					if_block0 = create_if_block_1$2(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(div, t2);
@@ -7306,7 +7359,7 @@ this['persian-datepicker-next-version'] = (function () {
     const file$6 = "src/components/Toolbox.svelte";
 
     // (7:1) {#if $config.calendarType === 'persian'}
-    function create_if_block_1$2(ctx) {
+    function create_if_block_1$3(ctx) {
     	let button;
     	let dispose;
 
@@ -7330,7 +7383,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_1$3.name,
     		type: "if",
     		source: "(7:1) {#if $config.calendarType === 'persian'}",
     		ctx
@@ -7379,7 +7432,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let t1;
     	let t2;
     	let dispose;
-    	let if_block0 = ctx.$config.calendarType === "persian" && create_if_block_1$2(ctx);
+    	let if_block0 = ctx.$config.calendarType === "persian" && create_if_block_1$3(ctx);
     	let if_block1 = ctx.$config.calendarType === "gregorian" && create_if_block$3(ctx);
 
     	const block = {
@@ -7413,7 +7466,7 @@ this['persian-datepicker-next-version'] = (function () {
     				if (if_block0) {
     					if_block0.p(changed, ctx);
     				} else {
-    					if_block0 = create_if_block_1$2(ctx);
+    					if_block0 = create_if_block_1$3(ctx);
     					if_block0.c();
     					if_block0.m(div, t2);
     				}
@@ -7854,7 +7907,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let if_block0 = ctx.$viewMode === "year" && create_if_block_4(ctx);
     	let if_block1 = ctx.$viewMode === "month" && create_if_block_3(ctx);
     	let if_block2 = ctx.$viewMode === "date" && create_if_block_2$1(ctx);
-    	let if_block3 = ctx.$viewMode === "time" && create_if_block_1$3(ctx);
+    	let if_block3 = ctx.$viewMode === "time" && create_if_block_1$4(ctx);
 
     	const toolbox = new Toolbox({
     			props: {
@@ -7984,7 +8037,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block3.p(changed, ctx);
     					transition_in(if_block3, 1);
     				} else {
-    					if_block3 = create_if_block_1$3(ctx);
+    					if_block3 = create_if_block_1$4(ctx);
     					if_block3.c();
     					transition_in(if_block3, 1);
     					if_block3.m(div, t5);
@@ -8257,7 +8310,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (45:2) {#if $viewMode === 'time'}
-    function create_if_block_1$3(ctx) {
+    function create_if_block_1$4(ctx) {
     	let current;
 
     	const timeview = new TimeView({
@@ -8294,7 +8347,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$3.name,
+    		id: create_if_block_1$4.name,
     		type: "if",
     		source: "(45:2) {#if $viewMode === 'time'}",
     		ctx

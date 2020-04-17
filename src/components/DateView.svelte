@@ -10,16 +10,19 @@
       {/if}
     </tr>
     {#each groupedDay as week, i}
-      <tr>
+			<tr>
+				{#if week.length > 1}
         {#each week as day}
           <td
 						on:click="{(event) => { if (!isDisable(day)) selectDate(day) }}"
+						class:othermonth="{currentViewMonth !== day.month()}"
 						class:disable="{isDisable(day)}"
             class:selected="{isSameDate(day, selectedDay)}"
             class:today="{isSameDate(day, today)}">
             {day.format('D')}
           </td>
         {/each}
+				{/if}
       </tr>
     {/each}
   </table>
@@ -70,41 +73,43 @@
   let today = new $dateObject(todayUnix)
   let groupedDay = []
 
+  $: currentViewMonth = new $dateObject(viewUnix).month()
   $: viewUnixDate = new $dateObject(viewUnix).format('MMMM YYYY')
   $: {
     groupedDay = []
     let days = []
     let dateObj = new $dateObject(viewUnix)
+		$dateObject.toCalendar('persian')
     let day = dateObj.startOf('month')
-    let daysInMonth = dateObj.daysInMonth()
-    let monthFirstDate = dateObj.startOf('month')
-    let monthLastDate = dateObj.endOf('month')
-    let monthVisualBeforeSpan = day.day()
-    let monthVisualAfterSpan =
-      8 -
-      monthLastDate
-        .clone()
-        .add('m', 1)
-        .startOf('month')
-        .day()
-    let i = 0
-    while (i < daysInMonth) {
-      i++
-      // days.push(day.add('day', i))
-      days.push(new $dateObject([day.year(), day.month(), i]))
-    }
-    let j = 1
-    while (j < monthVisualBeforeSpan) {
-      days.unshift(monthFirstDate.subtract('day', j))
-      j++
-    }
-    let f = 1
-    while (f <= monthVisualAfterSpan) {
-      days.push(monthLastDate.add('day', f))
-      f++
-    }
+		let daysInMonth = dateObj.daysInMonth()
+		let startVisualDelta = dateObj.startOf('month').day()
+		if ($config.calendarType === 'persian') {
+      startVisualDelta -= 1
+		}
+		let endVisualDelta = 8 - dateObj.endOf('month').day()
+		let visualLenght = daysInMonth + startVisualDelta + endVisualDelta
+		let firstVisualDate = day.subtract('day', startVisualDelta)
+		let startDateOfView = day.subtract('day', startVisualDelta)
+		let i = 0
+    while (i < visualLenght - 1) {
+      days.push(firstVisualDate.hour(12).add('day', i))
+			i++
+		}
     let weekindex = 0
+		//let cacheDate = null
     days.forEach((item, index) => {
+			// Test rendering
+			//if (cacheDate == item.date()) {
+      //   console.log('ther is problem')
+			//}
+			//if (cacheDate && cacheDate > item.date()) {
+			//	if(item.date() !== 1) {
+      //    console.log('ther is problem')
+			//	}
+			//}
+			//cacheDate = item.date()
+
+
       if (index % 7 == 0) {
         groupedDay[weekindex] = []
       }
@@ -147,6 +152,10 @@
 
 			&.today {
 				background: lighten($primarycolor, 40);
+			}
+
+			&.othermonth {
+        color: #ccc !important;
 			}
 
 			&.disable {

@@ -49,6 +49,7 @@ export const actions = {
   setConfig (payload) {
     config.set(payload)
     viewMode.set(payload.viewMode)
+    this.onSetCalendar(get(config).calendarType)
   },
   onSelectDate(pDate) {
     const date = pDate.detail
