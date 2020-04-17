@@ -5,7 +5,6 @@ import { writable, get } from 'svelte/store'
 import Config from './config.js'
 
 const nowUnix = persianDateToUnix(new persianDate())
-persianDate.toLocale('en')
 
 export const config = writable(Config)
 export const isDirty = writable(false)

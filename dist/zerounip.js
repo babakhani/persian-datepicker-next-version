@@ -5132,7 +5132,6 @@ this['persian-datepicker-next-version'] = (function () {
     // TODO get default value from config by more priority
 
     const nowUnix = persianDateToUnix(new persianDate$1());
-    persianDate$1.toLocale('en');
 
     const config = writable(defaultconfig);
     const isDirty = writable(false);
