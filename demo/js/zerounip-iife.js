@@ -4109,7 +4109,7 @@ this.zerounip = (function () {
     /**
      * @description persian-datepicker configuration document
      */
-    const Config = {
+    var defaultconfig = {
 
 
         /**
@@ -5127,13 +5127,12 @@ this.zerounip = (function () {
         'inputDelay': 800
     };
 
-    var config = Config;
-
     // TODO get default value from config by more priority
 
     const nowUnix = persianDateToUnix(new persianDate$1());
+    persianDate$1.toLocale('en');
 
-    const config$1 = writable(config);
+    const config = writable(defaultconfig);
     const isDirty = writable(false);
     const selectedUnix = writable(nowUnix);
     const viewUnix = writable(nowUnix);
@@ -5141,12 +5140,24 @@ this.zerounip = (function () {
     const isOpen = writable(false);
     const minUnix = writable(null);
     const maxUnix = writable(null);
-    const currentCalendar = writable('persian'); // [persian, gregorian]
+    const dateObject = writable(persianDate$1);
 
 
     const actions = {
+      onSetCalendar (payload) {
+        config.set({
+          ...get_store_value(config),
+          calendarType: payload
+        });
+        let currentLocale = get_store_value(config).calendar[payload].locale;
+        let obj = persianDate$1;
+        obj.toCalendar(payload);
+        obj.toLocale(currentLocale);
+        dateObject.set( obj );
+      },
       setConfig (payload) {
-        config$1.set(payload);
+        config.set(payload);
+        viewMode.set(payload.viewMode);
       },
       onSelectDate(pDate) {
         const date = pDate.detail;
@@ -5159,72 +5170,64 @@ this.zerounip = (function () {
         this.updateIsDirty(true);
       },
       setSelectedDate(pDate) {
-        const unix = persianDateToUnix(pDate);
-        selectedUnix.set(unix);
+        const pd = get_store_value(dateObject);
+        viewUnix.set(new pd(pDate).valueOf());
+        selectedUnix.set(new pd(pDate).valueOf());
       },
       onSelectMonth(month) {
+        const pd = get_store_value(dateObject);
         viewUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(viewUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .month(month)
-          )
+          new pd(get_store_value(viewUnix))
+          .month(month)
+          .valueOf()
         );
         selectedUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(viewUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .month(month)
-          )
+          new pd(get_store_value(viewUnix))
+          .month(month)
+          .valueOf()
         );
         this.setViewMode('date');
         this.updateIsDirty(true);
       },
       onSelectYear(year) {
+        const pd = get_store_value(dateObject);
         viewUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(selectedUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .year(year)
-          )
+          new pd(get_store_value(selectedUnix))
+          .year(year)
+          .valueOf()
         );
         selectedUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(selectedUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .year(year)
-          )
+          new pd(get_store_value(selectedUnix))
+          .year(year)
+          .valueOf()
         );
         this.setViewMode('month');
         this.updateIsDirty(true);
       },
       onSetHour(hour) {
+        const pd = get_store_value(dateObject);
         selectedUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(selectedUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .hour(hour)
-          )
+          new pd(get_store_value(selectedUnix))
+          .hour(hour)
+          .valueOf()
         );
         this.updateIsDirty(true);
       },
       onSetMinute(minute) {
+        const pd = get_store_value(dateObject);
         selectedUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(selectedUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .minute(minute)
-          )
+          new pd(get_store_value(selectedUnix))
+          .minute(minute)
+          .valueOf()
         );
         this.updateIsDirty(true);
       },
       setSecond(second) {
+        const pd = get_store_value(dateObject);
         selectedUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(selectedUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .second(second)
-          )
+          new pd(get_store_value(selectedUnix))
+          .second(second)
+          .valueOf()
         );
       },
       onChangeViewMode(viewMode) {
@@ -5245,14 +5248,7 @@ this.zerounip = (function () {
         maxUnix.set(date);
         this.setSelectedDate(Math.min(get_store_value(selectedUnix), get_store_value(maxUnix)));
       },
-      onSelectCalendar(calendar) {
-        this.setCalendar(calendar);
-      },
-      setCalendar(calendar) {
-        currentCalendar.set(calendar);
-      },
       onSelectNextView() {
-        console.log('onSelectNextView -----------------------');
         if (get_store_value(viewMode) === 'date') {
           viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).add('month', 1)));
         }
@@ -5264,7 +5260,6 @@ this.zerounip = (function () {
         }
       },
       onSelectPrevView() {
-        console.log('onSelectPrevView -----------------------');
         if (get_store_value(viewMode) === 'date') {
           viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).subtract('month', 1)));
         }
@@ -5438,6 +5433,9 @@ this.zerounip = (function () {
     }
 
     function instance($$self, $$props, $$invalidate) {
+    	let $dateObject;
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { selectedUnix } = $$props;
     	let { viewUnix } = $$props;
     	const dispatch = createEventDispatcher();
@@ -5468,6 +5466,7 @@ this.zerounip = (function () {
     			yearRange,
     			startYear,
     			currentYear,
+    			$dateObject,
     			currentViewYear
     		};
     	};
@@ -5478,19 +5477,20 @@ this.zerounip = (function () {
     		if ("yearRange" in $$props) $$invalidate("yearRange", yearRange = $$props.yearRange);
     		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
     		if ("currentYear" in $$props) $$invalidate("currentYear", currentYear = $$props.currentYear);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
     	};
 
     	let currentYear;
     	let currentViewYear;
 
-    	$$self.$$.update = (changed = { selectedUnix: 1, viewUnix: 1, currentViewYear: 1, yearRange: 1, startYear: 1 }) => {
-    		if (changed.selectedUnix) {
-    			 $$invalidate("currentYear", currentYear = new persianDate$1(selectedUnix).year());
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, currentViewYear: 1, yearRange: 1, startYear: 1 }) => {
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("currentYear", currentYear = new $dateObject(selectedUnix).year());
     		}
 
-    		if (changed.viewUnix) {
-    			 $$invalidate("currentViewYear", currentViewYear = new persianDate$1(viewUnix).year());
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 $$invalidate("currentViewYear", currentViewYear = new $dateObject(viewUnix).year());
     		}
 
     		if (changed.currentViewYear || changed.yearRange || changed.startYear) {
@@ -5697,6 +5697,9 @@ this.zerounip = (function () {
     }
 
     function instance$1($$self, $$props, $$invalidate) {
+    	let $dateObject;
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { selectedUnix } = $$props;
     	let { viewUnix } = $$props;
     	const dispatch = createEventDispatcher();
@@ -5705,7 +5708,7 @@ this.zerounip = (function () {
     		dispatch("select", payload);
     	}
 
-    	let monthRange = new persianDate$1().rangeName().months;
+    	let monthRange = new $dateObject().rangeName().months;
     	const writable_props = ["selectedUnix", "viewUnix"];
 
     	Object.keys($$props).forEach(key => {
@@ -5724,6 +5727,7 @@ this.zerounip = (function () {
     			selectedUnix,
     			viewUnix,
     			monthRange,
+    			$dateObject,
     			currentMonth,
     			currentSelectedYear,
     			currentViewYear
@@ -5734,6 +5738,7 @@ this.zerounip = (function () {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
     		if ("monthRange" in $$props) $$invalidate("monthRange", monthRange = $$props.monthRange);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("currentMonth" in $$props) $$invalidate("currentMonth", currentMonth = $$props.currentMonth);
     		if ("currentSelectedYear" in $$props) $$invalidate("currentSelectedYear", currentSelectedYear = $$props.currentSelectedYear);
     		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
@@ -5743,17 +5748,17 @@ this.zerounip = (function () {
     	let currentSelectedYear;
     	let currentViewYear;
 
-    	$$self.$$.update = (changed = { selectedUnix: 1, viewUnix: 1 }) => {
-    		if (changed.selectedUnix) {
-    			 $$invalidate("currentMonth", currentMonth = new persianDate$1(selectedUnix).month());
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1 }) => {
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("currentMonth", currentMonth = new $dateObject(selectedUnix).month());
     		}
 
-    		if (changed.selectedUnix) {
-    			 $$invalidate("currentSelectedYear", currentSelectedYear = new persianDate$1(selectedUnix).year());
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("currentSelectedYear", currentSelectedYear = new $dateObject(selectedUnix).year());
     		}
 
-    		if (changed.viewUnix) {
-    			 $$invalidate("currentViewYear", currentViewYear = new persianDate$1(viewUnix).year());
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 $$invalidate("currentViewYear", currentViewYear = new $dateObject(viewUnix).year());
     		}
     	};
 
@@ -6172,6 +6177,10 @@ this.zerounip = (function () {
     }
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let $dateObject;
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
+
     	const isSameDate = (a, b) => {
     		return a.format("YYYY/MM/DD") === b.format("YYYY/MM/DD");
     	};
@@ -6185,13 +6194,13 @@ this.zerounip = (function () {
     		dispatch("selectDate", payload);
     	}
 
-    	let selectedDay = new persianDate$1(selectedUnix).startOf("day");
+    	let selectedDay = new $dateObject(selectedUnix).startOf("day");
 
     	afterUpdate(async () => {
-    		$$invalidate("selectedDay", selectedDay = new persianDate$1(selectedUnix).startOf("day"));
+    		$$invalidate("selectedDay", selectedDay = new $dateObject(selectedUnix).startOf("day"));
     	});
 
-    	let today = new persianDate$1(todayUnix);
+    	let today = new $dateObject(todayUnix);
     	let groupedDay = [];
     	const writable_props = ["viewUnix", "selectedUnix", "todayUnix"];
 
@@ -6215,6 +6224,7 @@ this.zerounip = (function () {
     			selectedDay,
     			today,
     			groupedDay,
+    			$dateObject,
     			viewUnixDate
     		};
     	};
@@ -6226,21 +6236,22 @@ this.zerounip = (function () {
     		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
     		if ("today" in $$props) $$invalidate("today", today = $$props.today);
     		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("viewUnixDate" in $$props) viewUnixDate = $$props.viewUnixDate;
     	};
 
     	let viewUnixDate;
 
-    	$$self.$$.update = (changed = { viewUnix: 1, groupedDay: 1 }) => {
-    		if (changed.viewUnix) {
-    			 viewUnixDate = new persianDate$1(viewUnix).format("MMMM YYYY");
+    	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, groupedDay: 1 }) => {
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 viewUnixDate = new $dateObject(viewUnix).format("MMMM YYYY");
     		}
 
-    		if (changed.viewUnix || changed.groupedDay) {
+    		if (changed.$dateObject || changed.viewUnix || changed.groupedDay) {
     			 {
     				$$invalidate("groupedDay", groupedDay = []);
     				let days = [];
-    				let dateObj = new persianDate$1(viewUnix);
+    				let dateObj = new $dateObject(viewUnix);
     				let day = dateObj.startOf("month");
     				let daysInMonth = dateObj.daysInMonth();
     				let monthFirstDate = dateObj.startOf("month");
@@ -6251,7 +6262,7 @@ this.zerounip = (function () {
 
     				while (i < daysInMonth) {
     					i++;
-    					days.push(new persianDate$1([day.year(), day.month(), i]));
+    					days.push(new $dateObject([day.year(), day.month(), i]));
     				}
 
     				let j = 1;
@@ -6733,6 +6744,9 @@ this.zerounip = (function () {
     }
 
     function instance$4($$self, $$props, $$invalidate) {
+    	let $dateObject;
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { viewUnix } = $$props;
     	let { viewMode } = $$props;
     	const dispatch = createEventDispatcher();
@@ -6771,6 +6785,7 @@ this.zerounip = (function () {
     			viewMode,
     			startYear,
     			selectedYear,
+    			$dateObject,
     			selectedMonth
     		};
     	};
@@ -6780,19 +6795,20 @@ this.zerounip = (function () {
     		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
     		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
     		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("selectedMonth" in $$props) $$invalidate("selectedMonth", selectedMonth = $$props.selectedMonth);
     	};
 
     	let selectedYear;
     	let selectedMonth;
 
-    	$$self.$$.update = (changed = { viewUnix: 1, selectedYear: 1 }) => {
-    		if (changed.viewUnix) {
-    			 $$invalidate("selectedYear", selectedYear = new persianDate$1(viewUnix).year());
+    	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, selectedYear: 1 }) => {
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 $$invalidate("selectedYear", selectedYear = new $dateObject(viewUnix).year());
     		}
 
-    		if (changed.viewUnix) {
-    			 $$invalidate("selectedMonth", selectedMonth = new persianDate$1(viewUnix).format("MMMM"));
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 $$invalidate("selectedMonth", selectedMonth = new $dateObject(viewUnix).format("MMMM"));
     		}
 
     		if (changed.selectedYear) {
@@ -7089,6 +7105,9 @@ this.zerounip = (function () {
     }
 
     function instance$5($$self, $$props, $$invalidate) {
+    	let $dateObject;
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { viewUnix } = $$props;
     	let { selectedUnix } = $$props;
     	let oldotherPart;
@@ -7111,6 +7130,7 @@ this.zerounip = (function () {
     			oldotherPart,
     			visbility,
     			yearPrt,
+    			$dateObject,
     			otherPart
     		};
     	};
@@ -7121,19 +7141,20 @@ this.zerounip = (function () {
     		if ("oldotherPart" in $$props) oldotherPart = $$props.oldotherPart;
     		if ("visbility" in $$props) $$invalidate("visbility", visbility = $$props.visbility);
     		if ("yearPrt" in $$props) $$invalidate("yearPrt", yearPrt = $$props.yearPrt);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("otherPart" in $$props) $$invalidate("otherPart", otherPart = $$props.otherPart);
     	};
 
     	let yearPrt;
     	let otherPart;
 
-    	$$self.$$.update = (changed = { selectedUnix: 1, otherPart: 1 }) => {
-    		if (changed.selectedUnix) {
-    			 $$invalidate("yearPrt", yearPrt = new persianDate$1(selectedUnix).format("YYYY"));
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, otherPart: 1 }) => {
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("yearPrt", yearPrt = new $dateObject(selectedUnix).format("YYYY"));
     		}
 
-    		if (changed.selectedUnix) {
-    			 $$invalidate("otherPart", otherPart = new persianDate$1(selectedUnix).format("dddd DD MMMM"));
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("otherPart", otherPart = new $dateObject(selectedUnix).format("dddd DD MMMM"));
     		}
 
     		if (changed.otherPart) {
@@ -7203,16 +7224,93 @@ this.zerounip = (function () {
     /* src/components/Toolbox.svelte generated by Svelte v3.15.0 */
     const file$6 = "src/components/Toolbox.svelte";
 
+    // (7:1) {#if $config.calendarType === 'persian'}
+    function create_if_block_1$2(ctx) {
+    	let button;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			button.textContent = "gregorian";
+    			attr_dev(button, "class", "pwt-date-toolbox-button");
+    			add_location(button, file$6, 7, 2, 161);
+    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(7:1) {#if $config.calendarType === 'persian'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (14:1) {#if $config.calendarType === 'gregorian'}
+    function create_if_block$3(ctx) {
+    	let button;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			button.textContent = "Jalali";
+    			attr_dev(button, "class", "pwt-date-toolbox-button");
+    			add_location(button, file$6, 14, 2, 331);
+    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(14:1) {#if $config.calendarType === 'gregorian'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function create_fragment$6(ctx) {
     	let div;
     	let button;
+    	let t1;
+    	let t2;
     	let dispose;
+    	let if_block0 = ctx.$config.calendarType === "persian" && create_if_block_1$2(ctx);
+    	let if_block1 = ctx.$config.calendarType === "gregorian" && create_if_block$3(ctx);
 
     	const block = {
     		c: function create() {
     			div = element("div");
     			button = element("button");
     			button.textContent = "Today";
+    			t1 = space();
+    			if (if_block0) if_block0.c();
+    			t2 = space();
+    			if (if_block1) if_block1.c();
+    			attr_dev(button, "class", "pwt-date-toolbox-button");
     			add_location(button, file$6, 1, 1, 32);
     			attr_dev(div, "class", "pwt-date-toolbox");
     			add_location(div, file$6, 0, 0, 0);
@@ -7224,12 +7322,44 @@ this.zerounip = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
     			append_dev(div, button);
+    			append_dev(div, t1);
+    			if (if_block0) if_block0.m(div, null);
+    			append_dev(div, t2);
+    			if (if_block1) if_block1.m(div, null);
     		},
-    		p: noop,
+    		p: function update(changed, ctx) {
+    			if (ctx.$config.calendarType === "persian") {
+    				if (if_block0) {
+    					if_block0.p(changed, ctx);
+    				} else {
+    					if_block0 = create_if_block_1$2(ctx);
+    					if_block0.c();
+    					if_block0.m(div, t2);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
+    			}
+
+    			if (ctx.$config.calendarType === "gregorian") {
+    				if (if_block1) {
+    					if_block1.p(changed, ctx);
+    				} else {
+    					if_block1 = create_if_block$3(ctx);
+    					if_block1.c();
+    					if_block1.m(div, null);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
+    			}
+    		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
+    			if (if_block0) if_block0.d();
+    			if (if_block1) if_block1.d();
     			dispose();
     		}
     	};
@@ -7246,9 +7376,16 @@ this.zerounip = (function () {
     }
 
     function instance$6($$self, $$props, $$invalidate) {
+    	let $config;
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	let { viewUnix } = $$props;
     	let { viewMode } = $$props;
     	const dispatch = createEventDispatcher();
+
+    	function setcalendar(payload) {
+    		dispatch("setcalendar", payload);
+    	}
 
     	function today(payload) {
     		dispatch("today", payload);
@@ -7262,6 +7399,9 @@ this.zerounip = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Toolbox> was created with unknown prop '${key}'`);
     	});
 
+    	const click_handler = () => setcalendar("gregorian");
+    	const click_handler_1 = () => setcalendar("persian");
+
     	$$self.$set = $$props => {
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
     		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
@@ -7274,7 +7414,8 @@ this.zerounip = (function () {
     			yearRange,
     			startYear,
     			selectedYear,
-    			selectedMonth
+    			selectedMonth,
+    			$config
     		};
     	};
 
@@ -7285,6 +7426,7 @@ this.zerounip = (function () {
     		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
     		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
     		if ("selectedMonth" in $$props) selectedMonth = $$props.selectedMonth;
+    		if ("$config" in $$props) config.set($config = $$props.$config);
     	};
 
     	let selectedYear;
@@ -7313,7 +7455,15 @@ this.zerounip = (function () {
     		}
     	};
 
-    	return { viewUnix, viewMode, today };
+    	return {
+    		viewUnix,
+    		viewMode,
+    		setcalendar,
+    		today,
+    		$config,
+    		click_handler,
+    		click_handler_1
+    	};
     }
 
     class Toolbox extends SvelteComponentDev {
@@ -7384,12 +7534,15 @@ this.zerounip = (function () {
     }
 
     function instance$7($$self, $$props, $$invalidate) {
-    	let $selectedUnix;
     	let $config;
+    	let $isDirty;
+    	let $selectedUnix;
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
+    	validate_store(isDirty, "isDirty");
+    	component_subscribe($$self, isDirty, $$value => $$invalidate("$isDirty", $isDirty = $$value));
     	validate_store(selectedUnix, "selectedUnix");
     	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
-    	validate_store(config$1, "config");
-    	component_subscribe($$self, config$1, $$value => $$invalidate("$config", $config = $$value));
     	let { originalContainer } = $$props;
     	let { plotarea } = $$props;
     	const dispatch = createEventDispatcher();
@@ -7443,7 +7596,7 @@ this.zerounip = (function () {
 
     	let initInputEvents = function () {
     		let bodyListener = e => {
-    			if (plotarea && plotarea.contains(e.target) || e.target == originalContainer || e.target.className === "pwt-date-navigator-button") ; else {
+    			if (plotarea && plotarea.contains(e.target) || e.target == originalContainer || e.target.className === "pwt-date-navigator-button" || e.target.className === "pwt-date-toolbox-button") ; else {
     				dispatch("setvisibility", false);
     				document.removeEventListener("click", bodyListener);
     			}
@@ -7455,6 +7608,20 @@ this.zerounip = (function () {
     				setPlotPostion();
     				document.addEventListener("click", bodyListener);
     			});
+    		}
+    	};
+
+    	let updateInputs = function () {
+    		if ($config.initialValue || $isDirty) {
+    			let selected = new persianDate$1($selectedUnix).format($config.format);
+    			$$invalidate("originalContainer", originalContainer.value = selected, originalContainer);
+
+    			if ($config.altField) {
+    				let altField = document.querySelector($config.altField);
+    				let selected;
+    				if ($config.altFormat === "unix") selected = new persianDate$1($selectedUnix).valueOf(); else selected = new persianDate$1($selectedUnix).format($config.altField);
+    				altField.value = selected;
+    			}
     		}
     	};
 
@@ -7477,8 +7644,10 @@ this.zerounip = (function () {
     			plotarea,
     			setPlotPostion,
     			initInputEvents,
-    			$selectedUnix,
-    			$config
+    			updateInputs,
+    			$config,
+    			$isDirty,
+    			$selectedUnix
     		};
     	};
 
@@ -7487,23 +7656,17 @@ this.zerounip = (function () {
     		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
     		if ("setPlotPostion" in $$props) setPlotPostion = $$props.setPlotPostion;
     		if ("initInputEvents" in $$props) initInputEvents = $$props.initInputEvents;
+    		if ("updateInputs" in $$props) $$invalidate("updateInputs", updateInputs = $$props.updateInputs);
+    		if ("$config" in $$props) config.set($config = $$props.$config);
+    		if ("$isDirty" in $$props) isDirty.set($isDirty = $$props.$isDirty);
     		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
-    		if ("$config" in $$props) config$1.set($config = $$props.$config);
     	};
 
-    	$$self.$$.update = (changed = { $selectedUnix: 1, $config: 1 }) => {
-    		if (changed.$selectedUnix || changed.$config) {
+    	$$self.$$.update = (changed = { $selectedUnix: 1, updateInputs: 1 }) => {
+    		if (changed.$selectedUnix || changed.updateInputs) {
     			 {
-    				if (selectedUnix) {
-    					let currentYear = new persianDate$1($selectedUnix).format($config.format);
-    					$$invalidate("originalContainer", originalContainer.value = currentYear, originalContainer);
-
-    					if ($config.altField) {
-    						let altField = document.querySelector($config.altField);
-    						let currentYear;
-    						if ($config.altFormat === "unix") currentYear = new persianDate$1($selectedUnix).valueOf(); else currentYear = new persianDate$1($selectedUnix).format($config.altField);
-    						altField.value = currentYear;
-    					}
+    				if ($selectedUnix) {
+    					updateInputs();
     				}
     			}
     		}
@@ -7559,7 +7722,7 @@ this.zerounip = (function () {
     const file$7 = "src/app.svelte";
 
     // (1:0) {#if isVisbile}
-    function create_if_block$3(ctx) {
+    function create_if_block$4(ctx) {
     	let div;
     	let t0;
     	let t1;
@@ -7567,8 +7730,6 @@ this.zerounip = (function () {
     	let t3;
     	let t4;
     	let t5;
-    	let t6;
-    	let if_block4_anchor;
     	let current;
 
     	const infobox = new Infobox({
@@ -7592,10 +7753,10 @@ this.zerounip = (function () {
     	navigator.$on("today", ctx.today);
     	navigator.$on("next", ctx.navNext);
     	navigator.$on("prev", ctx.navPrev);
-    	let if_block0 = ctx.$viewMode === "year" && create_if_block_5(ctx);
-    	let if_block1 = ctx.$viewMode === "month" && create_if_block_4(ctx);
-    	let if_block2 = ctx.$viewMode === "date" && create_if_block_3(ctx);
-    	let if_block3 = ctx.$viewMode === "time" && create_if_block_2$1(ctx);
+    	let if_block0 = ctx.$viewMode === "year" && create_if_block_4(ctx);
+    	let if_block1 = ctx.$viewMode === "month" && create_if_block_3(ctx);
+    	let if_block2 = ctx.$viewMode === "date" && create_if_block_2$1(ctx);
+    	let if_block3 = ctx.$viewMode === "time" && create_if_block_1$3(ctx);
 
     	const toolbox = new Toolbox({
     			props: {
@@ -7606,6 +7767,7 @@ this.zerounip = (function () {
     			$$inline: true
     		});
 
+    	toolbox.$on("setcalendar", ctx.setcalendar);
     	toolbox.$on("selectmode", ctx.setViewMode);
     	toolbox.$on("today", ctx.today);
     	toolbox.$on("next", ctx.navNext);
@@ -7627,10 +7789,8 @@ this.zerounip = (function () {
     			if (if_block3) if_block3.c();
     			t5 = space();
     			create_component(toolbox.$$.fragment);
-    			t6 = space();
-    			if_block4_anchor = empty();
-    			attr_dev(div, "class", "pwt-datepicker svelte-1xwesbl");
-    			add_location(div, file$7, 1, 0, 16);
+    			attr_dev(div, "class", "pwt-datepicker");
+    			add_location(div, file$7, 1, 1, 17);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -7648,8 +7808,6 @@ this.zerounip = (function () {
     			append_dev(div, t5);
     			mount_component(toolbox, div, null);
     			ctx.div_binding(div);
-    			insert_dev(target, t6, anchor);
-    			insert_dev(target, if_block4_anchor, anchor);
     			current = true;
     		},
     		p: function update(changed, ctx) {
@@ -7668,7 +7826,7 @@ this.zerounip = (function () {
     					if_block0.p(changed, ctx);
     					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_5(ctx);
+    					if_block0 = create_if_block_4(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(div, t2);
@@ -7688,7 +7846,7 @@ this.zerounip = (function () {
     					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
     				} else {
-    					if_block1 = create_if_block_4(ctx);
+    					if_block1 = create_if_block_3(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(div, t3);
@@ -7708,7 +7866,7 @@ this.zerounip = (function () {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_3(ctx);
+    					if_block2 = create_if_block_2$1(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(div, t4);
@@ -7728,7 +7886,7 @@ this.zerounip = (function () {
     					if_block3.p(changed, ctx);
     					transition_in(if_block3, 1);
     				} else {
-    					if_block3 = create_if_block_2$1(ctx);
+    					if_block3 = create_if_block_1$3(ctx);
     					if_block3.c();
     					transition_in(if_block3, 1);
     					if_block3.m(div, t5);
@@ -7780,14 +7938,12 @@ this.zerounip = (function () {
     			if (if_block3) if_block3.d();
     			destroy_component(toolbox);
     			ctx.div_binding(null);
-    			if (detaching) detach_dev(t6);
-    			if (detaching) detach_dev(if_block4_anchor);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(1:0) {#if isVisbile}",
     		ctx
@@ -7796,8 +7952,8 @@ this.zerounip = (function () {
     	return block;
     }
 
-    // (16:1) {#if $viewMode === 'year'}
-    function create_if_block_5(ctx) {
+    // (16:2) {#if $viewMode === 'year'}
+    function create_if_block_4(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -7816,8 +7972,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(yearview.$$.fragment);
-    			attr_dev(div, "class", "svelte-1xwesbl");
-    			add_location(div, file$7, 16, 2, 364);
+    			add_location(div, file$7, 16, 3, 382);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -7856,17 +8011,17 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_5.name,
+    		id: create_if_block_4.name,
     		type: "if",
-    		source: "(16:1) {#if $viewMode === 'year'}",
+    		source: "(16:2) {#if $viewMode === 'year'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (25:1) {#if $viewMode === 'month'}
-    function create_if_block_4(ctx) {
+    // (25:2) {#if $viewMode === 'month'}
+    function create_if_block_3(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -7885,8 +8040,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(monthview.$$.fragment);
-    			attr_dev(div, "class", "svelte-1xwesbl");
-    			add_location(div, file$7, 25, 2, 561);
+    			add_location(div, file$7, 25, 3, 588);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -7925,17 +8079,17 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4.name,
+    		id: create_if_block_3.name,
     		type: "if",
-    		source: "(25:1) {#if $viewMode === 'month'}",
+    		source: "(25:2) {#if $viewMode === 'month'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:1) {#if $viewMode === 'date'}
-    function create_if_block_3(ctx) {
+    // (34:2) {#if $viewMode === 'date'}
+    function create_if_block_2$1(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -7956,8 +8110,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(dateview.$$.fragment);
-    			attr_dev(div, "class", "svelte-1xwesbl");
-    			add_location(div, file$7, 34, 2, 759);
+    			add_location(div, file$7, 34, 3, 795);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -7996,17 +8149,17 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(34:1) {#if $viewMode === 'date'}",
+    		source: "(34:2) {#if $viewMode === 'date'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (45:1) {#if $viewMode === 'time'}
-    function create_if_block_2$1(ctx) {
+    // (45:2) {#if $viewMode === 'time'}
+    function create_if_block_1$3(ctx) {
     	let current;
 
     	const timeview = new TimeView({
@@ -8043,9 +8196,9 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$1.name,
+    		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(45:1) {#if $viewMode === 'time'}",
+    		source: "(45:2) {#if $viewMode === 'time'}",
     		ctx
     	});
 
@@ -8055,7 +8208,7 @@ this.zerounip = (function () {
     function create_fragment$8(ctx) {
     	let t;
     	let current;
-    	let if_block = ctx.isVisbile && create_if_block$3(ctx);
+    	let if_block = ctx.isVisbile && create_if_block$4(ctx);
 
     	const input = new Input({
     			props: {
@@ -8088,7 +8241,7 @@ this.zerounip = (function () {
     					if_block.p(changed, ctx);
     					transition_in(if_block, 1);
     				} else {
-    					if_block = create_if_block$3(ctx);
+    					if_block = create_if_block$4(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(t.parentNode, t);
@@ -8141,18 +8294,14 @@ this.zerounip = (function () {
     	let $viewUnix;
     	let $selectedUnix;
     	let $viewMode;
-    	let $config;
     	validate_store(viewUnix, "viewUnix");
     	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
     	validate_store(selectedUnix, "selectedUnix");
     	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
     	validate_store(viewMode, "viewMode");
     	component_subscribe($$self, viewMode, $$value => $$invalidate("$viewMode", $viewMode = $$value));
-    	validate_store(config$1, "config");
-    	component_subscribe($$self, config$1, $$value => $$invalidate("$config", $config = $$value));
     	let { options = {} } = $$props;
     	let { originalContainer = null } = $$props;
-    	const dispatch = createEventDispatcher();
 
     	const dispatcher = function (input) {
     		if (options[input]) {
@@ -8165,9 +8314,9 @@ this.zerounip = (function () {
     	};
 
     	if (!options) {
-    		$$invalidate("options", options = config);
+    		$$invalidate("options", options = defaultconfig);
     	} else {
-    		$$invalidate("options", options = Object.assign(config, options));
+    		$$invalidate("options", options = Object.assign(defaultconfig, options));
     	}
 
     	dispatcher("setConfig")(options);
@@ -8187,8 +8336,14 @@ this.zerounip = (function () {
     		);
     	};
 
+    	setvisibility({ detail: true });
+
     	const setViewMode = function (event) {
     		dispatcher("setViewMode")(event.detail);
+    	};
+
+    	const setcalendar = function (event) {
+    		dispatcher("onSetCalendar")(event.detail);
     	};
 
     	const onSelectDate = function (event) {
@@ -8240,8 +8395,7 @@ this.zerounip = (function () {
     			isVisbile,
     			$viewUnix,
     			$selectedUnix,
-    			$viewMode,
-    			$config
+    			$viewMode
     		};
     	};
 
@@ -8253,7 +8407,6 @@ this.zerounip = (function () {
     		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
     		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
     		if ("$viewMode" in $$props) viewMode.set($viewMode = $$props.$viewMode);
-    		if ("$config" in $$props) config$1.set($config = $$props.$config);
     	};
 
     	return {
@@ -8263,6 +8416,7 @@ this.zerounip = (function () {
     		isVisbile,
     		setvisibility,
     		setViewMode,
+    		setcalendar,
     		onSelectDate,
     		onSelectMonth,
     		onSelectYear,
@@ -8272,7 +8426,6 @@ this.zerounip = (function () {
     		$viewUnix,
     		$selectedUnix,
     		$viewMode,
-    		$config,
     		div_binding
     	};
     }

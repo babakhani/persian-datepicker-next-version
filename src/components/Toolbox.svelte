@@ -1,24 +1,44 @@
 <div class="pwt-date-toolbox">
 	<button 
+	  class="pwt-date-toolbox-button"
 		on:click="{today}">
 		Today
 	</button>
+	{#if $config.calendarType === 'persian'}
+		<button 
+			class="pwt-date-toolbox-button"
+			on:click="{() => setcalendar('gregorian')}">
+			gregorian
+		</button>
+	{/if}
+	{#if $config.calendarType === 'gregorian'}
+		<button 
+			class="pwt-date-toolbox-button"
+			on:click="{() => setcalendar('persian')}">
+			Jalali
+		</button>
+	{/if}
 </div>
 
 <script>
   import persianDate from 'persian-date'
   import { createEventDispatcher } from 'svelte'
+	import { config } from '../stores.js'
 
 	export let viewUnix
 	export let viewMode
 
   const dispatch = createEventDispatcher()
+
 	function setViewMode(payload) { dispatch('selectmode', payload) }
+	function setcalendar(payload) { dispatch('setcalendar', payload) }
   function today(payload) { dispatch('today', payload) }
   function next(payload) { dispatch('next', payload) }
   function prev(payload) { dispatch('prev', payload) }
+
   $: selectedYear = new persianDate(viewUnix).year()
   $: selectedMonth = new persianDate(viewUnix).format('MMMM')
+
   let yearRange
   let startYear
   $: {

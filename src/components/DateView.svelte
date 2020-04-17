@@ -28,30 +28,35 @@
 	import { afterUpdate } from 'svelte'
 	import { flip } from 'svelte/animate'
   import { time, elapsed, countable } from '../stores.js'
-  import persianDate from 'persian-date'
+	import { config, dateObject } from '../stores.js'
+
   const isSameDate = (a, b) => {
     return a.format('YYYY/MM/DD') === b.format('YYYY/MM/DD')
   }
+
   export let viewUnix
   export let selectedUnix
   export let todayUnix
 
   import { createEventDispatcher } from 'svelte'
   const dispatch = createEventDispatcher()
+	
   function selectDate(payload) { dispatch('selectDate', payload) }
-  let selectedDay = new persianDate(selectedUnix).startOf('day');
+
+  let selectedDay = new $dateObject(selectedUnix).startOf('day');
+
   afterUpdate(async () => {
-    selectedDay = new persianDate(selectedUnix).startOf('day')
+    selectedDay = new $dateObject(selectedUnix).startOf('day')
 	});
 
-  let today = new persianDate(todayUnix)
+  let today = new $dateObject(todayUnix)
   let groupedDay = []
 
-  $: viewUnixDate = new persianDate(viewUnix).format('MMMM YYYY')
+  $: viewUnixDate = new $dateObject(viewUnix).format('MMMM YYYY')
   $: {
     groupedDay = []
     let days = []
-    let dateObj = new persianDate(viewUnix)
+    let dateObj = new $dateObject(viewUnix)
     let day = dateObj.startOf('month')
     let daysInMonth = dateObj.daysInMonth()
     let monthFirstDate = dateObj.startOf('month')
@@ -68,7 +73,7 @@
     while (i < daysInMonth) {
       i++
       // days.push(day.add('day', i))
-      days.push(new persianDate([day.year(), day.month(), i]))
+      days.push(new $dateObject([day.year(), day.month(), i]))
     }
     let j = 1
     while (j < monthVisualBeforeSpan) {

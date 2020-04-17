@@ -6,7 +6,7 @@ let Helper = {
 /**
  * @description persian-datepicker configuration document
  */
-const Config = {
+export default {
 
 
     /**
@@ -1023,5 +1023,3 @@ const Config = {
      */
     'inputDelay': 800
 };
-
-module.exports = Config;

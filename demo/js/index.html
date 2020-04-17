@@ -20,16 +20,32 @@
   </style>
 </head>
 <body>
-  <center>
-    <img width="180" style="padding-top: 4em;" src="https://i.pinimg.com/originals/63/d0/8d/63d08d548b8215a571ff61f56e4f47c0.jpg" />
-    <h1> Pure javascript usage example </h1>
-  </center>
+  <!--<center>-->
+    <!--<img width="180" style="padding-top: 4em;" src="https://i.pinimg.com/originals/63/d0/8d/63d08d548b8215a571ff61f56e4f47c0.jpg" />-->
+    <!--<h1> Pure javascript usage example </h1>-->
+  <!--</center>-->
   <input id="container" />
   <input id="containerAlt" />
   <script>
     var container = document.getElementById('container')
     var options = {
-      altField: '#containerAlt'
+      calendarType: 'persian',
+      calendar: {
+        'persian': {
+          'locale': 'fa',
+          'showHint': false,
+          'leapYearMode': 'algorithmic' // "astronomical"
+        },
+
+        'gregorian': {
+          'locale': 'en',
+          'showHint': false
+        }
+      },
+      viewMode: 'date', // DONE
+      format: 'YYYY/MM/DD', // DONE
+      initialValue: false,  // DONE
+      altField: '#containerAlt'  // DONE
     }
     zerounip(container, options)
   </script>

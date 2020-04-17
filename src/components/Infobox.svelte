@@ -18,15 +18,15 @@
 <script>
 	import { slide, fly } from 'svelte/transition'
 	import { quintOut } from 'svelte/easing'
-  import persianDate from 'persian-date'
+	import { config, dateObject } from '../stores.js'
 
 	export let viewUnix
 	export let selectedUnix
 
 	let oldotherPart
 
-  $: yearPrt = new persianDate(selectedUnix).format('YYYY')
-  $: otherPart = new persianDate(selectedUnix).format('dddd DD MMMM')
+  $: yearPrt = new $dateObject(selectedUnix).format('YYYY')
+  $: otherPart = new $dateObject(selectedUnix).format('dddd DD MMMM')
 
   let visbility
 	$: if (otherPart){

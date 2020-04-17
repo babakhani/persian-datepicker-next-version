@@ -11,16 +11,21 @@
 </div>
 
 <script>
-  import persianDate from 'persian-date'
   import { createEventDispatcher } from 'svelte'
+	import { config, dateObject } from '../stores.js'
+
   export let selectedUnix
   export let viewUnix
+
   const dispatch = createEventDispatcher()
+
   function select(payload) { dispatch('select', payload) }
-  let monthRange = new persianDate().rangeName().months
-  $: currentMonth = new persianDate(selectedUnix).month()
-  $: currentSelectedYear = new persianDate(selectedUnix).year()
-  $: currentViewYear = new persianDate(viewUnix).year()
+
+  let monthRange = new $dateObject().rangeName().months
+
+  $: currentMonth = new $dateObject(selectedUnix).month()
+  $: currentSelectedYear = new $dateObject(selectedUnix).year()
+  $: currentViewYear = new $dateObject(viewUnix).year()
 </script>
 
 <style global lang="scss">

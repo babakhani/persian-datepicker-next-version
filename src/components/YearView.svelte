@@ -12,16 +12,22 @@
 
 <script>
   import { time, elapsed, countable } from '../stores.js'
-  import persianDate from 'persian-date'
+  import { createEventDispatcher } from 'svelte'
+	import { config, dateObject } from '../stores.js'
+
   export let selectedUnix
   export let viewUnix
-  import { createEventDispatcher } from 'svelte'
+
   const dispatch = createEventDispatcher()
+
   function select(payload) { dispatch('select', payload) }
-  $: currentYear = new persianDate(selectedUnix).year()
-  $: currentViewYear = new persianDate(viewUnix).year()
+
+  $: currentYear = new $dateObject(selectedUnix).year()
+  $: currentViewYear = new $dateObject(viewUnix).year()
+
   let yearRange
   let startYear
+
   $: {
     yearRange = []
     startYear = currentViewYear - (currentViewYear % 12)

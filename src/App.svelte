@@ -1,79 +1,69 @@
 {#if isVisbile}
-<div 
-bind:this={plotarea}
-class="pwt-datepicker">
-	<Infobox
-		viewUnix="{$viewUnix}"
-		selectedUnix="{$selectedUnix}" />
-	<Navigator 
-		on:selectmode="{setViewMode}"
-		on:today="{today}"
-		on:next="{navNext}"
-		on:prev="{navPrev}"
-		viewMode="{$viewMode}"
-		viewUnix="{$viewUnix}"
-		selectedUnix="{$selectedUnix}" />
-	{#if $viewMode === 'year'}
-		<div
-			transition:fade={{duration: 0}}>
-			<YearView
-				on:select="{onSelectYear}"
-				viewUnix="{$viewUnix}"
-				selectedUnix="{$selectedUnix}" />
-		</div>
-	{/if}
-	{#if $viewMode === 'month'}
-		<div
-			transition:fade={{duration: 0}}>
-			<MonthView
-				on:select="{onSelectMonth}"
-				viewUnix="{$viewUnix}"
-				selectedUnix="{$selectedUnix}" />
-		</div>
-	{/if}
-	{#if $viewMode === 'date'}
-		<div
-			transition:fade={{duration: 0}}>
-			<DateView
-		    on:prev="{navPrev}"
-				on:next="{navNext}"
-				on:selectDate="{onSelectDate}"
-				viewUnix="{$viewUnix}"
-				selectedUnix="{$selectedUnix}"/>
-		</div>
-	{/if}
-	{#if $viewMode === 'time'}
-		<TimeView 
+	<div 
+		bind:this={plotarea}
+		class="pwt-datepicker">
+		<Infobox
+			viewUnix="{$viewUnix}"
 			selectedUnix="{$selectedUnix}" />
-	{/if}
-	<Toolbox 
-		on:selectmode="{setViewMode}"
-		on:today="{today}"
-		on:next="{navNext}"
-		on:prev="{navPrev}"
-		viewMode="{$viewMode}"
-		viewUnix="{$viewUnix}"
-		selectedUnix="{$selectedUnix}" />
-</div>
-
-{#if false}
-{#each Object.keys($config) as item, index}
-	<pre> {item} </pre>
-	<pre> { JSON.stringify($config[item]) } </pre>
-	<hr>
-{/each}
+		<Navigator 
+			on:selectmode="{setViewMode}"
+			on:today="{today}"
+			on:next="{navNext}"
+			on:prev="{navPrev}"
+			viewMode="{$viewMode}"
+			viewUnix="{$viewUnix}"
+			selectedUnix="{$selectedUnix}" />
+		{#if $viewMode === 'year'}
+			<div
+				transition:fade={{duration: 0}}>
+				<YearView
+					on:select="{onSelectYear}"
+					viewUnix="{$viewUnix}"
+					selectedUnix="{$selectedUnix}" />
+			</div>
+		{/if}
+		{#if $viewMode === 'month'}
+			<div
+				transition:fade={{duration: 0}}>
+				<MonthView
+					on:select="{onSelectMonth}"
+					viewUnix="{$viewUnix}"
+					selectedUnix="{$selectedUnix}" />
+			</div>
+		{/if}
+		{#if $viewMode === 'date'}
+			<div
+				transition:fade={{duration: 0}}>
+				<DateView
+					on:prev="{navPrev}"
+					on:next="{navNext}"
+					on:selectDate="{onSelectDate}"
+					viewUnix="{$viewUnix}"
+					selectedUnix="{$selectedUnix}"/>
+			</div>
+		{/if}
+		{#if $viewMode === 'time'}
+			<TimeView 
+				selectedUnix="{$selectedUnix}" />
+		{/if}
+		<Toolbox 
+			on:setcalendar="{setcalendar}"
+			on:selectmode="{setViewMode}"
+			on:today="{today}"
+			on:next="{navNext}"
+			on:prev="{navPrev}"
+			viewMode="{$viewMode}"
+			viewUnix="{$viewUnix}"
+			selectedUnix="{$selectedUnix}" />
+	</div>
 {/if}
-{/if}
-<Input 
- on:setvisibility={setvisibility}
- plotarea={plotarea} 
- originalContainer={originalContainer} />
+	<Input 
+on:setvisibility={setvisibility}
+plotarea={plotarea} 
+originalContainer={originalContainer} />
 
 <script>
-	import { fly, fade, slide } from 'svelte/transition';
-	import { onMount } from 'svelte'
-	import { createEventDispatcher } from 'svelte'
-	import persianDate from 'persian-date'
+	import { fade } from 'svelte/transition';
 	import YearView from './components/YearView.svelte'
 	import MonthView from './components/MonthView.svelte'
 	import DateView from './components/DateView.svelte'
@@ -83,15 +73,15 @@ class="pwt-datepicker">
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
-	import { persianDateToUnix } from './helpers.js'
-	import { actions, selectedUnix, viewUnix, viewMode, config } from './stores.js'
-  
+	import { actions, selectedUnix, viewUnix, viewMode } from './stores.js'
 
-	// Public props
+
+	// Public props used in adapters
 	export let options = {}
 	export let originalContainer = null
 
-	const dispatch = createEventDispatcher()
+
+	// Handle global event and store events
 	const dispatcher = function(input) {
 		if (options[input]) {
 			return event => options[input](event)
@@ -102,6 +92,7 @@ class="pwt-datepicker">
 		}
 	}
 
+	// merge user defined config with predefined config and commit to store
 	if (!options) {
 		options = defaultconfig
 	} else {
@@ -112,17 +103,26 @@ class="pwt-datepicker">
 	let plotarea
 	let isVisbile = false
 
+
+	// Methods that would called by component events
 	const setvisibility = function(payload) {
 		isVisbile = payload.detail
 		setTimeout(() => {
 			if (plotarea) {
-			  plotarea.style.display = isVisbile ? 'block' : 'none'
+				plotarea.style.display = isVisbile ? 'block' : 'none'
 			}
 		}, 0)
 	}
 
+	// TODO: develop time
+	setvisibility({detail: true})
+
 	const setViewMode = function(event) {
 		dispatcher('setViewMode')(event.detail)
+	}
+
+	const setcalendar = function(event) {
+		dispatcher('onSetCalendar')(event.detail)
 	}
 
 	const onSelectDate = function(event) {
@@ -151,16 +151,5 @@ class="pwt-datepicker">
 </script>
 
 <style>
-	@import './theme.scss';
-	body {
-		font-size: 12px;
-	}
-	* {
-		direction: rtl;
-	}
-	td {
-		width: 40px;
-		height: 80px;
-		padding: 2em;
-	}
+  @import './theme.scss';
 </style>

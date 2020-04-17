@@ -5,6 +5,7 @@ import { writable, get } from 'svelte/store'
 import Config from './config.js'
 
 const nowUnix = persianDateToUnix(new persianDate())
+persianDate.toLocale('en')
 
 export const config = writable(Config)
 export const isDirty = writable(false)
@@ -14,12 +15,25 @@ export const viewMode = writable('date') // [date, month, year]
 export const isOpen = writable(false)
 export const minUnix = writable(null)
 export const maxUnix = writable(null)
+export const dateObject = writable(persianDate)
 export const currentCalendar = writable('persian') // [persian, gregorian]
 
 
 export const actions = {
+  onSetCalendar (payload) {
+    config.set({
+      ...get(config),
+      calendarType: payload
+    })
+    let currentLocale = get(config).calendar[payload].locale
+    let obj = persianDate
+    obj.toCalendar(payload)
+    obj.toLocale(currentLocale)
+    dateObject.set( obj )
+  },
   setConfig (payload) {
     config.set(payload)
+    viewMode.set(payload.viewMode)
   },
   onSelectDate(pDate) {
     const date = pDate.detail
@@ -32,72 +46,64 @@ export const actions = {
     this.updateIsDirty(true)
   },
   setSelectedDate(pDate) {
-    const unix = persianDateToUnix(pDate)
-    selectedUnix.set(unix)
+    const pd = get(dateObject)
+    viewUnix.set(new pd(pDate).valueOf())
+    selectedUnix.set(new pd(pDate).valueOf())
   },
   onSelectMonth(month) {
+    const pd = get(dateObject)
     viewUnix.set(
-      persianDateToUnix(
-        new persianDate(get(viewUnix))
-          .toCalendar(get(currentCalendar))
-          .month(month)
-      )
+      new pd(get(viewUnix))
+      .month(month)
+      .valueOf()
     )
     selectedUnix.set(
-      persianDateToUnix(
-        new persianDate(get(viewUnix))
-          .toCalendar(get(currentCalendar))
-          .month(month)
-      )
+      new pd(get(viewUnix))
+      .month(month)
+      .valueOf()
     )
     this.setViewMode('date')
     this.updateIsDirty(true)
   },
   onSelectYear(year) {
+    const pd = get(dateObject)
     viewUnix.set(
-      persianDateToUnix(
-        new persianDate(get(selectedUnix))
-          .toCalendar(get(currentCalendar))
-          .year(year)
-      )
+      new pd(get(selectedUnix))
+      .year(year)
+      .valueOf()
     )
     selectedUnix.set(
-      persianDateToUnix(
-        new persianDate(get(selectedUnix))
-          .toCalendar(get(currentCalendar))
-          .year(year)
-      )
+      new pd(get(selectedUnix))
+      .year(year)
+      .valueOf()
     )
     this.setViewMode('month')
     this.updateIsDirty(true)
   },
   onSetHour(hour) {
+    const pd = get(dateObject)
     selectedUnix.set(
-      persianDateToUnix(
-        new persianDate(get(selectedUnix))
-          .toCalendar(get(currentCalendar))
-          .hour(hour)
-      )
+      new pd(get(selectedUnix))
+      .hour(hour)
+      .valueOf()
     )
     this.updateIsDirty(true)
   },
   onSetMinute(minute) {
+    const pd = get(dateObject)
     selectedUnix.set(
-      persianDateToUnix(
-        new persianDate(get(selectedUnix))
-          .toCalendar(get(currentCalendar))
-          .minute(minute)
-      )
+      new pd(get(selectedUnix))
+      .minute(minute)
+      .valueOf()
     )
     this.updateIsDirty(true)
   },
   setSecond(second) {
+    const pd = get(dateObject)
     selectedUnix.set(
-      persianDateToUnix(
-        new persianDate(get(selectedUnix))
-          .toCalendar(get(currentCalendar))
-          .second(second)
-      )
+      new pd(get(selectedUnix))
+      .second(second)
+      .valueOf()
     )
   },
   onChangeViewMode(viewMode) {
@@ -118,14 +124,7 @@ export const actions = {
     maxUnix.set(date)
     this.setSelectedDate(Math.min(get(selectedUnix), get(maxUnix)))
   },
-  onSelectCalendar(calendar) {
-    this.setCalendar(calendar)
-  },
-  setCalendar(calendar) {
-    currentCalendar.set(calendar)
-  },
   onSelectNextView() {
-    console.log('onSelectNextView -----------------------')
     if (get(viewMode) === 'date') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
     }
@@ -137,7 +136,6 @@ export const actions = {
     }
   },
   onSelectPrevView() {
-    console.log('onSelectPrevView -----------------------')
     if (get(viewMode) === 'date') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
     }

@@ -1,26 +1,10 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import persianDate from 'persian-date'
-	import { actions, selectedUnix, viewUnix, viewMode, config } from '../stores.js'
+	import { actions, isDirty, selectedUnix, viewUnix, viewMode, config } from '../stores.js'
 
 	export let originalContainer
 	export let plotarea
-
-	$: {
-		if (selectedUnix) {
-			let currentYear = new persianDate($selectedUnix).format($config.format)
-			originalContainer.value = currentYear
-			if ($config.altField) {
-				let altField = document.querySelector($config.altField)
-				let currentYear
-				if ($config.altFormat === 'unix')
-					currentYear = new persianDate($selectedUnix).valueOf()
-				else
-					currentYear = new persianDate($selectedUnix).format($config.altField)
-				altField.value = currentYear
-			}
-		}
-	}
 
 	const dispatch = createEventDispatcher()
 
@@ -60,6 +44,8 @@
 				e.target == originalContainer 
 				|| 
 				e.target.className === 'pwt-date-navigator-button'
+				|| 
+				e.target.className === 'pwt-date-toolbox-button'
 			) {
 
 			} else {
@@ -73,6 +59,28 @@
 				setPlotPostion()
 				document.addEventListener('click', bodyListener)
 			})
+		}
+	}
+
+	let updateInputs = function () {
+		if ($config.initialValue || $isDirty) {
+		  let selected = new persianDate($selectedUnix).format($config.format)
+			originalContainer.value = selected
+			if ($config.altField) {
+				let altField = document.querySelector($config.altField)
+				let selected
+				if ($config.altFormat === 'unix')
+					selected = new persianDate($selectedUnix).valueOf()
+				else
+					selected = new persianDate($selectedUnix).format($config.altField)
+				altField.value = selected
+			}
+		}
+	}
+
+	$: {
+		if ($selectedUnix) {
+			updateInputs()
 		}
 	}
 
