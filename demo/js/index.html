@@ -5,12 +5,15 @@
   <title>zerounip</title>
   <link rel="stylesheet" href="zerounip.css">
   <script type="text/javascript" src="./zerounip-iife.js" ></script>
+  <script type="text/javascript" src="http://babakhani.github.io/PersianWebToolkit/doc/lib/persian-date/dist/persian-date.js" ></script>
+ 
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
   <style>
     html {
       font-family: 'Open Sans', sans-serif;
     }
-
+    
+    #containerAlt,
     #container {
       border: 2px solid red;
       height: 32px;
@@ -24,28 +27,51 @@
     <!--<img width="180" style="padding-top: 4em;" src="https://i.pinimg.com/originals/63/d0/8d/63d08d548b8215a571ff61f56e4f47c0.jpg" />-->
     <!--<h1> Pure javascript usage example </h1>-->
   <!--</center>-->
-  <input id="container" />
+  <input 
+  value="1396-10-12"  
+  id="container" />
   <input id="containerAlt" />
   <script>
     var container = document.getElementById('container')
     var options = {
-      calendarType: 'persian',
+      calendarType: 'persian', // DONE
       calendar: {
         'persian': {
-          'locale': 'fa',
+          'locale': 'fa', // DONE
           'showHint': false,
           'leapYearMode': 'algorithmic' // "astronomical"
         },
 
         'gregorian': {
-          'locale': 'en',
+          'locale': 'en', // DONE
           'showHint': false
         }
       },
-      viewMode: 'date', // DONE
-      format: 'YYYY/MM/DD', // DONE
+      responsive: true, // Deprecated
+      inline: false, // Deprected
       initialValue: false,  // DONE
-      altField: '#containerAlt'  // DONE
+      initialValueType: 'persian', // Works but deprecated in next version
+      persianDigit: true, // Deprected
+      viewMode: 'year', // DONE
+      format: 'LLLL', // DONE
+      formatter (unixDate, dateObject) {
+        return new dateObject(unixDate).format(this.format);
+      }, // DONE
+      altField: '#containerAlt',  // DONE
+      altFormat: 'g', // DONE
+      altFieldFormatter: function (unixDate, dateObject) {
+        console.log('user config alt formmater funciton')
+        if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
+          return new Date(unixDate)
+        }
+        else if (this.altFormat === 'unix' || this.altFormat === 'u') {
+          return new dateObject(unixDate).valueOf();
+        } else {
+          return new dateObject(unixDate).format(this.altFormat);
+        }
+      }, // DONE
+      minDate: new persianDate().subtract('day', 2),
+      maxDate: new persianDate().subtract('day', 2)
     }
     zerounip(container, options)
   </script>

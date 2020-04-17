@@ -102,18 +102,22 @@ export default {
 
 
     /**
-     * @description if set true make enable responsive view on mobile devices
+     * @description if set true make enable responsive view on mobile devices, Since 2.0.0
+     * responsive is enable by default and you cant disable it
      * @type boolean
      * @since 1.0.0
      * @default true
+     * @deprecated 2.0.0
      */
     'responsive': true,
 
 
     /**
-     * @description if true datepicker render inline
+     * @description if true datepicker render inline, Since 2.0.0 datepicker would show inline if
+     * you init it on anything except input
      * @type boolean
      * @default false
+     * @deprecated 2.0.0
      */
     'inline': false,
 
@@ -127,9 +131,11 @@ export default {
 
 
     /**
-     * @description Initial value calendar type, accept: 'persian', 'gregorian'
+     * @description Initial value calendar type, accept: 'persian', 'gregorian', Since 2.0.0
+     * pwt.datepicker only accept gregorian value as initail value
      * @type boolean
      * @default true
+     * @deprecated 2.0.0
      */
     'initialValueType': 'gregorian',
 
@@ -139,6 +145,7 @@ export default {
      * @deprecated
      * @type boolean
      * @default true
+     * @deprecated 2.0.0
      */
     'persianDigit': true,
 
@@ -163,6 +170,7 @@ export default {
     /**
      * @description format value of input
      * @param unixDate
+     * @param dateObject
      * @default function
      * @example function (unixDate) {
      *      var self = this;
@@ -171,10 +179,8 @@ export default {
      *      return pdate.format(self.format);
      *  }
      */
-    'formatter': function (unixDate) {
-        let self = this,
-          pdate = this.model.PersianDate.date(unixDate);
-        return pdate.format(self.format);
+    'formatter': function (unixDate, dateObject) {
+       return new dateObject(unixDate).format(this.format);
     },
 
 
@@ -202,37 +208,27 @@ export default {
     /**
      * @description format value of 'altField' input
      * @param unixDate
+     * @param dateObject
      * @default function
      * @example function (unixDate) {
-     *      var self = this;
-     *      var thisAltFormat = self.altFormat.toLowerCase();
-     *      if (thisAltFormat === 'gregorian' || thisAltFormat === 'g') {
-     *          return new Date(unixDate);
+     *      if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
+     *         return new Date(unixDate)
      *      }
-     *      if (thisAltFormat === 'unix' || thisAltFormat === 'u') {
-     *          return unixDate;
+     *      else if (this.altFormat === 'unix' || this.altFormat === 'u') {
+     *        return new dateObject(unixDate).valueOf();
+     *      } else {
+     *        return new dateObject(unixDate).format(this.altFormat);
      *      }
-     *      else {
-     *          var pd = new persianDate(unixDate);
-     *          pd.formatPersian = this.persianDigit;
-     *          return pd.format(self.altFormat);
-     *      }
-     *  }
      */
-    'altFieldFormatter': function (unixDate) {
-        let self = this,
-          thisAltFormat = self.altFormat.toLowerCase(),
-          pd;
-        if (thisAltFormat === 'gregorian' || thisAltFormat === 'g') {
-            return new Date(unixDate);
-        }
-        if (thisAltFormat === 'unix' || thisAltFormat === 'u') {
-            return unixDate;
-        }
-        else {
-            pd = this.model.PersianDate.date(unixDate);
-            return pd.format(self.altFormat);
-        }
+    'altFieldFormatter': function (unixDate, dateObject) {
+       if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
+          return new Date(unixDate)
+       }
+       else if (this.altFormat === 'unix' || this.altFormat === 'u') {
+         return new dateObject(unixDate).valueOf();
+       } else {
+         return new dateObject(unixDate).format(this.altFormat);
+       }
     },
 
 

@@ -1,4 +1,5 @@
 // TODO get default value from config by more priority
+import PersianDateParser from './parser'
 import persianDate from 'persian-date'
 import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
 import { writable, get } from 'svelte/store'
@@ -19,6 +20,21 @@ export const currentCalendar = writable('persian') // [persian, gregorian]
 
 
 export const actions = {
+  parsInitialValue (inputString) {
+    let pd = get(dateObject)
+    let parse = new PersianDateParser()
+    if (parse.parse(inputString) !== undefined) {
+        pd.toCalendar(get(config).initialValueType)
+        let unix = new pd(parse.parse(inputString)).valueOf()
+        this.updateIsDirty(true)
+        viewUnix.set(unix)
+        selectedUnix.set(unix)
+        pd.toCalendar(get(config).calendarType)
+    }
+  },
+  setFromDefaultValue (data) {
+    this.parsInitialValue(data)
+  },
   onSetCalendar (payload) {
     config.set({
       ...get(config),

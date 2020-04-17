@@ -58,9 +58,10 @@
 	</div>
 {/if}
 	<Input 
-on:setvisibility={setvisibility}
-plotarea={plotarea} 
-originalContainer={originalContainer} />
+		on:setinitialvalue="{setInitialValue}"
+		on:setvisibility={setvisibility}
+		plotarea={plotarea} 
+		originalContainer={originalContainer} />
 
 <script>
 	import { fade } from 'svelte/transition';
@@ -116,6 +117,10 @@ originalContainer={originalContainer} />
 
 	// TODO: develop time
 	setvisibility({detail: true})
+
+	const setInitialValue = function (event) {
+		dispatcher('setFromDefaultValue')(event.detail)
+	}
 
 	const setViewMode = function(event) {
 		dispatcher('setViewMode')(event.detail)

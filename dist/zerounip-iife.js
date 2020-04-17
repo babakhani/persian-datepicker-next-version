@@ -766,6 +766,44 @@ this.zerounip = (function () {
         };
     }
 
+    class PersianDateParser {
+        constructor() {
+            this.pattern = {
+              iso: /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z)?$/g,
+              jalali: /^[1-4]\d{3}(\/|-|\.)((0?[1-6](\/|-|\.)((3[0-1])|([1-2][0-9])|(0?[1-9])))|((1[0-2]|(0?[7-9]))(\/|-|\.)(30|([1-2][0-9])|(0?[1-9]))))$/g
+            };
+        }
+
+        parse(inputString) {
+            let that = this,
+                persianDateArray,
+                isoPat = new RegExp(that.pattern.iso),
+                jalaliPat = new RegExp(that.pattern.jalali);
+
+            String.prototype.toEnglishDigits = function () {
+                let charCodeZero = '۰'.charCodeAt(0);
+                return this.replace(/[۰-۹]/g, function (w) {
+                    return w.charCodeAt(0) - charCodeZero;
+                });
+            };
+            inputString = inputString.toEnglishDigits();
+            if (jalaliPat.test(inputString)) {
+              /* eslint-disable no-useless-escape */
+              persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);
+              /* eslint-enable no-useless-escape */
+              return persianDateArray;
+            } else if (isoPat.test(inputString)) {
+              /* eslint-disable no-useless-escape */
+              persianDateArray = inputString.split(/\/|-|\,|\:|\T|\Z/g).map(Number);
+              return persianDateArray;
+              /* eslint-enable no-useless-escape */
+            } else {
+                return undefined;
+            }
+
+        }
+    }
+
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
     function unwrapExports (x) {
@@ -4205,18 +4243,22 @@ this.zerounip = (function () {
 
 
         /**
-         * @description if set true make enable responsive view on mobile devices
+         * @description if set true make enable responsive view on mobile devices, Since 2.0.0
+         * responsive is enable by default and you cant disable it
          * @type boolean
          * @since 1.0.0
          * @default true
+         * @deprecated 2.0.0
          */
         'responsive': true,
 
 
         /**
-         * @description if true datepicker render inline
+         * @description if true datepicker render inline, Since 2.0.0 datepicker would show inline if
+         * you init it on anything except input
          * @type boolean
          * @default false
+         * @deprecated 2.0.0
          */
         'inline': false,
 
@@ -4230,9 +4272,11 @@ this.zerounip = (function () {
 
 
         /**
-         * @description Initial value calendar type, accept: 'persian', 'gregorian'
+         * @description Initial value calendar type, accept: 'persian', 'gregorian', Since 2.0.0
+         * pwt.datepicker only accept gregorian value as initail value
          * @type boolean
          * @default true
+         * @deprecated 2.0.0
          */
         'initialValueType': 'gregorian',
 
@@ -4242,6 +4286,7 @@ this.zerounip = (function () {
          * @deprecated
          * @type boolean
          * @default true
+         * @deprecated 2.0.0
          */
         'persianDigit': true,
 
@@ -4266,6 +4311,7 @@ this.zerounip = (function () {
         /**
          * @description format value of input
          * @param unixDate
+         * @param dateObject
          * @default function
          * @example function (unixDate) {
          *      var self = this;
@@ -4274,10 +4320,8 @@ this.zerounip = (function () {
          *      return pdate.format(self.format);
          *  }
          */
-        'formatter': function (unixDate) {
-            let self = this,
-              pdate = this.model.PersianDate.date(unixDate);
-            return pdate.format(self.format);
+        'formatter': function (unixDate, dateObject) {
+           return new dateObject(unixDate).format(this.format);
         },
 
 
@@ -4305,37 +4349,27 @@ this.zerounip = (function () {
         /**
          * @description format value of 'altField' input
          * @param unixDate
+         * @param dateObject
          * @default function
          * @example function (unixDate) {
-         *      var self = this;
-         *      var thisAltFormat = self.altFormat.toLowerCase();
-         *      if (thisAltFormat === 'gregorian' || thisAltFormat === 'g') {
-         *          return new Date(unixDate);
+         *      if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
+         *         return new Date(unixDate)
          *      }
-         *      if (thisAltFormat === 'unix' || thisAltFormat === 'u') {
-         *          return unixDate;
+         *      else if (this.altFormat === 'unix' || this.altFormat === 'u') {
+         *        return new dateObject(unixDate).valueOf();
+         *      } else {
+         *        return new dateObject(unixDate).format(this.altFormat);
          *      }
-         *      else {
-         *          var pd = new persianDate(unixDate);
-         *          pd.formatPersian = this.persianDigit;
-         *          return pd.format(self.altFormat);
-         *      }
-         *  }
          */
-        'altFieldFormatter': function (unixDate) {
-            let self = this,
-              thisAltFormat = self.altFormat.toLowerCase(),
-              pd;
-            if (thisAltFormat === 'gregorian' || thisAltFormat === 'g') {
-                return new Date(unixDate);
-            }
-            if (thisAltFormat === 'unix' || thisAltFormat === 'u') {
-                return unixDate;
-            }
-            else {
-                pd = this.model.PersianDate.date(unixDate);
-                return pd.format(self.altFormat);
-            }
+        'altFieldFormatter': function (unixDate, dateObject) {
+           if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
+              return new Date(unixDate)
+           }
+           else if (this.altFormat === 'unix' || this.altFormat === 'u') {
+             return new dateObject(unixDate).valueOf();
+           } else {
+             return new dateObject(unixDate).format(this.altFormat);
+           }
         },
 
 
@@ -5143,6 +5177,21 @@ this.zerounip = (function () {
 
 
     const actions = {
+      parsInitialValue (inputString) {
+        let pd = get_store_value(dateObject);
+        let parse = new PersianDateParser();
+        if (parse.parse(inputString) !== undefined) {
+            pd.toCalendar(get_store_value(config).initialValueType);
+            let unix = new pd(parse.parse(inputString)).valueOf();
+            this.updateIsDirty(true);
+            viewUnix.set(unix);
+            selectedUnix.set(unix);
+            pd.toCalendar(get_store_value(config).calendarType);
+        }
+      },
+      setFromDefaultValue (data) {
+        this.parsInitialValue(data);
+      },
       onSetCalendar (payload) {
         config.set({
           ...get_store_value(config),
@@ -7536,12 +7585,15 @@ this.zerounip = (function () {
     	let $config;
     	let $isDirty;
     	let $selectedUnix;
+    	let $dateObject;
     	validate_store(config, "config");
     	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	validate_store(isDirty, "isDirty");
     	component_subscribe($$self, isDirty, $$value => $$invalidate("$isDirty", $isDirty = $$value));
     	validate_store(selectedUnix, "selectedUnix");
     	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { originalContainer } = $$props;
     	let { plotarea } = $$props;
     	const dispatch = createEventDispatcher();
@@ -7612,18 +7664,28 @@ this.zerounip = (function () {
 
     	let updateInputs = function () {
     		if ($config.initialValue || $isDirty) {
-    			let selected = new persianDate$1($selectedUnix).format($config.format);
+    			let selected = $config.formatter($selectedUnix, $dateObject);
     			$$invalidate("originalContainer", originalContainer.value = selected, originalContainer);
 
     			if ($config.altField) {
     				let altField = document.querySelector($config.altField);
-    				let selected;
-    				if ($config.altFormat === "unix") selected = new persianDate$1($selectedUnix).valueOf(); else selected = new persianDate$1($selectedUnix).format($config.altField);
-    				altField.value = selected;
+    				altField.value = $config.altFieldFormatter($selectedUnix, $dateObject);
     			}
     		}
     	};
 
+    	let getInputInitialValue = function () {
+    		let value = originalContainer.value;
+
+    		setTimeout(
+    			() => {
+    				dispatch("setinitialvalue", value);
+    			},
+    			0
+    		);
+    	};
+
+    	getInputInitialValue();
     	setPlotPostion();
     	initInputEvents();
     	const writable_props = ["originalContainer", "plotarea"];
@@ -7644,9 +7706,11 @@ this.zerounip = (function () {
     			setPlotPostion,
     			initInputEvents,
     			updateInputs,
+    			getInputInitialValue,
     			$config,
     			$isDirty,
-    			$selectedUnix
+    			$selectedUnix,
+    			$dateObject
     		};
     	};
 
@@ -7656,9 +7720,11 @@ this.zerounip = (function () {
     		if ("setPlotPostion" in $$props) setPlotPostion = $$props.setPlotPostion;
     		if ("initInputEvents" in $$props) initInputEvents = $$props.initInputEvents;
     		if ("updateInputs" in $$props) $$invalidate("updateInputs", updateInputs = $$props.updateInputs);
+    		if ("getInputInitialValue" in $$props) getInputInitialValue = $$props.getInputInitialValue;
     		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$isDirty" in $$props) isDirty.set($isDirty = $$props.$isDirty);
     		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     	};
 
     	$$self.$$.update = (changed = { $selectedUnix: 1, updateInputs: 1 }) => {
@@ -8217,6 +8283,7 @@ this.zerounip = (function () {
     			$$inline: true
     		});
 
+    	input.$on("setinitialvalue", ctx.setInitialValue);
     	input.$on("setvisibility", ctx.setvisibility);
 
     	const block = {
@@ -8337,6 +8404,10 @@ this.zerounip = (function () {
 
     	setvisibility({ detail: true });
 
+    	const setInitialValue = function (event) {
+    		dispatcher("setFromDefaultValue")(event.detail);
+    	};
+
     	const setViewMode = function (event) {
     		dispatcher("setViewMode")(event.detail);
     	};
@@ -8414,6 +8485,7 @@ this.zerounip = (function () {
     		plotarea,
     		isVisbile,
     		setvisibility,
+    		setInitialValue,
     		setViewMode,
     		setcalendar,
     		onSelectDate,

@@ -1,7 +1,7 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import persianDate from 'persian-date'
-	import { actions, isDirty, selectedUnix, viewUnix, viewMode, config } from '../stores.js'
+	import { actions, isDirty, selectedUnix, viewUnix, viewMode, config, dateObject } from '../stores.js'
 
 	export let originalContainer
 	export let plotarea
@@ -64,18 +64,20 @@
 
 	let updateInputs = function () {
 		if ($config.initialValue || $isDirty) {
-		  let selected = new persianDate($selectedUnix).format($config.format)
+		  let selected = $config.formatter($selectedUnix, $dateObject)
 			originalContainer.value = selected
 			if ($config.altField) {
 				let altField = document.querySelector($config.altField)
-				let selected
-				if ($config.altFormat === 'unix')
-					selected = new persianDate($selectedUnix).valueOf()
-				else
-					selected = new persianDate($selectedUnix).format($config.altField)
-				altField.value = selected
+				altField.value = $config.altFieldFormatter($selectedUnix, $dateObject)
 			}
 		}
+	}
+	
+	let getInputInitialValue = function () {
+		let value = originalContainer.value
+		setTimeout(() => {
+		  dispatch('setinitialvalue', value)
+		}, 0)
 	}
 
 	$: {
@@ -84,6 +86,7 @@
 		}
 	}
 
+  getInputInitialValue()
 	setPlotPostion()
 	initInputEvents()
 </script>
