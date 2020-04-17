@@ -6003,6 +6003,7 @@ this['persian-datepicker-next-version'] = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
+    			toggle_class(td, "disable", ctx.isDisable(ctx.day));
     			toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
     			toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
     			add_location(td, file$2, 14, 10, 311);
@@ -6025,6 +6026,10 @@ this['persian-datepicker-next-version'] = (function () {
     		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
     			if (changed.groupedDay && t_value !== (t_value = ctx.day.format("D") + "")) set_data_dev(t, t_value);
+
+    			if (changed.isDisable || changed.groupedDay) {
+    				toggle_class(td, "disable", ctx.isDisable(ctx.day));
+    			}
 
     			if (changed.isSameDate || changed.groupedDay || changed.selectedDay) {
     				toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
@@ -6083,7 +6088,7 @@ this['persian-datepicker-next-version'] = (function () {
     			append_dev(tr, t);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.isSameDate || changed.groupedDay || changed.selectedDay || changed.today || changed.selectDate) {
+    			if (changed.isDisable || changed.groupedDay || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
     				each_value_1 = ctx.week;
     				let i;
 
@@ -6183,7 +6188,7 @@ this['persian-datepicker-next-version'] = (function () {
     				if_block = null;
     			}
 
-    			if (changed.groupedDay || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
+    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
     				each_value = ctx.groupedDay;
     				let i;
 
@@ -6227,12 +6232,33 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let $config;
     	let $dateObject;
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
 
     	const isSameDate = (a, b) => {
     		return a.format("YYYY/MM/DD") === b.format("YYYY/MM/DD");
+    	};
+
+    	const isDisable = day => {
+    		let unixtimespan = day.valueOf();
+
+    		if ($config.minDate && $config.maxDate) {
+    			if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
+    				return true;
+    			}
+    		} else if ($config.minDate) {
+    			if (unixtimespan <= $config.minDate) {
+    				return true;
+    			}
+    		} else if ($config.maxDate) {
+    			if (unixtimespan >= $config.maxDate) {
+    				return true;
+    			}
+    		}
     	};
 
     	let { viewUnix } = $$props;
@@ -6258,7 +6284,9 @@ this['persian-datepicker-next-version'] = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<DateView> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = ({ day }, event) => selectDate(day);
+    	const click_handler = ({ day }, event) => {
+    		if (!isDisable(day)) selectDate(day);
+    	};
 
     	$$self.$set = $$props => {
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
@@ -6274,6 +6302,7 @@ this['persian-datepicker-next-version'] = (function () {
     			selectedDay,
     			today,
     			groupedDay,
+    			$config,
     			$dateObject,
     			viewUnixDate
     		};
@@ -6286,6 +6315,7 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
     		if ("today" in $$props) $$invalidate("today", today = $$props.today);
     		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
+    		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("viewUnixDate" in $$props) viewUnixDate = $$props.viewUnixDate;
     	};
@@ -6348,6 +6378,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	return {
     		isSameDate,
+    		isDisable,
     		viewUnix,
     		selectedUnix,
     		todayUnix,

@@ -13,7 +13,8 @@
       <tr>
         {#each week as day}
           <td
-            on:click="{event => selectDate(day)}"
+						on:click="{(event) => { if (!isDisable(day)) selectDate(day) }}"
+						class:disable="{isDisable(day)}"
             class:selected="{isSameDate(day, selectedDay)}"
             class:today="{isSameDate(day, today)}">
             {day.format('D')}
@@ -32,7 +33,24 @@
 
   const isSameDate = (a, b) => {
     return a.format('YYYY/MM/DD') === b.format('YYYY/MM/DD')
-  }
+	}
+
+	const isDisable = (day) => {
+		let unixtimespan  = day.valueOf()
+		if ($config.minDate && $config.maxDate) {
+			if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
+				return true;
+			}
+		} else if ($config.minDate) {
+			if (unixtimespan <= $config.minDate) {
+				return true;
+			}
+		} else if ($config.maxDate) {
+			if (unixtimespan >= $config.maxDate) {
+				return true;
+			}
+		}
+	}
 
   export let viewUnix
   export let selectedUnix
@@ -129,6 +147,11 @@
 
 			&.today {
 				background: lighten($primarycolor, 40);
+			}
+
+			&.disable {
+				background: #ededed;
+				cursor: default !important;
 			}
 
 			&.selected {
