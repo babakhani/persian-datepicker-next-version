@@ -5222,7 +5222,7 @@ this['persian-datepicker-next-version'] = (function () {
       },
       setSelectedDate(pDate) {
         const pd = get_store_value(dateObject);
-        viewUnix.set(new pd(pDate).valueOf());
+        //viewUnix.set(new pd(pDate).valueOf())
         selectedUnix.set(new pd(pDate).valueOf());
       },
       onSelectMonth(month) {

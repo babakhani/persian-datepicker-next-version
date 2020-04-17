@@ -63,7 +63,7 @@ export const actions = {
   },
   setSelectedDate(pDate) {
     const pd = get(dateObject)
-    viewUnix.set(new pd(pDate).valueOf())
+    //viewUnix.set(new pd(pDate).valueOf())
     selectedUnix.set(new pd(pDate).valueOf())
   },
   onSelectMonth(month) {

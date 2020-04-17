@@ -75,48 +75,48 @@
 
   $: currentViewMonth = new $dateObject(viewUnix).month()
   $: viewUnixDate = new $dateObject(viewUnix).format('MMMM YYYY')
-  $: {
-    groupedDay = []
-    let days = []
-    let dateObj = new $dateObject(viewUnix)
+	$: {
+		groupedDay = []
+		let days = []
+		let dateObj = new $dateObject(viewUnix)
 		$dateObject.toCalendar('persian')
-    let day = dateObj.startOf('month')
+		let day = dateObj.startOf('month')
 		let daysInMonth = dateObj.daysInMonth()
 		let startVisualDelta = dateObj.startOf('month').day()
 		if ($config.calendarType === 'persian') {
-      startVisualDelta -= 1
+			startVisualDelta -= 1
 		}
 		let endVisualDelta = 8 - dateObj.endOf('month').day()
 		let visualLenght = daysInMonth + startVisualDelta + endVisualDelta
 		let firstVisualDate = day.subtract('day', startVisualDelta)
 		let startDateOfView = day.subtract('day', startVisualDelta)
 		let i = 0
-    while (i < visualLenght - 1) {
-      days.push(firstVisualDate.hour(6).add('day', i))
+		while (i < visualLenght - 1) {
+			days.push(firstVisualDate.hour(6).add('day', i))
 			i++
 		}
-    let weekindex = 0
+		let weekindex = 0
 		//let cacheDate = null
-    days.forEach((item, index) => {
+		days.forEach((item, index) => {
 			// Test rendering
 			//if (cacheDate == item.date()) {
-      //   console.log('ther is problem')
+			//   console.log('ther is problem')
 			//}
 			//if (cacheDate && cacheDate > item.date()) {
 			//	if(item.date() !== 1) {
-      //    console.log('ther is problem')
+			//    console.log('ther is problem')
 			//	}
 			//}
 			//cacheDate = item.date()
-      if (index % 7 == 0) {
-        groupedDay[weekindex] = []
-      }
-      groupedDay[weekindex].push(item)
-      if (index % 7 == 6) {
-        weekindex++
-      }
-    })
-  }
+			if (index % 7 == 0) {
+				groupedDay[weekindex] = []
+			}
+			groupedDay[weekindex].push(item)
+			if (index % 7 == 6) {
+				weekindex++
+			}
+		})
+	}
 </script>
 
 <style global lang="scss">
