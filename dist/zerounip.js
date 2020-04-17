@@ -6412,7 +6412,7 @@ this['persian-datepicker-next-version'] = (function () {
     				let i = 0;
 
     				while (i < visualLenght - 1) {
-    					days.push(firstVisualDate.hour(12).add("day", i));
+    					days.push(firstVisualDate.hour(6).add("day", i));
     					i++;
     				}
 
