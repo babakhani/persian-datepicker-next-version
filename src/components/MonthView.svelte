@@ -33,7 +33,6 @@
     width: 100%;
     height: 100%;
     div {
-      outline: 1px solid $borderscolor;
 			margin: auto;
 			width: 33.33%;
 			height: 25%; 
@@ -44,13 +43,21 @@
 			position: relative;
 			cursor: pointer;
 			&:hover {
-				background-color: lighten($primarycolor, 30);
+				span {
+				  background-color: lighten($primarycolor, 30);
+				}
 			}
       &.selected {
-				background-color: $primarycolor;
-				color: white;
+				span {
+					background-color: $primarycolor;
+					color: white;
+				}
       }
 			span.pwt-text {
+				display: block;
+				width: 80%;
+				padding: 6px;
+				border-radius: 20px;
 				position: absolute;
 				top: 50%;
 				left: 50%;

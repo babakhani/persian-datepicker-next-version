@@ -1,4 +1,18 @@
 <div class="pwt-date-toolbox">
+	{#if viewMode !== 'time'}
+		<button 
+			class="pwt-date-toolbox-button"
+			on:click={() => setViewMode("time")}>
+			Time
+		</button>
+	{/if}
+	{#if viewMode === 'time'}
+		<button 
+			class="pwt-date-toolbox-button"
+			on:click={() => setViewMode("date")}>
+			Date
+		</button>
+	{/if}
 	<button 
 	  class="pwt-date-toolbox-button"
 		on:click="{today}">
@@ -23,7 +37,7 @@
 <script>
   import persianDate from 'persian-date'
   import { createEventDispatcher } from 'svelte'
-	import { config } from '../stores.js'
+	import { config  } from '../stores.js'
 
 	export let viewUnix
 	export let viewMode
@@ -60,7 +74,7 @@
 		border: 0;
 		marign: -9px;
 		button {
-      width: 33%;
+      width: 30%;
 			background: transparent;
 			border: 0;
 			height: 100%;

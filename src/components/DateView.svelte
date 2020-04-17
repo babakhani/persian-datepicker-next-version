@@ -14,12 +14,16 @@
 				{#if week.length > 1}
         {#each week as day}
           <td
-						on:click="{(event) => { if (!isDisable(day)) selectDate(day) }}"
+						on:click="{(event) => { if (!isDisable(day) && currentViewMonth === day.month()) selectDate(day) }}"
 						class:othermonth="{currentViewMonth !== day.month()}"
 						class:disable="{isDisable(day)}"
             class:selected="{isSameDate(day, selectedDay)}"
             class:today="{isSameDate(day, today)}">
-            {day.format('D')}
+						{#if currentViewMonth === day.month()}
+							<span>
+								{day.format('D')}
+							</span>
+						{/if}
           </td>
         {/each}
 				{/if}
@@ -88,11 +92,11 @@
 		}
 		let endVisualDelta = 8 - dateObj.endOf('month').day()
 		let visualLenght = daysInMonth + startVisualDelta + endVisualDelta
-		let firstVisualDate = day.subtract('day', startVisualDelta)
+		let firstVisualDate = day.subtract('day', startVisualDelta).hour(6)
 		let startDateOfView = day.subtract('day', startVisualDelta)
 		let i = 0
 		while (i < visualLenght - 1) {
-			days.push(firstVisualDate.hour(6).add('day', i))
+			days.push(firstVisualDate.add('day', i))
 			i++
 		}
 		let weekindex = 0
@@ -131,39 +135,49 @@
 		}
 		tr {
       width: 100%;
-			height: calc(100/7%);
+			height: calc(100/8%);
 		}
 		th {
-      height: 42px;
+			height: calc(100/8%);
 			text-align: center;
 		}
 		td {
 			text-align: center;
-			height: calc(100/7%);
+			height: calc(100/8%);
 			width: 14.2%;
 			cursor: pointer;
-      outline: 1px solid $borderscolor;
 
 			&:hover {
-				background: #ededed;
+				span {
+				  background: #ededed;
+				}
 			}
 
 			&.today {
-				background: lighten($primarycolor, 40);
+				span {
+					border: 1px solid gray;
+				}
 			}
 
 			&.othermonth {
-        color: #ccc !important;
+			  cursor: default !important;
+				span {
+					color: #ccc !important;
+				}
 			}
 
 			&.disable {
-				background: #ededed;
 				cursor: default !important;
+				span {
+					background: #ededed;
+				}
 			}
 
 			&.selected {
-				color: white;
-				background: $primarycolor;
+				span {
+					color: white;
+					background: $primarycolor;
+				}
 			}
 		}
 	}

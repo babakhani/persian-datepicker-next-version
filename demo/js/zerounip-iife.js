@@ -5892,7 +5892,7 @@ this.zerounip = (function () {
     }
 
     // (6:6) {#if groupedDay[0]}
-    function create_if_block_1(ctx) {
+    function create_if_block_2(ctx) {
     	let each_1_anchor;
     	let each_value_2 = ctx.groupedDay[0];
     	let each_blocks = [];
@@ -5948,7 +5948,7 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1.name,
+    		id: create_if_block_2.name,
     		type: "if",
     		source: "(6:6) {#if groupedDay[0]}",
     		ctx
@@ -6058,13 +6058,48 @@ this.zerounip = (function () {
     	return block;
     }
 
+    // (22:6) {#if currentViewMonth === day.month()}
+    function create_if_block_1(ctx) {
+    	let span;
+    	let t_value = ctx.day.format("D") + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			span = element("span");
+    			t = text(t_value);
+    			add_location(span, file$2, 22, 7, 708);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span, anchor);
+    			append_dev(span, t);
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.groupedDay && t_value !== (t_value = ctx.day.format("D") + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(span);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(22:6) {#if currentViewMonth === day.month()}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     // (15:8) {#each week as day}
     function create_each_block_1(ctx) {
     	let td;
-    	let t0_value = ctx.day.format("D") + "";
-    	let t0;
-    	let t1;
+    	let show_if = ctx.currentViewMonth === ctx.day.month();
+    	let t;
     	let dispose;
+    	let if_block = show_if && create_if_block_1(ctx);
 
     	function click_handler(...args) {
     		return ctx.click_handler(ctx, ...args);
@@ -6073,8 +6108,8 @@ this.zerounip = (function () {
     	const block = {
     		c: function create() {
     			td = element("td");
-    			t0 = text(t0_value);
-    			t1 = space();
+    			if (if_block) if_block.c();
+    			t = space();
     			toggle_class(td, "othermonth", ctx.currentViewMonth !== ctx.day.month());
     			toggle_class(td, "disable", ctx.isDisable(ctx.day));
     			toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
@@ -6094,12 +6129,25 @@ this.zerounip = (function () {
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
-    			append_dev(td, t0);
-    			append_dev(td, t1);
+    			if (if_block) if_block.m(td, null);
+    			append_dev(td, t);
     		},
     		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
-    			if (changed.groupedDay && t0_value !== (t0_value = ctx.day.format("D") + "")) set_data_dev(t0, t0_value);
+    			if (changed.currentViewMonth || changed.groupedDay) show_if = ctx.currentViewMonth === ctx.day.month();
+
+    			if (show_if) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    				} else {
+    					if_block = create_if_block_1(ctx);
+    					if_block.c();
+    					if_block.m(td, t);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
 
     			if (changed.currentViewMonth || changed.groupedDay) {
     				toggle_class(td, "othermonth", ctx.currentViewMonth !== ctx.day.month());
@@ -6119,6 +6167,7 @@ this.zerounip = (function () {
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(td);
+    			if (if_block) if_block.d();
     			dispose();
     		}
     	};
@@ -6188,7 +6237,7 @@ this.zerounip = (function () {
     	let table;
     	let tr;
     	let t;
-    	let if_block = ctx.groupedDay[0] && create_if_block_1(ctx);
+    	let if_block = ctx.groupedDay[0] && create_if_block_2(ctx);
     	let each_value = ctx.groupedDay;
     	let each_blocks = [];
 
@@ -6234,7 +6283,7 @@ this.zerounip = (function () {
     				if (if_block) {
     					if_block.p(changed, ctx);
     				} else {
-    					if_block = create_if_block_1(ctx);
+    					if_block = create_if_block_2(ctx);
     					if_block.c();
     					if_block.m(tr, null);
     				}
@@ -6340,7 +6389,7 @@ this.zerounip = (function () {
     	});
 
     	const click_handler = ({ day }, event) => {
-    		if (!isDisable(day)) selectDate(day);
+    		if (!isDisable(day) && currentViewMonth === day.month()) selectDate(day);
     	};
 
     	$$self.$set = $$props => {
@@ -6405,12 +6454,12 @@ this.zerounip = (function () {
 
     				let endVisualDelta = 8 - dateObj.endOf("month").day();
     				let visualLenght = daysInMonth + startVisualDelta + endVisualDelta;
-    				let firstVisualDate = day.subtract("day", startVisualDelta);
+    				let firstVisualDate = day.subtract("day", startVisualDelta).hour(6);
     				let startDateOfView = day.subtract("day", startVisualDelta);
     				let i = 0;
 
     				while (i < visualLenght - 1) {
-    					days.push(firstVisualDate.hour(6).add("day", i));
+    					days.push(firstVisualDate.add("day", i));
     					i++;
     				}
 
@@ -6609,7 +6658,7 @@ this.zerounip = (function () {
     const file$4 = "src/components/Navigator.svelte";
 
     // (16:2) {#if viewMode === 'year'}
-    function create_if_block_2(ctx) {
+    function create_if_block_2$1(ctx) {
     	let button;
     	let t0;
     	let t1;
@@ -6645,7 +6694,7 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
     		source: "(16:2) {#if viewMode === 'year'}",
     		ctx
@@ -6751,7 +6800,7 @@ this.zerounip = (function () {
     	let svg1;
     	let path1;
     	let dispose;
-    	let if_block0 = ctx.viewMode === "year" && create_if_block_2(ctx);
+    	let if_block0 = ctx.viewMode === "year" && create_if_block_2$1(ctx);
     	let if_block1 = ctx.viewMode === "month" && create_if_block_1$1(ctx);
     	let if_block2 = ctx.viewMode === "date" && create_if_block$1(ctx);
 
@@ -6823,7 +6872,7 @@ this.zerounip = (function () {
     				if (if_block0) {
     					if_block0.p(changed, ctx);
     				} else {
-    					if_block0 = create_if_block_2(ctx);
+    					if_block0 = create_if_block_2$1(ctx);
     					if_block0.c();
     					if_block0.m(div0, t1);
     				}
@@ -7361,7 +7410,75 @@ this.zerounip = (function () {
     /* src/components/Toolbox.svelte generated by Svelte v3.15.0 */
     const file$6 = "src/components/Toolbox.svelte";
 
-    // (7:1) {#if $config.calendarType === 'persian'}
+    // (2:1) {#if viewMode !== 'time'}
+    function create_if_block_3(ctx) {
+    	let button;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			button.textContent = "Time";
+    			attr_dev(button, "class", "pwt-date-toolbox-button");
+    			add_location(button, file$6, 2, 2, 60);
+    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3.name,
+    		type: "if",
+    		source: "(2:1) {#if viewMode !== 'time'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (9:1) {#if viewMode === 'time'}
+    function create_if_block_2$2(ctx) {
+    	let button;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			button.textContent = "Date";
+    			attr_dev(button, "class", "pwt-date-toolbox-button");
+    			add_location(button, file$6, 9, 2, 201);
+    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$2.name,
+    		type: "if",
+    		source: "(9:1) {#if viewMode === 'time'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (21:1) {#if $config.calendarType === 'persian'}
     function create_if_block_1$3(ctx) {
     	let button;
     	let dispose;
@@ -7371,8 +7488,8 @@ this.zerounip = (function () {
     			button = element("button");
     			button.textContent = "gregorian";
     			attr_dev(button, "class", "pwt-date-toolbox-button");
-    			add_location(button, file$6, 7, 2, 161);
-    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
+    			add_location(button, file$6, 21, 2, 443);
+    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -7388,14 +7505,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(7:1) {#if $config.calendarType === 'persian'}",
+    		source: "(21:1) {#if $config.calendarType === 'persian'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (14:1) {#if $config.calendarType === 'gregorian'}
+    // (28:1) {#if $config.calendarType === 'gregorian'}
     function create_if_block$3(ctx) {
     	let button;
     	let dispose;
@@ -7405,8 +7522,8 @@ this.zerounip = (function () {
     			button = element("button");
     			button.textContent = "Jalali";
     			attr_dev(button, "class", "pwt-date-toolbox-button");
-    			add_location(button, file$6, 14, 2, 331);
-    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    			add_location(button, file$6, 28, 2, 613);
+    			dispose = listen_dev(button, "click", ctx.click_handler_3, false, false, false);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -7422,7 +7539,7 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(14:1) {#if $config.calendarType === 'gregorian'}",
+    		source: "(28:1) {#if $config.calendarType === 'gregorian'}",
     		ctx
     	});
 
@@ -7431,24 +7548,32 @@ this.zerounip = (function () {
 
     function create_fragment$6(ctx) {
     	let div;
-    	let button;
+    	let t0;
     	let t1;
-    	let t2;
+    	let button;
+    	let t3;
+    	let t4;
     	let dispose;
-    	let if_block0 = ctx.$config.calendarType === "persian" && create_if_block_1$3(ctx);
-    	let if_block1 = ctx.$config.calendarType === "gregorian" && create_if_block$3(ctx);
+    	let if_block0 = ctx.viewMode !== "time" && create_if_block_3(ctx);
+    	let if_block1 = ctx.viewMode === "time" && create_if_block_2$2(ctx);
+    	let if_block2 = ctx.$config.calendarType === "persian" && create_if_block_1$3(ctx);
+    	let if_block3 = ctx.$config.calendarType === "gregorian" && create_if_block$3(ctx);
 
     	const block = {
     		c: function create() {
     			div = element("div");
+    			if (if_block0) if_block0.c();
+    			t0 = space();
+    			if (if_block1) if_block1.c();
+    			t1 = space();
     			button = element("button");
     			button.textContent = "Today";
-    			t1 = space();
-    			if (if_block0) if_block0.c();
-    			t2 = space();
-    			if (if_block1) if_block1.c();
+    			t3 = space();
+    			if (if_block2) if_block2.c();
+    			t4 = space();
+    			if (if_block3) if_block3.c();
     			attr_dev(button, "class", "pwt-date-toolbox-button");
-    			add_location(button, file$6, 1, 1, 32);
+    			add_location(button, file$6, 15, 1, 314);
     			attr_dev(div, "class", "pwt-date-toolbox");
     			add_location(div, file$6, 0, 0, 0);
     			dispose = listen_dev(button, "click", ctx.today, false, false, false);
@@ -7458,37 +7583,67 @@ this.zerounip = (function () {
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
-    			append_dev(div, button);
-    			append_dev(div, t1);
     			if (if_block0) if_block0.m(div, null);
-    			append_dev(div, t2);
+    			append_dev(div, t0);
     			if (if_block1) if_block1.m(div, null);
+    			append_dev(div, t1);
+    			append_dev(div, button);
+    			append_dev(div, t3);
+    			if (if_block2) if_block2.m(div, null);
+    			append_dev(div, t4);
+    			if (if_block3) if_block3.m(div, null);
     		},
     		p: function update(changed, ctx) {
-    			if (ctx.$config.calendarType === "persian") {
+    			if (ctx.viewMode !== "time") {
     				if (if_block0) {
     					if_block0.p(changed, ctx);
     				} else {
-    					if_block0 = create_if_block_1$3(ctx);
+    					if_block0 = create_if_block_3(ctx);
     					if_block0.c();
-    					if_block0.m(div, t2);
+    					if_block0.m(div, t0);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
     				if_block0 = null;
     			}
 
-    			if (ctx.$config.calendarType === "gregorian") {
+    			if (ctx.viewMode === "time") {
     				if (if_block1) {
     					if_block1.p(changed, ctx);
     				} else {
-    					if_block1 = create_if_block$3(ctx);
+    					if_block1 = create_if_block_2$2(ctx);
     					if_block1.c();
-    					if_block1.m(div, null);
+    					if_block1.m(div, t1);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
+    			}
+
+    			if (ctx.$config.calendarType === "persian") {
+    				if (if_block2) {
+    					if_block2.p(changed, ctx);
+    				} else {
+    					if_block2 = create_if_block_1$3(ctx);
+    					if_block2.c();
+    					if_block2.m(div, t4);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
+
+    			if (ctx.$config.calendarType === "gregorian") {
+    				if (if_block3) {
+    					if_block3.p(changed, ctx);
+    				} else {
+    					if_block3 = create_if_block$3(ctx);
+    					if_block3.c();
+    					if_block3.m(div, null);
+    				}
+    			} else if (if_block3) {
+    				if_block3.d(1);
+    				if_block3 = null;
     			}
     		},
     		i: noop,
@@ -7497,6 +7652,8 @@ this.zerounip = (function () {
     			if (detaching) detach_dev(div);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			if (if_block3) if_block3.d();
     			dispose();
     		}
     	};
@@ -7520,6 +7677,10 @@ this.zerounip = (function () {
     	let { viewMode } = $$props;
     	const dispatch = createEventDispatcher();
 
+    	function setViewMode(payload) {
+    		dispatch("selectmode", payload);
+    	}
+
     	function setcalendar(payload) {
     		dispatch("setcalendar", payload);
     	}
@@ -7536,8 +7697,10 @@ this.zerounip = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Toolbox> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = () => setcalendar("gregorian");
-    	const click_handler_1 = () => setcalendar("persian");
+    	const click_handler = () => setViewMode("time");
+    	const click_handler_1 = () => setViewMode("date");
+    	const click_handler_2 = () => setcalendar("gregorian");
+    	const click_handler_3 = () => setcalendar("persian");
 
     	$$self.$set = $$props => {
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
@@ -7595,11 +7758,14 @@ this.zerounip = (function () {
     	return {
     		viewUnix,
     		viewMode,
+    		setViewMode,
     		setcalendar,
     		today,
     		$config,
     		click_handler,
-    		click_handler_1
+    		click_handler_1,
+    		click_handler_2,
+    		click_handler_3
     	};
     }
 
@@ -7908,8 +8074,8 @@ this.zerounip = (function () {
     	navigator.$on("next", ctx.navNext);
     	navigator.$on("prev", ctx.navPrev);
     	let if_block0 = ctx.$viewMode === "year" && create_if_block_4(ctx);
-    	let if_block1 = ctx.$viewMode === "month" && create_if_block_3(ctx);
-    	let if_block2 = ctx.$viewMode === "date" && create_if_block_2$1(ctx);
+    	let if_block1 = ctx.$viewMode === "month" && create_if_block_3$1(ctx);
+    	let if_block2 = ctx.$viewMode === "date" && create_if_block_2$3(ctx);
     	let if_block3 = ctx.$viewMode === "time" && create_if_block_1$4(ctx);
 
     	const toolbox = new Toolbox({
@@ -8000,7 +8166,7 @@ this.zerounip = (function () {
     					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
     				} else {
-    					if_block1 = create_if_block_3(ctx);
+    					if_block1 = create_if_block_3$1(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(div, t3);
@@ -8020,7 +8186,7 @@ this.zerounip = (function () {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_2$1(ctx);
+    					if_block2 = create_if_block_2$3(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(div, t4);
@@ -8175,7 +8341,7 @@ this.zerounip = (function () {
     }
 
     // (25:2) {#if $viewMode === 'month'}
-    function create_if_block_3(ctx) {
+    function create_if_block_3$1(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -8233,7 +8399,7 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3.name,
+    		id: create_if_block_3$1.name,
     		type: "if",
     		source: "(25:2) {#if $viewMode === 'month'}",
     		ctx
@@ -8243,7 +8409,7 @@ this.zerounip = (function () {
     }
 
     // (34:2) {#if $viewMode === 'date'}
-    function create_if_block_2$1(ctx) {
+    function create_if_block_2$3(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -8303,7 +8469,7 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$1.name,
+    		id: create_if_block_2$3.name,
     		type: "if",
     		source: "(34:2) {#if $viewMode === 'date'}",
     		ctx
