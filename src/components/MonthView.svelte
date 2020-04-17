@@ -21,8 +21,7 @@
 
   function select(payload) { dispatch('select', payload) }
 
-  let monthRange = new $dateObject().rangeName().months
-
+  $:  monthRange = new $dateObject().rangeName().months
   $: currentMonth = new $dateObject(selectedUnix).month()
   $: currentSelectedYear = new $dateObject(selectedUnix).year()
   $: currentViewYear = new $dateObject(viewUnix).year()

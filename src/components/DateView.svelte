@@ -108,8 +108,6 @@
 			//	}
 			//}
 			//cacheDate = item.date()
-
-
       if (index % 7 == 0) {
         groupedDay[weekindex] = []
       }

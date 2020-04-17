@@ -5652,6 +5652,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
+    			if (changed.monthRange && t0_value !== (t0_value = ctx.month + "")) set_data_dev(t0, t0_value);
 
     			if (changed.currentMonth || changed.currentViewYear || changed.currentSelectedYear) {
     				toggle_class(div, "selected", ctx.currentMonth - 1 === ctx.index && ctx.currentViewYear === ctx.currentSelectedYear);
@@ -5759,7 +5760,6 @@ this['persian-datepicker-next-version'] = (function () {
     		dispatch("select", payload);
     	}
 
-    	let monthRange = new $dateObject().rangeName().months;
     	const writable_props = ["selectedUnix", "viewUnix"];
 
     	Object.keys($$props).forEach(key => {
@@ -5795,11 +5795,16 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
     	};
 
+    	let monthRange;
     	let currentMonth;
     	let currentSelectedYear;
     	let currentViewYear;
 
     	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1 }) => {
+    		if (changed.$dateObject) {
+    			 $$invalidate("monthRange", monthRange = new $dateObject().rangeName().months);
+    		}
+
     		if (changed.$dateObject || changed.selectedUnix) {
     			 $$invalidate("currentMonth", currentMonth = new $dateObject(selectedUnix).month());
     		}
