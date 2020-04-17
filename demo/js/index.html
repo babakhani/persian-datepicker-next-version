@@ -10,6 +10,13 @@
     html {
       font-family: 'Open Sans', sans-serif;
     }
+
+    #container {
+      border: 2px solid red;
+      height: 32px;
+      width: 300px;
+      margin: 100px;
+    }
   </style>
 </head>
 <body>
@@ -17,14 +24,12 @@
     <img width="180" style="padding-top: 4em;" src="https://i.pinimg.com/originals/63/d0/8d/63d08d548b8215a571ff61f56e4f47c0.jpg" />
     <h1> Pure javascript usage example </h1>
   </center>
-  <div id="container" />
+  <input id="container" />
+  <input id="containerAlt" />
   <script>
     var container = document.getElementById('container')
     var options = {
-      sampleConfig: 'Overwrite by plugin user',
-      onSampleEvent: function (args) {
-        alert('alert from iife js')
-      }
+      altField: '#containerAlt'
     }
     zerounip(container, options)
   </script>

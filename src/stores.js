@@ -1,26 +1,34 @@
+// TODO get default value from config by more priority
 import persianDate from 'persian-date'
 import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
 import { writable, get } from 'svelte/store'
+import Config from './config.js'
 
 const nowUnix = persianDateToUnix(new persianDate())
+
+export const config = writable(Config)
 export const isDirty = writable(false)
-// TODO get default value from config by more priority
 export const selectedUnix = writable(nowUnix)
 export const viewUnix = writable(nowUnix)
-export const viewMode = writable('month') // [date, month, year]
+export const viewMode = writable('date') // [date, month, year]
 export const isOpen = writable(false)
 export const minUnix = writable(null)
 export const maxUnix = writable(null)
 export const currentCalendar = writable('persian') // [persian, gregorian]
 
+
 export const actions = {
+  setConfig (payload) {
+    config.set(payload)
+  },
   onSelectDate(pDate) {
+    const date = pDate.detail
     const { hour, minute, second } = getHourMinuteSecond(get(selectedUnix))
-    pDate
+    date
       .hour(hour)
       .minute(minute)
       .second(second)
-    this.setSelectedDate(pDate)
+    this.setSelectedDate(date)
     this.updateIsDirty(true)
   },
   setSelectedDate(pDate) {
@@ -28,24 +36,31 @@ export const actions = {
     selectedUnix.set(unix)
   },
   onSelectMonth(month) {
-    this.setMonth(month)
-    this.setViewMode('day')
+    viewUnix.set(
+      persianDateToUnix(
+        new persianDate(get(viewUnix))
+          .toCalendar(get(currentCalendar))
+          .month(month)
+      )
+    )
+    selectedUnix.set(
+      persianDateToUnix(
+        new persianDate(get(viewUnix))
+          .toCalendar(get(currentCalendar))
+          .month(month)
+      )
+    )
+    this.setViewMode('date')
     this.updateIsDirty(true)
   },
   onSelectYear(year) {
-    this.setYear(year)
-    this.setViewMode('month')
-    this.updateIsDirty(true)
-  },
-  onSetHour(hour) {
-    this.setHour(hour)
-    this.updateIsDirty(true)
-  },
-  onSetMinute(minute) {
-    this.setMinute(minute)
-    this.updateIsDirty(true)
-  },
-  setYear(year) {
+    viewUnix.set(
+      persianDateToUnix(
+        new persianDate(get(selectedUnix))
+          .toCalendar(get(currentCalendar))
+          .year(year)
+      )
+    )
     selectedUnix.set(
       persianDateToUnix(
         new persianDate(get(selectedUnix))
@@ -53,27 +68,10 @@ export const actions = {
           .year(year)
       )
     )
+    this.setViewMode('month')
+    this.updateIsDirty(true)
   },
-  setMonth(month) {
-    selectedUnix.set(
-      persianDateToUnix(
-        new persianDate(get(selectedUnix))
-          .toCalendar(get(currentCalendar))
-          .month(month)
-      )
-    )
-  },
-  /* @param {number} date - day of month */
-  setDate(date) {
-    selectedUnix.set(
-      persianDateToUnix(
-        new persianDate(get(selectedUnix))
-          .toCalendar(get(currentCalendar))
-          .date(date)
-      )
-    )
-  },
-  setHour(hour) {
+  onSetHour(hour) {
     selectedUnix.set(
       persianDateToUnix(
         new persianDate(get(selectedUnix))
@@ -81,8 +79,9 @@ export const actions = {
           .hour(hour)
       )
     )
+    this.updateIsDirty(true)
   },
-  setMinute(minute) {
+  onSetMinute(minute) {
     selectedUnix.set(
       persianDateToUnix(
         new persianDate(get(selectedUnix))
@@ -90,6 +89,7 @@ export const actions = {
           .minute(minute)
       )
     )
+    this.updateIsDirty(true)
   },
   setSecond(second) {
     selectedUnix.set(
@@ -125,10 +125,28 @@ export const actions = {
     currentCalendar.set(calendar)
   },
   onSelectNextView() {
-    viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
+    console.log('onSelectNextView -----------------------')
+    if (get(viewMode) === 'date') {
+      viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
+    }
+    if (get(viewMode) === 'month') {
+      viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 1)))
+    }
+    if (get(viewMode) === 'year') {
+      viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 12)))
+    }
   },
   onSelectPrevView() {
-    viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
+    console.log('onSelectPrevView -----------------------')
+    if (get(viewMode) === 'date') {
+      viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
+    }
+    if (get(viewMode) === 'month') {
+      viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 1)))
+    }
+    if (get(viewMode) === 'year') {
+      viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 12)))
+    }
   },
   setViewUnix(pDate) {
     viewUnix.set(persianDateToUnix(pDate))
@@ -141,43 +159,5 @@ export const actions = {
   },
   setOpen(value) {
     isOpen.set(value)
-  },
+  }
 }
-
-/*
-
-import { writable, readable, derived } from 'svelte/store'
-
-// Readable Example
-export const time = readable(new Date(), function start (set) {
-  const interval = setInterval(() => {
-    set(new Date())
-  }, 1000)
-
-  return function stop () {
-    clearInterval(interval)
-  }
-})
-
-// Writable Example
-export const count = writable(0)
-// Derived Example
-const start = new Date()
-export const elapsed = derived(time, $time =>
-  Math.round(($time - start) / 1000)
-)
-
-// Custom Store
-export const countable = (function () {
-  const { subscribe, set, update } = writable(0)
-  return {
-    set: input => update(() => input),
-    subscribe,
-    increment: () => update(n => n + 1),
-    decrement: () => update(n => n - 1),
-    reset: () => set(0)
-  }
-})()
-
-
-*/

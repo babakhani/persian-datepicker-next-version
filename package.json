@@ -12,6 +12,7 @@
     "autoprefixer": "^9.7.0",
     "babel-eslint": "^10.0.3",
     "eslint": "^6.6.0",
+    "eslint-config-standard": "^14.1.0",
     "eslint-config-stylelint": "^11.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^10.0.0",
@@ -20,7 +21,6 @@
     "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-svelte3": "^2.7.3",
     "eslint-plugin-vue": "^5.2.3",
-    "eslint-config-standard": "^14.1.0",
     "husky": "^3.0.9",
     "kill-port": "^1.6.0",
     "node-sass": "^4.13.0",
@@ -91,6 +91,8 @@
     "singleQuote": true
   },
   "dependencies": {
-    "persian-date": "^1.1.0"
+    "persian-date": "^1.1.0",
+    "svelte-swipe": "^1.5.0",
+    "swiper": "^5.3.7"
   }
 }

@@ -1,0 +1,53 @@
+<div class="pwt-date-toolbox">
+	<button 
+		on:click="{today}">
+		Today
+	</button>
+</div>
+
+<script>
+  import persianDate from 'persian-date'
+  import { createEventDispatcher } from 'svelte'
+
+	export let viewUnix
+	export let viewMode
+
+  const dispatch = createEventDispatcher()
+	function setViewMode(payload) { dispatch('selectmode', payload) }
+  function today(payload) { dispatch('today', payload) }
+  function next(payload) { dispatch('next', payload) }
+  function prev(payload) { dispatch('prev', payload) }
+  $: selectedYear = new persianDate(viewUnix).year()
+  $: selectedMonth = new persianDate(viewUnix).format('MMMM')
+  let yearRange
+  let startYear
+  $: {
+    yearRange = []
+    startYear = selectedYear - (selectedYear % 12)
+    let i = 0
+    while (i < 12) {
+      yearRange.push(startYear + i)
+      i++
+    }
+  }
+</script>
+
+<style global lang="scss">
+  @import './theme.scss';
+  .pwt-date-toolbox {
+		height: 40px;
+    line-height: 40px;
+		border: 0;
+		marign: -9px;
+		button {
+      width: 33%;
+			background: transparent;
+			border: 0;
+			height: 100%;
+			cursor: pointer;
+			&:hover {
+        background: #f1f1f1;
+			}
+		}
+	}
+</style>

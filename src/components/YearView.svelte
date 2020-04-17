@@ -1,10 +1,12 @@
 <div class="pwt-date-year-view">
   {#each yearRange as year}
-    <span
+    <div
       on:click="{event => select(year)}"
       class:selected="{currentYear === year}">
-      {year}
-    </span>
+			<span class="pwt-text">
+        {year}
+			</span>
+    </div>
   {/each}
 </div>
 
@@ -15,18 +17,14 @@
   export let viewUnix
   import { createEventDispatcher } from 'svelte'
   const dispatch = createEventDispatcher()
-  function select(payload) {
-    dispatch('select', {
-      payload: payload,
-    })
-  }
-  $: currentViewDate = new persianDate(viewUnix).format('MMMM')
+  function select(payload) { dispatch('select', payload) }
   $: currentYear = new persianDate(selectedUnix).year()
+  $: currentViewYear = new persianDate(viewUnix).year()
   let yearRange
   let startYear
   $: {
     yearRange = []
-    startYear = currentYear - (currentYear % 12)
+    startYear = currentViewYear - (currentViewYear % 12)
     let i = 0
     while (i < 12) {
       yearRange.push(startYear + i)
@@ -38,17 +36,32 @@
 <style global lang="scss">
   @import './theme.scss';
   .pwt-date-year-view {
-    border: 1px solid red;
-    width: 300px;
-    height: 100px;
-    span {
-      outline: 1px solid red;
-      display: block;
-      width: 33.33%;
-      float: right;
+    width: 100%;
+    height: 100%;
+    div {
+      outline: 1px solid $borderscolor;
+			margin: auto;
+			width: 33.33%;
+			height: 25%; 
+			vertical-align: middle;
+			text-align: center;
+			float: right;
+			display: block;
+			position: relative;
+			cursor: pointer;
+			&:hover {
+				background-color: lighten($primarycolor, 30);
+			}
       &.selected {
-        background-color: red;
+				background-color: $primarycolor;
+				color: white;
       }
+			span.pwt-text {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+			}
     }
   }
 </style>

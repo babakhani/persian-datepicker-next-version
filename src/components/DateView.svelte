@@ -1,5 +1,7 @@
 <div class="pwt-date-view">
-  <table class="month-table next" border="1">
+	<table 
+		class="month-table next" 
+		border="0">
     <tr>
       {#if groupedDay[0]}
         {#each groupedDay[0] as day}
@@ -23,8 +25,9 @@
 </div>
 
 <script>
+	import { afterUpdate } from 'svelte'
+	import { flip } from 'svelte/animate'
   import { time, elapsed, countable } from '../stores.js'
-  import { afterUpdate } from 'svelte';
   import persianDate from 'persian-date'
   const isSameDate = (a, b) => {
     return a.format('YYYY/MM/DD') === b.format('YYYY/MM/DD')
@@ -35,11 +38,7 @@
 
   import { createEventDispatcher } from 'svelte'
   const dispatch = createEventDispatcher()
-  function selectDate(payload) {
-    dispatch('selectDate', {
-      payload: payload,
-    })
-  }
+  function selectDate(payload) { dispatch('selectDate', payload) }
   let selectedDay = new persianDate(selectedUnix).startOf('day');
   afterUpdate(async () => {
     selectedDay = new persianDate(selectedUnix).startOf('day')
@@ -96,36 +95,41 @@
 
 <style global lang="scss">
   @import './theme.scss';
-  table {
-    float: right;
-  }
   .pwt-date-view {
-    width: 600px;
-    height: 350px;
-    position: relative;
-    border: 3px dashed $primarycolor;
-  }
-  .month-table {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    left: 10%;
-    bottom: 0px;
     width: 100%;
-    border: 1px solid red;
-  }
-  .today {
-    background: green;
-  }
-  .selected {
-    background: red;
-  }
-  td {
-    height: 20px;
-    padding: 1em;
-    cursor: pointer;
-    &:hover {
-      background: #ededed;
-    }
-  }
+    height: 100%;
+		position: relative;
+		.month-table {
+			width: 100%;
+			height: 100%;
+		}
+		tr {
+      width: 100%;
+			height: calc(100/7%);
+		}
+		th {
+      height: 42px;
+			text-align: center;
+		}
+		td {
+			text-align: center;
+			height: calc(100/7%);
+			width: 14.2%;
+			cursor: pointer;
+      outline: 1px solid $borderscolor;
+
+			&:hover {
+				background: #ededed;
+			}
+
+			&.today {
+				background: lighten($primarycolor, 40);
+			}
+
+			&.selected {
+				color: white;
+				background: $primarycolor;
+			}
+		}
+	}
 </style>

@@ -1,4 +1,6 @@
-<div class="pwt-date-navigator">{currentUnixDate}</div>
+<div class="pwt-date-time">
+	{currentUnixDate}
+</div>
 
 <script>
   import { time, elapsed, countable } from '../stores.js'

@@ -14,6 +14,7 @@ this['persian-datepicker-next-version'] = (function () {
     'use strict';
 
     function noop() { }
+    const identity = x => x;
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -35,15 +36,12 @@ this['persian-datepicker-next-version'] = (function () {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
     }
     function validate_store(store, name) {
-        if (store != null && typeof store.subscribe !== 'function') {
+        if (!store || typeof store.subscribe !== 'function') {
             throw new Error(`'${name}' is not a store with a 'subscribe' method`);
         }
     }
-    function subscribe(store, ...callbacks) {
-        if (store == null) {
-            return noop;
-        }
-        const unsub = store.subscribe(...callbacks);
+    function subscribe(store, callback) {
+        const unsub = store.subscribe(callback);
         return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
     }
     function get_store_value(store) {
@@ -53,6 +51,41 @@ this['persian-datepicker-next-version'] = (function () {
     }
     function component_subscribe(component, store, callback) {
         component.$$.on_destroy.push(subscribe(store, callback));
+    }
+
+    const is_client = typeof window !== 'undefined';
+    let now = is_client
+        ? () => window.performance.now()
+        : () => Date.now();
+    let raf = is_client ? cb => requestAnimationFrame(cb) : noop;
+
+    const tasks = new Set();
+    let running = false;
+    function run_tasks() {
+        tasks.forEach(task => {
+            if (!task[0](now())) {
+                tasks.delete(task);
+                task[1]();
+            }
+        });
+        running = tasks.size > 0;
+        if (running)
+            raf(run_tasks);
+    }
+    function loop(fn) {
+        let task;
+        if (!running) {
+            running = true;
+            raf(run_tasks);
+        }
+        return {
+            promise: new Promise(fulfil => {
+                tasks.add(task = [fn, fulfil]);
+            }),
+            abort() {
+                tasks.delete(task);
+            }
+        };
     }
 
     function append(target, node) {
@@ -72,6 +105,9 @@ this['persian-datepicker-next-version'] = (function () {
     }
     function element(name) {
         return document.createElement(name);
+    }
+    function svg_element(name) {
+        return document.createElementNS('http://www.w3.org/2000/svg', name);
     }
     function text(data) {
         return document.createTextNode(data);
@@ -102,6 +138,62 @@ this['persian-datepicker-next-version'] = (function () {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, false, false, detail);
         return e;
+    }
+
+    let stylesheet;
+    let active = 0;
+    let current_rules = {};
+    // https://github.com/darkskyapp/string-hash/blob/master/index.js
+    function hash(str) {
+        let hash = 5381;
+        let i = str.length;
+        while (i--)
+            hash = ((hash << 5) - hash) ^ str.charCodeAt(i);
+        return hash >>> 0;
+    }
+    function create_rule(node, a, b, duration, delay, ease, fn, uid = 0) {
+        const step = 16.666 / duration;
+        let keyframes = '{\n';
+        for (let p = 0; p <= 1; p += step) {
+            const t = a + (b - a) * ease(p);
+            keyframes += p * 100 + `%{${fn(t, 1 - t)}}\n`;
+        }
+        const rule = keyframes + `100% {${fn(b, 1 - b)}}\n}`;
+        const name = `__svelte_${hash(rule)}_${uid}`;
+        if (!current_rules[name]) {
+            if (!stylesheet) {
+                const style = element('style');
+                document.head.appendChild(style);
+                stylesheet = style.sheet;
+            }
+            current_rules[name] = true;
+            stylesheet.insertRule(`@keyframes ${name} ${rule}`, stylesheet.cssRules.length);
+        }
+        const animation = node.style.animation || '';
+        node.style.animation = `${animation ? `${animation}, ` : ``}${name} ${duration}ms linear ${delay}ms 1 both`;
+        active += 1;
+        return name;
+    }
+    function delete_rule(node, name) {
+        node.style.animation = (node.style.animation || '')
+            .split(', ')
+            .filter(name
+            ? anim => anim.indexOf(name) < 0 // remove specific animation
+            : anim => anim.indexOf('__svelte') === -1 // remove all Svelte animations
+        )
+            .join(', ');
+        if (name && !--active)
+            clear_rules();
+    }
+    function clear_rules() {
+        raf(() => {
+            if (active)
+                return;
+            let i = stylesheet.cssRules.length;
+            while (i--)
+                stylesheet.deleteRule(i);
+            current_rules = {};
+        });
     }
 
     let current_component;
@@ -146,21 +238,16 @@ this['persian-datepicker-next-version'] = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
-    let flushing = false;
-    const seen_callbacks = new Set();
     function flush() {
-        if (flushing)
-            return;
-        flushing = true;
+        const seen_callbacks = new Set();
         do {
             // first, call beforeUpdate functions
             // and update components
-            for (let i = 0; i < dirty_components.length; i += 1) {
-                const component = dirty_components[i];
+            while (dirty_components.length) {
+                const component = dirty_components.shift();
                 set_current_component(component);
                 update(component.$$);
             }
-            dirty_components.length = 0;
             while (binding_callbacks.length)
                 binding_callbacks.pop()();
             // then, once components are updated, call
@@ -169,9 +256,9 @@ this['persian-datepicker-next-version'] = (function () {
             for (let i = 0; i < render_callbacks.length; i += 1) {
                 const callback = render_callbacks[i];
                 if (!seen_callbacks.has(callback)) {
+                    callback();
                     // ...so guard against infinite loops
                     seen_callbacks.add(callback);
-                    callback();
                 }
             }
             render_callbacks.length = 0;
@@ -180,21 +267,45 @@ this['persian-datepicker-next-version'] = (function () {
             flush_callbacks.pop()();
         }
         update_scheduled = false;
-        flushing = false;
-        seen_callbacks.clear();
     }
     function update($$) {
         if ($$.fragment !== null) {
-            $$.update();
+            $$.update($$.dirty);
             run_all($$.before_update);
-            const dirty = $$.dirty;
-            $$.dirty = [-1];
-            $$.fragment && $$.fragment.p($$.ctx, dirty);
+            $$.fragment && $$.fragment.p($$.dirty, $$.ctx);
+            $$.dirty = null;
             $$.after_update.forEach(add_render_callback);
         }
     }
+
+    let promise;
+    function wait() {
+        if (!promise) {
+            promise = Promise.resolve();
+            promise.then(() => {
+                promise = null;
+            });
+        }
+        return promise;
+    }
+    function dispatch(node, direction, kind) {
+        node.dispatchEvent(custom_event(`${direction ? 'intro' : 'outro'}${kind}`));
+    }
     const outroing = new Set();
     let outros;
+    function group_outros() {
+        outros = {
+            r: 0,
+            c: [],
+            p: outros // parent group
+        };
+    }
+    function check_outros() {
+        if (!outros.r) {
+            run_all(outros.c);
+        }
+        outros = outros.p;
+    }
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
@@ -217,6 +328,232 @@ this['persian-datepicker-next-version'] = (function () {
             block.o(local);
         }
     }
+    const null_transition = { duration: 0 };
+    function create_in_transition(node, fn, params) {
+        let config = fn(node, params);
+        let running = false;
+        let animation_name;
+        let task;
+        let uid = 0;
+        function cleanup() {
+            if (animation_name)
+                delete_rule(node, animation_name);
+        }
+        function go() {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            if (css)
+                animation_name = create_rule(node, 0, 1, duration, delay, easing, css, uid++);
+            tick(0, 1);
+            const start_time = now() + delay;
+            const end_time = start_time + duration;
+            if (task)
+                task.abort();
+            running = true;
+            add_render_callback(() => dispatch(node, true, 'start'));
+            task = loop(now => {
+                if (running) {
+                    if (now >= end_time) {
+                        tick(1, 0);
+                        dispatch(node, true, 'end');
+                        cleanup();
+                        return running = false;
+                    }
+                    if (now >= start_time) {
+                        const t = easing((now - start_time) / duration);
+                        tick(t, 1 - t);
+                    }
+                }
+                return running;
+            });
+        }
+        let started = false;
+        return {
+            start() {
+                if (started)
+                    return;
+                delete_rule(node);
+                if (is_function(config)) {
+                    config = config();
+                    wait().then(go);
+                }
+                else {
+                    go();
+                }
+            },
+            invalidate() {
+                started = false;
+            },
+            end() {
+                if (running) {
+                    cleanup();
+                    running = false;
+                }
+            }
+        };
+    }
+    function create_out_transition(node, fn, params) {
+        let config = fn(node, params);
+        let running = true;
+        let animation_name;
+        const group = outros;
+        group.r += 1;
+        function go() {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            if (css)
+                animation_name = create_rule(node, 1, 0, duration, delay, easing, css);
+            const start_time = now() + delay;
+            const end_time = start_time + duration;
+            add_render_callback(() => dispatch(node, false, 'start'));
+            loop(now => {
+                if (running) {
+                    if (now >= end_time) {
+                        tick(0, 1);
+                        dispatch(node, false, 'end');
+                        if (!--group.r) {
+                            // this will result in `end()` being called,
+                            // so we don't need to clean up here
+                            run_all(group.c);
+                        }
+                        return false;
+                    }
+                    if (now >= start_time) {
+                        const t = easing((now - start_time) / duration);
+                        tick(1 - t, t);
+                    }
+                }
+                return running;
+            });
+        }
+        if (is_function(config)) {
+            wait().then(() => {
+                // @ts-ignore
+                config = config();
+                go();
+            });
+        }
+        else {
+            go();
+        }
+        return {
+            end(reset) {
+                if (reset && config.tick) {
+                    config.tick(1, 0);
+                }
+                if (running) {
+                    if (animation_name)
+                        delete_rule(node, animation_name);
+                    running = false;
+                }
+            }
+        };
+    }
+    function create_bidirectional_transition(node, fn, params, intro) {
+        let config = fn(node, params);
+        let t = intro ? 0 : 1;
+        let running_program = null;
+        let pending_program = null;
+        let animation_name = null;
+        function clear_animation() {
+            if (animation_name)
+                delete_rule(node, animation_name);
+        }
+        function init(program, duration) {
+            const d = program.b - t;
+            duration *= Math.abs(d);
+            return {
+                a: t,
+                b: program.b,
+                d,
+                duration,
+                start: program.start,
+                end: program.start + duration,
+                group: program.group
+            };
+        }
+        function go(b) {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            const program = {
+                start: now() + delay,
+                b
+            };
+            if (!b) {
+                // @ts-ignore todo: improve typings
+                program.group = outros;
+                outros.r += 1;
+            }
+            if (running_program) {
+                pending_program = program;
+            }
+            else {
+                // if this is an intro, and there's a delay, we need to do
+                // an initial tick and/or apply CSS animation immediately
+                if (css) {
+                    clear_animation();
+                    animation_name = create_rule(node, t, b, duration, delay, easing, css);
+                }
+                if (b)
+                    tick(0, 1);
+                running_program = init(program, duration);
+                add_render_callback(() => dispatch(node, b, 'start'));
+                loop(now => {
+                    if (pending_program && now > pending_program.start) {
+                        running_program = init(pending_program, duration);
+                        pending_program = null;
+                        dispatch(node, running_program.b, 'start');
+                        if (css) {
+                            clear_animation();
+                            animation_name = create_rule(node, t, running_program.b, running_program.duration, 0, easing, config.css);
+                        }
+                    }
+                    if (running_program) {
+                        if (now >= running_program.end) {
+                            tick(t = running_program.b, 1 - t);
+                            dispatch(node, running_program.b, 'end');
+                            if (!pending_program) {
+                                // we're done
+                                if (running_program.b) {
+                                    // intro — we can tidy up immediately
+                                    clear_animation();
+                                }
+                                else {
+                                    // outro — needs to be coordinated
+                                    if (!--running_program.group.r)
+                                        run_all(running_program.group.c);
+                                }
+                            }
+                            running_program = null;
+                        }
+                        else if (now >= running_program.start) {
+                            const p = now - running_program.start;
+                            t = running_program.a + running_program.d * easing(p / running_program.duration);
+                            tick(t, 1 - t);
+                        }
+                    }
+                    return !!(running_program || pending_program);
+                });
+            }
+        }
+        return {
+            run(b) {
+                if (is_function(config)) {
+                    wait().then(() => {
+                        // @ts-ignore
+                        config = config();
+                        go(b);
+                    });
+                }
+                else {
+                    go(b);
+                }
+            },
+            end() {
+                clear_animation();
+                running_program = pending_program = null;
+            }
+        };
+    }
+
+    const globals = (typeof window !== 'undefined' ? window : global);
     function create_component(block) {
         block && block.c();
     }
@@ -246,18 +583,18 @@ this['persian-datepicker-next-version'] = (function () {
             // TODO null out other refs, including component.$$ (but need to
             // preserve final state?)
             $$.on_destroy = $$.fragment = null;
-            $$.ctx = [];
+            $$.ctx = {};
         }
     }
-    function make_dirty(component, i) {
-        if (component.$$.dirty[0] === -1) {
+    function make_dirty(component, key) {
+        if (!component.$$.dirty) {
             dirty_components.push(component);
             schedule_update();
-            component.$$.dirty.fill(0);
+            component.$$.dirty = blank_object();
         }
-        component.$$.dirty[(i / 31) | 0] |= (1 << (i % 31));
+        component.$$.dirty[key] = true;
     }
-    function init(component, options, instance, create_fragment, not_equal, props, dirty = [-1]) {
+    function init(component, options, instance, create_fragment, not_equal, props) {
         const parent_component = current_component;
         set_current_component(component);
         const prop_values = options.props || {};
@@ -277,21 +614,20 @@ this['persian-datepicker-next-version'] = (function () {
             context: new Map(parent_component ? parent_component.$$.context : []),
             // everything else
             callbacks: blank_object(),
-            dirty
+            dirty: null
         };
         let ready = false;
         $$.ctx = instance
-            ? instance(component, prop_values, (i, ret, ...rest) => {
-                const value = rest.length ? rest[0] : ret;
-                if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
-                    if ($$.bound[i])
-                        $$.bound[i](value);
+            ? instance(component, prop_values, (key, ret, value = ret) => {
+                if ($$.ctx && not_equal($$.ctx[key], $$.ctx[key] = value)) {
+                    if ($$.bound[key])
+                        $$.bound[key](value);
                     if (ready)
-                        make_dirty(component, i);
+                        make_dirty(component, key);
                 }
                 return ret;
             })
-            : [];
+            : prop_values;
         $$.update();
         ready = true;
         run_all($$.before_update);
@@ -333,7 +669,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.18.2' }, detail)));
+        document.dispatchEvent(custom_event(type, detail));
     }
     function append_dev(target, node) {
         dispatch_dev("SvelteDOMInsert", { target, node });
@@ -387,6 +723,49 @@ this['persian-datepicker-next-version'] = (function () {
                 console.warn(`Component was already destroyed`); // eslint-disable-line no-console
             };
         }
+    }
+
+    function cubicOut(t) {
+        const f = t - 1.0;
+        return f * f * f + 1.0;
+    }
+    function quintOut(t) {
+        return --t * t * t * t * t + 1;
+    }
+
+    function fade(node, { delay = 0, duration = 400, easing = identity }) {
+        const o = +getComputedStyle(node).opacity;
+        return {
+            delay,
+            duration,
+            easing,
+            css: t => `opacity: ${t * o}`
+        };
+    }
+    function slide(node, { delay = 0, duration = 400, easing = cubicOut }) {
+        const style = getComputedStyle(node);
+        const opacity = +style.opacity;
+        const height = parseFloat(style.height);
+        const padding_top = parseFloat(style.paddingTop);
+        const padding_bottom = parseFloat(style.paddingBottom);
+        const margin_top = parseFloat(style.marginTop);
+        const margin_bottom = parseFloat(style.marginBottom);
+        const border_top_width = parseFloat(style.borderTopWidth);
+        const border_bottom_width = parseFloat(style.borderBottomWidth);
+        return {
+            delay,
+            duration,
+            easing,
+            css: t => `overflow: hidden;` +
+                `opacity: ${Math.min(t * 20, 1) * opacity};` +
+                `height: ${t * height}px;` +
+                `padding-top: ${t * padding_top}px;` +
+                `padding-bottom: ${t * padding_bottom}px;` +
+                `margin-top: ${t * margin_top}px;` +
+                `margin-bottom: ${t * margin_bottom}px;` +
+                `border-top-width: ${t * border_top_width}px;` +
+                `border-bottom-width: ${t * border_bottom_width}px;`
+        };
     }
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -3724,25 +4103,1061 @@ this['persian-datepicker-next-version'] = (function () {
         return { set, update, subscribe };
     }
 
-    const nowUnix = persianDateToUnix(new persianDate$1());
-    const isDirty = writable(false);
+    let Helper = {
+      debug (i) {
+        console.log(i);
+      }
+    };
+    /**
+     * @description persian-datepicker configuration document
+     */
+    const Config = {
+
+
+        /**
+         * @description set default calendar mode of datepicker, available options: 'persian', 'gregorian'
+         * @default 'persian'
+         * @type string
+         * @since 1.0.0
+         */
+        'calendarType': 'persian',
+
+
+        /**
+         * @description calendar type and localization configuration
+         * @type object
+         * @since 1.0.0
+         * @example
+         * {
+         *     'persian': {
+         *         'locale': 'fa',
+         *         'showHint': false,
+         *         'leapYearMode': 'algorithmic' // "astronomical"
+         *     },
+         *
+         *     'gregorian': {
+         *         'locale': 'en',
+         *         'showHint': false
+         *     }
+         * }
+         *
+         *
+         *
+         */
+        'calendar': {
+
+            /**
+             * @description Persian calendar configuration
+             * @type object
+             * @since 1.0.0
+             */
+            'persian': {
+
+                /**
+                 * @description set locale of Persian calendar available options: 'fa', 'en'
+                 * @default 'fa'
+                 * @type string
+                 * @since 1.0.0
+                 */
+                'locale': 'fa',
+
+                /**
+                 * @description if set true, small date hint of this calendar will be shown on another calendar
+                 * @type boolean
+                 * @default false
+                 * @since 1.0.0
+                 */
+                'showHint': false,
+
+                /**
+                 * @description Persian calendar leap year calculation mode, available options: 'algorithmic', 'astronomical'
+                 * @type string
+                 * @link http://babakhani.github.io/PersianWebToolkit/doc/persian-date/leapyear
+                 * @default 'algorithmic'
+                 * @since 1.0.0
+                 */
+                'leapYearMode': 'algorithmic' // "astronomical"
+            },
+
+
+            /**
+             * @description Gregorian calendar configuration
+             * @type object
+             * @since 1.0.0
+             */
+            'gregorian': {
+
+                /**
+                 * @description set locale of Gregorian calendar available options: 'fa', 'en'
+                 * @default 'en'
+                 * @type string
+                 * @since 1.0.0
+                 */
+                'locale': 'en',
+
+                /**
+                 * @description if set true, small date hint of this calendar will be shown on another calendar
+                 * @type boolean
+                 * @default false
+                 * @since 1.0.0
+                 */
+                'showHint': false
+            }
+        },
+
+
+        /**
+         * @description if set true make enable responsive view on mobile devices
+         * @type boolean
+         * @since 1.0.0
+         * @default true
+         */
+        'responsive': true,
+
+
+        /**
+         * @description if true datepicker render inline
+         * @type boolean
+         * @default false
+         */
+        'inline': false,
+
+
+        /**
+         * @description If set true datepicker init with input value date, use data-date property when you want set inline datepicker initial value
+         * @type boolean
+         * @default true
+         */
+        'initialValue': true,
+
+
+        /**
+         * @description Initial value calendar type, accept: 'persian', 'gregorian'
+         * @type boolean
+         * @default true
+         */
+        'initialValueType': 'gregorian',
+
+
+        /**
+         * @description from v1.0.0 this options is deprecated, use calendar.persian.locale instead
+         * @deprecated
+         * @type boolean
+         * @default true
+         */
+        'persianDigit': true,
+
+
+        /**
+         * @description default view mode, Acceptable value : day,month,year
+         * @type {string}
+         * @default 'day'
+         */
+        'viewMode': 'day',
+
+
+        /**
+         * @description the date format, combination of d, dd, m, mm, yy, yyy.
+         * @link http://babakhani.github.io/PersianWebToolkit/doc/persian-date/#format
+         * @type {boolean}
+         * @default 'LLLL'
+         */
+        'format': 'LLLL',
+
+
+        /**
+         * @description format value of input
+         * @param unixDate
+         * @default function
+         * @example function (unixDate) {
+         *      var self = this;
+         *      var pdate = new persianDate(unixDate);
+         *      pdate.formatPersian = this.persianDigit;
+         *      return pdate.format(self.format);
+         *  }
+         */
+        'formatter': function (unixDate) {
+            let self = this,
+              pdate = this.model.PersianDate.date(unixDate);
+            return pdate.format(self.format);
+        },
+
+
+        /**
+         * @description An input element that is to be updated with the selected date from the datepicker. Use the altFormat option to change the format of the date within this field. Leave as blank for no alternate field. acceptable value: : '#elementId','.element-class'
+         * @type {boolean}
+         * @default false
+         * @example
+         * altField: '#inputAltFirld'
+         *
+         * altField: '.input-alt-field'
+         */
+        'altField': false,
+
+
+        /**
+         * @description the date format, combination of d, dd, m, mm, yy, yyy.
+         * @link http://babakhani.github.io/PersianWebToolkit/doc/persian-date/#format
+         * @type {string}
+         * @default 'unix'
+         */
+        'altFormat': 'unix',
+
+
+        /**
+         * @description format value of 'altField' input
+         * @param unixDate
+         * @default function
+         * @example function (unixDate) {
+         *      var self = this;
+         *      var thisAltFormat = self.altFormat.toLowerCase();
+         *      if (thisAltFormat === 'gregorian' || thisAltFormat === 'g') {
+         *          return new Date(unixDate);
+         *      }
+         *      if (thisAltFormat === 'unix' || thisAltFormat === 'u') {
+         *          return unixDate;
+         *      }
+         *      else {
+         *          var pd = new persianDate(unixDate);
+         *          pd.formatPersian = this.persianDigit;
+         *          return pd.format(self.altFormat);
+         *      }
+         *  }
+         */
+        'altFieldFormatter': function (unixDate) {
+            let self = this,
+              thisAltFormat = self.altFormat.toLowerCase(),
+              pd;
+            if (thisAltFormat === 'gregorian' || thisAltFormat === 'g') {
+                return new Date(unixDate);
+            }
+            if (thisAltFormat === 'unix' || thisAltFormat === 'u') {
+                return unixDate;
+            }
+            else {
+                pd = this.model.PersianDate.date(unixDate);
+                return pd.format(self.altFormat);
+            }
+        },
+
+
+        /**
+         * @description Set min date on datepicker, prevent user select date before given unix time
+         * @property minDate
+         * @type Date
+         * @default null
+         */
+        'minDate': null,
+
+
+        /**
+         * @description Set max date on datepicker, prevent user select date after given unix time
+         * @property maxDate
+         * @type Date
+         * @default null
+         */
+        'maxDate': null,
+
+
+        /**
+         * @description navigator config object
+         * @type {object}
+         * @default true
+         */
+        'navigator': {
+            /**
+             * @description make navigator enable or disable
+             * @type boolean
+             * @default true
+             */
+            'enabled': true,
+
+            /**
+             * @description navigate by scroll configuration
+             * @type object
+             * @description scroll navigation options
+             */
+            'scroll': {
+
+                /**
+                 * @description if you want make disable scroll navigation set this option false
+                 * @type boolean
+                 * @default true
+                 */
+                'enabled': true
+            },
+
+
+            /**
+             * @description navigator text config object
+             */
+            'text': {
+                /**
+                 * @description text of next button
+                 * @default '<'
+                 */
+                'btnNextText': '<',
+
+
+                /**
+                 * @description text of prev button
+                 * @default: '>'
+                 */
+                'btnPrevText': '>'
+            },
+
+
+            /**
+             * @description Called when navigator goes to next state
+             * @event
+             * @example function (navigator) {
+             *      //log('navigator next ');
+             *  }
+             */
+            'onNext': function (datepickerObject) {
+                Helper.debug(datepickerObject, 'Event: onNext');
+            },
+
+
+            /**
+             * @description Called when navigator goes to previews state
+             * @event
+             * @example function (navigator) {
+             *      //log('navigator prev ');
+             *  }
+             */
+            'onPrev': function (datepickerObject) {
+                Helper.debug(datepickerObject, 'Event: onPrev');
+            },
+
+
+            /**
+             * @description Called when navigator switch
+             * @event
+             * @example function (datepickerObject) {
+                    // console.log('navigator switch ');
+             *  }
+             */
+            'onSwitch': function (datepickerObject) {
+                Helper.debug(datepickerObject, 'dayPicker Event: onSwitch');
+            }
+        },
+
+
+        /**
+         * @description toolbox config object
+         * @type {object}
+         * @default true
+         */
+        'toolbox': {
+
+            /**
+             * @description boolean option that make toolbar enable or disable
+             * @type boolean
+             * @default true
+             */
+            'enabled': true,
+
+            /**
+             * @description toolbox button text configuration
+             * @type object
+             * @deprecated from 1.0.0
+             */
+            'text': {
+
+                /**
+                 * @description text of today button, deprecated from 1.0.0
+                 * @type string
+                 * @default 'امروز'
+                 * @deprecated from 1.0.0
+                 */
+                btnToday: 'امروز'
+
+            },
+
+
+            /**
+             * @description submit button configuration (only shown on mobile)
+             * @since 1.0.0
+             */
+            submitButton: {
+
+                /**
+                 * @description make submit button enable or disable
+                 * @type boolean
+                 * @default false
+                 * @since 1.0.0
+                 */
+                enabled: Helper.isMobile,
+
+
+                /**
+                 * @description submit button text
+                 * @since 1.0.0
+                 * @type object
+                 */
+                text: {
+
+                    /**
+                     * @description show when current calendar is Persian
+                     * @since 1.0.0
+                     * @type object
+                     * @default تایید
+                     */
+                    fa: 'تایید',
+
+
+                    /**
+                     * @description show when current calendar is Gregorian
+                     * @since 1.0.0
+                     * @type object
+                     * @default submit
+                     */
+                    en: 'submit'
+                },
+
+
+                /**
+                 * @description Called when submit button clicked
+                 * @since 1.0.0
+                 * @type function
+                 * @event
+                 */
+                onSubmit: function (datepickerObject) {
+                    Helper.debug(datepickerObject, 'dayPicker Event: onSubmit');
+                }
+            },
+
+
+            /**
+             * @description toolbox today button configuration
+             * @since 1.0.0
+             */
+            todayButton: {
+
+                /**
+                 * @description make toolbox today button enable or disable
+                 * @type boolean
+                 * @since 1.0.0
+                 */
+                enabled: true,
+
+
+                /**
+                 * @description today button text
+                 * @since 1.0.0
+                 * @type object
+                 */
+                text: {
+
+                    /**
+                     * @description show when current calendar is Persian
+                     * @since 1.0.0
+                     * @type object
+                     * @default امروز
+                     */
+                    fa: 'امروز',
+
+                    /**
+                     * @description show when current calendar is Gregorian
+                     * @since 1.0.0
+                     * @type object
+                     * @default today
+                     */
+                    en: 'today'
+                },
+
+                /**
+                 * @description Called when today button clicked
+                 * @since 1.0.0
+                 * @type function
+                 * @event
+                 */
+                onToday: function (datepickerObject) {
+                    Helper.debug(datepickerObject, 'dayPicker Event: onToday');
+                }
+            },
+
+
+            /**
+             * @description toolbox calendar switch configuration
+             * @type object
+             * @since 1.0.0
+             */
+            calendarSwitch: {
+
+                /**
+                 * @description make calendar switch enable or disable
+                 * @type boolean
+                 * @since 1.0.0
+                 * @default true
+                 */
+                enabled: true,
+
+
+                /**
+                 * @description calendar switch text format string
+                 * @link http://babakhani.github.io/PersianWebToolkit/doc/persian-date/#format
+                 * @type string
+                 * @since 1.0.0
+                 * @default MMMM
+                 */
+                format: 'MMMM',
+
+
+                /**
+                 * @description Called when calendar switch clicked
+                 * @since 1.0.0
+                 * @type function
+                 * @event
+                 */
+                onSwitch: function (datepickerObject) {
+                    Helper.debug(datepickerObject, 'dayPicker Event: onSwitch');
+                }
+            },
+
+            /**
+             * @event
+             * @param toolbox
+             * @example function (toolbox) {
+             *      //log('toolbox today btn');
+             *  }
+             *  @deprecated 1.0.0
+             */
+            onToday: function (datepickerObject) {
+                Helper.debug(datepickerObject, 'dayPicker Event: onToday');
+            }
+        },
+
+
+        /**
+         * @description if true all pickers hide and just show timepicker
+         * @default false
+         * @type boolean
+         */
+        'onlyTimePicker': false,
+
+
+        /**
+         * @description  if true date select just by click on day in month grid, and when user select month or year selected date doesnt change
+         * @property justSelectOnDate
+         * @type boolean
+         * @default: true
+         */
+        'onlySelectOnDate': true,
+
+
+        /**
+         * @description Validate date access before render
+         * @type function
+         */
+        'checkDate': function () {
+            return true;
+        },
+
+
+        /**
+         * @description Validate month access before render
+         * @type {function}
+         */
+        'checkMonth': function () {
+            return true;
+        },
+
+
+        /**
+         * @description Validate year access before render
+         * @type {function}
+         */
+        'checkYear': function () {
+            return true;
+        },
+
+
+        /**
+         * @description timePicker configuration
+         * @type {object}
+         */
+        'timePicker': {
+
+            /**
+             * @description make timePicker enable or disable
+             * @type boolean
+             */
+            'enabled': false,
+
+            /**
+             * @description The amount that increases or decreases by pressing the button
+             * @type number
+             */
+            'step': 1,
+
+            /**
+             * @description hour selector configuration
+             * @type object
+             */
+            'hour': {
+
+                /**
+                 * @description make hour selector enable or disable
+                 * @type boolean
+                 */
+                'enabled': true,
+
+                /**
+                 * @description The amount that increases or decreases hour, by pressing the button. overwrite by timepicker.step
+                 * @type boolean
+                 */
+                'step': null
+            },
+
+            /**
+             * @description minute selector configuration
+             * @type object
+             */
+            'minute': {
+
+                /**
+                 * @description make minute selector enable or disable
+                 * @type boolean
+                 */
+                'enabled': true,
+
+                /**
+                 * @description The amount that increases or decreases minute, by pressing the button. overwrite by timepicker.step
+                 * @description overwrite by parent step
+                 * @type boolean
+                 */
+                'step': null
+            },
+
+            /**
+             * @description second selector configuration
+             * @type object
+             */
+            'second': {
+
+                /**
+                 * @description make second selector enable or disable
+                 * @type boolean
+                 */
+                'enabled': true,
+
+                /**
+                 * @description The amount that increases or decreases second, by pressing the button. overwrite by timepicker.step
+                 * @type boolean
+                 */
+                'step': null
+            },
+
+            /**
+             * @description meridian selector configuration
+             * @type object
+             */
+            'meridian': {
+
+                /**
+                 * @description if you set this as false, datepicker timepicker system moved to 24-hour system
+                 * @type boolean
+                 */
+                'enabled': false
+            }
+        },
+
+
+        /**
+         * @description dayPicker configuration
+         * @type {object}
+         */
+        'dayPicker': {
+
+            /**
+             * @description make daypicker enable or disable
+             * @type boolean
+             * @default true
+             */
+            'enabled': true,
+
+            /**
+             * @description daypicker title format string
+             * @type string
+             * @default 'YYYY MMMM'
+             * @link http://babakhani.github.io/PersianWebToolkit/doc/persian-date/#format
+             */
+            'titleFormat': 'YYYY MMMM',
+
+            /**
+             * @description daypicker title formatter function
+             * @param year
+             * @param month
+             * @return {*}
+             */
+            'titleFormatter': function (year, month) {
+                let titleDate = this.model.PersianDate.date([year, month]);
+                return titleDate.format(this.model.options.dayPicker.titleFormat);
+            },
+
+            /**
+             * @description fired when user select date
+             * @event
+             * @param selectedDayUnix
+             */
+            'onSelect': function (selectedDayUnix) {
+                Helper.debug(this, 'dayPicker Event: onSelect : ' + selectedDayUnix);
+            }
+
+        },
+
+
+        /**
+         * @description monthPicker configuration
+         * @type {object}
+         */
+        'monthPicker': {
+
+            /**
+             * @description make monthPicker enable or disable
+             * @type boolean
+             * @default true
+             */
+            'enabled': true,
+
+            /**
+             * @description monthPicker title format string
+             * @type string
+             * @default 'YYYY'
+             */
+            'titleFormat': 'YYYY',
+
+            /**
+             * @description monthPicker title formatter function
+             * @param unix
+             * @return {*}
+             */
+            'titleFormatter': function (unix) {
+                let titleDate = this.model.PersianDate.date(unix);
+                return titleDate.format(this.model.options.monthPicker.titleFormat);
+            },
+
+            /**
+             * @description fired when user select month
+             * @event
+             * @param monthIndex
+             */
+            'onSelect': function (monthIndex) {
+                Helper.debug(this, 'monthPicker Event: onSelect : ' + monthIndex);
+            }
+        },
+
+
+        /**
+         * @description yearPicker configuration
+         * @type {object}
+         */
+        'yearPicker': {
+
+            /**
+             * @description make yearPicker enable or disable
+             * @type boolean
+             * @default true
+             */
+            'enabled': true,
+
+            /**
+             * @description yearPicker title format string
+             * @type string
+             * @default 'YYYY'
+             */
+            'titleFormat': 'YYYY',
+
+            /**
+             * @description yearPicker title formatter function
+             * @param year
+             * @return {string}
+             */
+            'titleFormatter': function (year) {
+                let remaining = parseInt(year / 12, 10) * 12;
+                let startYear = this.model.PersianDate.date([remaining]);
+                let endYear = this.model.PersianDate.date([remaining + 11]);
+                return startYear.format(this.model.options.yearPicker.titleFormat) + '-' + endYear.format(this.model.options.yearPicker.titleFormat);
+            },
+
+            /**
+             * @description fired when user select year
+             * @event
+             * @param year
+             */
+            'onSelect': function (year) {
+                Helper.debug(this, 'yearPicker Event: onSelect : ' + year);
+            }
+        },
+
+
+        /**
+         * @description Called when date Select by user.
+         * @event
+         * @param unixDate
+         */
+        'onSelect': function (unixDate) {
+            Helper.debug(this, 'datepicker Event: onSelect : ' + unixDate);
+        },
+
+
+        /**
+         * @description Called when date Select by api.
+         * @event
+         * @param unixDate
+         */
+        'onSet': function (unixDate) {
+            Helper.debug(this, 'datepicker Event: onSet : ' + unixDate);
+        },
+
+        /**
+         * @description position of datepicker relative to input element
+         * @type string | array
+         * @default 'auto'
+         * @example
+         *  'position': 'auto'
+         *'position': [10,10]
+         */
+        'position': 'auto',
+
+
+        /**
+         * @description A function that takes current datepicker instance. It is called just before the datepicker is displayed.
+         * @event
+         */
+        'onShow': function (datepickerObject) {
+            Helper.debug(datepickerObject, 'Event: onShow ');
+        },
+
+
+        /**
+         * @description A function that takes current datepicker instance. It is called just before the datepicker Hide.
+         * @event
+         */
+        'onHide': function (datepickerObject) {
+            Helper.debug(datepickerObject, 'Event: onHide ');
+        },
+
+
+        /**
+         * @description on toggle datepicker event
+         * @event
+         */
+        'onToggle': function (datepickerObject) {
+            Helper.debug(datepickerObject, 'Event: onToggle ');
+        },
+
+
+        /**
+         * @description on destroy datepicker event
+         * @event
+         */
+        'onDestroy': function (datepickerObject) {
+            Helper.debug(datepickerObject, 'Event: onDestroy ');
+        },
+
+
+        /**
+         * @description If true datepicker close When select a date
+         * @type {boolean}
+         * @default false
+         */
+        'autoClose': false,
+
+
+        /**
+         * @description by default datepicker have a template string, and you can overwrite it simply by replace string in config.
+         * @type string
+         * @example
+         * <div id="plotId" class="datepicker-plot-area datepicker-plot-area-inline-view">
+         {{#navigator.enabled}}
+         <div class="navigator">
+         <div class="datepicker-header">
+         <div class="btn btn-next">{{navigator.text.btnNextText}}</div>
+         <div class="btn btn-switch">{{ navigator.switch.text }}</div>
+         <div class="btn btn-prev">{{navigator.text.btnPrevText}}</div>
+         </div>
+         </div>
+         {{/navigator.enabled}}
+         <div class="datepicker-grid-view" >
+         {{#days.enabled}}
+         {{#days.viewMode}}
+         <div class="datepicker-day-view" >
+         <div class="month-grid-box">
+         <div class="header">
+         <div class="title"></div>
+         <div class="header-row">
+         <div class="header-row-cell">ش</div>
+         <div class="header-row-cell">ی</div>
+         <div class="header-row-cell">د</div>
+         <div class="header-row-cell">س</div>
+         <div class="header-row-cell">چ</div>
+         <div class="header-row-cell">پ</div>
+         <div class="header-row-cell">ج</div>
+         </div>
+         </div>
+         <table cellspacing="0" class="table-days">
+         <tbody>
+         {{#days.list}}
+
+         <tr>
+         {{#.}}
+
+         {{#enabled}}
+         <td data-unix="{{dataUnix}}" ><span  class="{{#otherMonth}}other-month{{/otherMonth}} {{#selected}}selected{{/selected}}">{{title}}</span></td>
+         {{/enabled}}
+         {{^enabled}}
+         <td data-unix="{{dataUnix}}" class="disabled"><span class="{{#otherMonth}}other-month{{/otherMonth}}">{{title}}</span></td>
+         {{/enabled}}
+
+         {{/.}}
+         </tr>
+         {{/days.list}}
+         </tbody>
+         </table>
+         </div>
+         </div>
+         {{/days.viewMode}}
+         {{/days.enabled}}
+
+         {{#month.enabled}}
+         {{#month.viewMode}}
+         <div class="datepicker-month-view">
+         {{#month.list}}
+         {{#enabled}}
+         <div data-month="{{dataMonth}}" class="month-item {{#selected}}selected{{/selected}}">{{title}}</small></div>
+         {{/enabled}}
+         {{^enabled}}
+         <div data-month="{{dataMonth}}" class="month-item month-item-disable {{#selected}}selected{{/selected}}">{{title}}</small></div>
+         {{/enabled}}
+         {{/month.list}}
+         </div>
+         {{/month.viewMode}}
+         {{/month.enabled}}
+
+         {{#year.enabled }}
+         {{#year.viewMode }}
+         <div class="datepicker-year-view" >
+         {{#year.list}}
+         {{#enabled}}
+         <div data-year="{{dataYear}}" class="year-item {{#selected}}selected{{/selected}}">{{title}}</div>
+         {{/enabled}}
+         {{^enabled}}
+         <div data-year="{{dataYear}}" class="year-item year-item-disable {{#selected}}selected{{/selected}}">{{title}}</div>
+         {{/enabled}}
+         {{/year.list}}
+         </div>
+         {{/year.viewMode }}
+         {{/year.enabled }}
+
+         </div>
+         {{#time}}
+         {{#enabled}}
+         <div class="datepicker-time-view">
+         {{#hour.enabled}}
+         <div class="hour time-segment" data-time-key="hour">
+         <div class="up-btn" data-time-key="hour">▲</div>
+         <input value="{{hour.title}}" type="text" placeholder="hour" class="hour-input">
+         <div class="down-btn" data-time-key="hour">▼</div>
+         </div>
+         <div class="divider">:</div>
+         {{/hour.enabled}}
+         {{#minute.enabled}}
+         <div class="minute time-segment" data-time-key="minute" >
+         <div class="up-btn" data-time-key="minute">▲</div>
+         <input value="{{minute.title}}" type="text" placeholder="minute" class="minute-input">
+         <div class="down-btn" data-time-key="minute">▼</div>
+         </div>
+         <div class="divider second-divider">:</div>
+         {{/minute.enabled}}
+         {{#second.enabled}}
+         <div class="second time-segment" data-time-key="second"  >
+         <div class="up-btn" data-time-key="second" >▲</div>
+         <input value="{{second.title}}"  type="text" placeholder="second" class="second-input">
+         <div class="down-btn" data-time-key="second" >▼</div>
+         </div>
+         <div class="divider meridian-divider"></div>
+         <div class="divider meridian-divider"></div>
+         {{/second.enabled}}
+         {{#meridian.enabled}}
+         <div class="meridian time-segment" data-time-key="meridian" >
+         <div class="up-btn" data-time-key="meridian">▲</div>
+         <input value="{{meridian.title}}" type="text" class="meridian-input">
+         <div class="down-btn" data-time-key="meridian">▼</div>
+         </div>
+         {{/meridian.enabled}}
+         </div>
+         {{/enabled}}
+         {{/time}}
+
+         {{#toolbox}}
+         {{#enabled}}
+         <div class="toolbox ">
+         <div class="btn-today">{{text.btnToday}}</div>
+         </div>
+         {{/enabled}}
+         {{/toolbox}}
+         </div>
+         */
+        'template': null,
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////// Under Implement ///////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * @description if true datepicker update self by user inputted date string, accept 'yyyy/mm/dd'
+         * @example '1396/10/2', ''
+         * @type {boolean}
+         * @default false
+         */
+        'observer': false,
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////// Un  implemented ///////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        /**
+         * @description waite time for last user key-down event, accept millisecond
+         * @type {number}
+         * @default 800
+         */
+        'inputDelay': 800
+    };
+
+    var config = Config;
+
     // TODO get default value from config by more priority
+
+    const nowUnix = persianDateToUnix(new persianDate$1());
+
+    const config$1 = writable(config);
+    const isDirty = writable(false);
     const selectedUnix = writable(nowUnix);
     const viewUnix = writable(nowUnix);
-    const viewMode = writable('month'); // [date, month, year]
+    const viewMode = writable('date'); // [date, month, year]
     const isOpen = writable(false);
     const minUnix = writable(null);
     const maxUnix = writable(null);
     const currentCalendar = writable('persian'); // [persian, gregorian]
 
+
     const actions = {
+      setConfig (payload) {
+        config$1.set(payload);
+      },
       onSelectDate(pDate) {
+        const date = pDate.detail;
         const { hour, minute, second } = getHourMinuteSecond(get_store_value(selectedUnix));
-        pDate
+        date
           .hour(hour)
           .minute(minute)
           .second(second);
-        this.setSelectedDate(pDate);
+        this.setSelectedDate(date);
         this.updateIsDirty(true);
       },
       setSelectedDate(pDate) {
@@ -3750,24 +5165,31 @@ this['persian-datepicker-next-version'] = (function () {
         selectedUnix.set(unix);
       },
       onSelectMonth(month) {
-        this.setMonth(month);
-        this.setViewMode('day');
+        viewUnix.set(
+          persianDateToUnix(
+            new persianDate$1(get_store_value(viewUnix))
+              .toCalendar(get_store_value(currentCalendar))
+              .month(month)
+          )
+        );
+        selectedUnix.set(
+          persianDateToUnix(
+            new persianDate$1(get_store_value(viewUnix))
+              .toCalendar(get_store_value(currentCalendar))
+              .month(month)
+          )
+        );
+        this.setViewMode('date');
         this.updateIsDirty(true);
       },
       onSelectYear(year) {
-        this.setYear(year);
-        this.setViewMode('month');
-        this.updateIsDirty(true);
-      },
-      onSetHour(hour) {
-        this.setHour(hour);
-        this.updateIsDirty(true);
-      },
-      onSetMinute(minute) {
-        this.setMinute(minute);
-        this.updateIsDirty(true);
-      },
-      setYear(year) {
+        viewUnix.set(
+          persianDateToUnix(
+            new persianDate$1(get_store_value(selectedUnix))
+              .toCalendar(get_store_value(currentCalendar))
+              .year(year)
+          )
+        );
         selectedUnix.set(
           persianDateToUnix(
             new persianDate$1(get_store_value(selectedUnix))
@@ -3775,27 +5197,10 @@ this['persian-datepicker-next-version'] = (function () {
               .year(year)
           )
         );
+        this.setViewMode('month');
+        this.updateIsDirty(true);
       },
-      setMonth(month) {
-        selectedUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(selectedUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .month(month)
-          )
-        );
-      },
-      /* @param {number} date - day of month */
-      setDate(date) {
-        selectedUnix.set(
-          persianDateToUnix(
-            new persianDate$1(get_store_value(selectedUnix))
-              .toCalendar(get_store_value(currentCalendar))
-              .date(date)
-          )
-        );
-      },
-      setHour(hour) {
+      onSetHour(hour) {
         selectedUnix.set(
           persianDateToUnix(
             new persianDate$1(get_store_value(selectedUnix))
@@ -3803,8 +5208,9 @@ this['persian-datepicker-next-version'] = (function () {
               .hour(hour)
           )
         );
+        this.updateIsDirty(true);
       },
-      setMinute(minute) {
+      onSetMinute(minute) {
         selectedUnix.set(
           persianDateToUnix(
             new persianDate$1(get_store_value(selectedUnix))
@@ -3812,6 +5218,7 @@ this['persian-datepicker-next-version'] = (function () {
               .minute(minute)
           )
         );
+        this.updateIsDirty(true);
       },
       setSecond(second) {
         selectedUnix.set(
@@ -3847,10 +5254,28 @@ this['persian-datepicker-next-version'] = (function () {
         currentCalendar.set(calendar);
       },
       onSelectNextView() {
-        viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).add('month', 1)));
+        console.log('onSelectNextView -----------------------');
+        if (get_store_value(viewMode) === 'date') {
+          viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).add('month', 1)));
+        }
+        if (get_store_value(viewMode) === 'month') {
+          viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).add('year', 1)));
+        }
+        if (get_store_value(viewMode) === 'year') {
+          viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).add('year', 12)));
+        }
       },
       onSelectPrevView() {
-        viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).subtract('month', 1)));
+        console.log('onSelectPrevView -----------------------');
+        if (get_store_value(viewMode) === 'date') {
+          viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).subtract('month', 1)));
+        }
+        if (get_store_value(viewMode) === 'month') {
+          viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).subtract('year', 1)));
+        }
+        if (get_store_value(viewMode) === 'year') {
+          viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).subtract('year', 12)));
+        }
       },
       setViewUnix(pDate) {
         viewUnix.set(persianDateToUnix(pDate));
@@ -3863,92 +5288,69 @@ this['persian-datepicker-next-version'] = (function () {
       },
       setOpen(value) {
         isOpen.set(value);
-      },
+      }
     };
 
-    /*
-
-    import { writable, readable, derived } from 'svelte/store'
-
-    // Readable Example
-    export const time = readable(new Date(), function start (set) {
-      const interval = setInterval(() => {
-        set(new Date())
-      }, 1000)
-
-      return function stop () {
-        clearInterval(interval)
-      }
-    })
-
-    // Writable Example
-    export const count = writable(0)
-    // Derived Example
-    const start = new Date()
-    export const elapsed = derived(time, $time =>
-      Math.round(($time - start) / 1000)
-    )
-
-    // Custom Store
-    export const countable = (function () {
-      const { subscribe, set, update } = writable(0)
-      return {
-        set: input => update(() => input),
-        subscribe,
-        increment: () => update(n => n + 1),
-        decrement: () => update(n => n - 1),
-        reset: () => set(0)
-      }
-    })()
-
-
-    */
-
-    /* src/components/YearView.svelte generated by Svelte v3.18.2 */
+    /* src/components/YearView.svelte generated by Svelte v3.15.0 */
     const file = "src/components/YearView.svelte";
 
     function get_each_context(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[9] = list[i];
+    	const child_ctx = Object.create(ctx);
+    	child_ctx.year = list[i];
     	return child_ctx;
     }
 
     // (2:2) {#each yearRange as year}
     function create_each_block(ctx) {
+    	let div;
     	let span;
-    	let t0_value = /*year*/ ctx[9] + "";
+    	let t0_value = ctx.year + "";
     	let t0;
     	let t1;
     	let dispose;
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[8](/*year*/ ctx[9], ...args);
+    		return ctx.click_handler(ctx, ...args);
     	}
 
     	const block = {
     		c: function create() {
+    			div = element("div");
     			span = element("span");
     			t0 = text(t0_value);
     			t1 = space();
-    			toggle_class(span, "selected", /*currentYear*/ ctx[1] === /*year*/ ctx[9]);
-    			add_location(span, file, 2, 4, 65);
+    			attr_dev(span, "class", "pwt-text");
+    			add_location(span, file, 5, 3, 161);
+    			toggle_class(div, "selected", ctx.currentYear === ctx.year);
+    			add_location(div, file, 2, 4, 65);
+
+    			dispose = listen_dev(
+    				div,
+    				"click",
+    				function () {
+    					click_handler.apply(this, arguments);
+    				},
+    				false,
+    				false,
+    				false
+    			);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, span, anchor);
+    			insert_dev(target, div, anchor);
+    			append_dev(div, span);
     			append_dev(span, t0);
-    			append_dev(span, t1);
-    			dispose = listen_dev(span, "click", click_handler, false, false, false);
+    			append_dev(div, t1);
     		},
-    		p: function update(new_ctx, dirty) {
+    		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
-    			if (dirty & /*yearRange*/ 1 && t0_value !== (t0_value = /*year*/ ctx[9] + "")) set_data_dev(t0, t0_value);
+    			if (changed.yearRange && t0_value !== (t0_value = ctx.year + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*currentYear, yearRange*/ 3) {
-    				toggle_class(span, "selected", /*currentYear*/ ctx[1] === /*year*/ ctx[9]);
+    			if (changed.currentYear || changed.yearRange) {
+    				toggle_class(div, "selected", ctx.currentYear === ctx.year);
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(span);
+    			if (detaching) detach_dev(div);
     			dispose();
     		}
     	};
@@ -3966,7 +5368,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     function create_fragment(ctx) {
     	let div;
-    	let each_value = /*yearRange*/ ctx[0];
+    	let each_value = ctx.yearRange;
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -3994,16 +5396,16 @@ this['persian-datepicker-next-version'] = (function () {
     				each_blocks[i].m(div, null);
     			}
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*currentYear, yearRange, select*/ 7) {
-    				each_value = /*yearRange*/ ctx[0];
+    		p: function update(changed, ctx) {
+    			if (changed.currentYear || changed.yearRange || changed.select) {
+    				each_value = ctx.yearRange;
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
     					const child_ctx = get_each_context(ctx, each_value, i);
 
     					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
+    						each_blocks[i].p(changed, child_ctx);
     					} else {
     						each_blocks[i] = create_each_block(child_ctx);
     						each_blocks[i].c();
@@ -4043,7 +5445,7 @@ this['persian-datepicker-next-version'] = (function () {
     	const dispatch = createEventDispatcher();
 
     	function select(payload) {
-    		dispatch("select", { payload });
+    		dispatch("select", payload);
     	}
 
     	let yearRange;
@@ -4054,11 +5456,11 @@ this['persian-datepicker-next-version'] = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<YearView> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = (year, event) => select(year);
+    	const click_handler = ({ year }, event) => select(year);
 
     	$$self.$set = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(3, selectedUnix = $$props.selectedUnix);
-    		if ("viewUnix" in $$props) $$invalidate(4, viewUnix = $$props.viewUnix);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
     	};
 
     	$$self.$capture_state = () => {
@@ -4067,36 +5469,36 @@ this['persian-datepicker-next-version'] = (function () {
     			viewUnix,
     			yearRange,
     			startYear,
-    			currentViewDate,
-    			currentYear
+    			currentYear,
+    			currentViewYear
     		};
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(3, selectedUnix = $$props.selectedUnix);
-    		if ("viewUnix" in $$props) $$invalidate(4, viewUnix = $$props.viewUnix);
-    		if ("yearRange" in $$props) $$invalidate(0, yearRange = $$props.yearRange);
-    		if ("startYear" in $$props) $$invalidate(5, startYear = $$props.startYear);
-    		if ("currentViewDate" in $$props) currentViewDate = $$props.currentViewDate;
-    		if ("currentYear" in $$props) $$invalidate(1, currentYear = $$props.currentYear);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("yearRange" in $$props) $$invalidate("yearRange", yearRange = $$props.yearRange);
+    		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
+    		if ("currentYear" in $$props) $$invalidate("currentYear", currentYear = $$props.currentYear);
+    		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
     	};
 
-    	let currentViewDate;
     	let currentYear;
+    	let currentViewYear;
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*viewUnix*/ 16) {
-    			 currentViewDate = new persianDate$1(viewUnix).format("MMMM");
+    	$$self.$$.update = (changed = { selectedUnix: 1, viewUnix: 1, currentViewYear: 1, yearRange: 1, startYear: 1 }) => {
+    		if (changed.selectedUnix) {
+    			 $$invalidate("currentYear", currentYear = new persianDate$1(selectedUnix).year());
     		}
 
-    		if ($$self.$$.dirty & /*selectedUnix*/ 8) {
-    			 $$invalidate(1, currentYear = new persianDate$1(selectedUnix).year());
+    		if (changed.viewUnix) {
+    			 $$invalidate("currentViewYear", currentViewYear = new persianDate$1(viewUnix).year());
     		}
 
-    		if ($$self.$$.dirty & /*currentYear, yearRange, startYear*/ 35) {
+    		if (changed.currentViewYear || changed.yearRange || changed.startYear) {
     			 {
-    				$$invalidate(0, yearRange = []);
-    				$$invalidate(5, startYear = currentYear - currentYear % 12);
+    				$$invalidate("yearRange", yearRange = []);
+    				$$invalidate("startYear", startYear = currentViewYear - currentViewYear % 12);
     				let i = 0;
 
     				while (i < 12) {
@@ -4107,23 +5509,20 @@ this['persian-datepicker-next-version'] = (function () {
     		}
     	};
 
-    	return [
-    		yearRange,
-    		currentYear,
-    		select,
+    	return {
     		selectedUnix,
     		viewUnix,
-    		startYear,
-    		currentViewDate,
-    		dispatch,
+    		select,
+    		yearRange,
+    		currentYear,
     		click_handler
-    	];
+    	};
     }
 
     class YearView extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { selectedUnix: 3, viewUnix: 4 });
+    		init(this, options, instance, create_fragment, safe_not_equal, { selectedUnix: 0, viewUnix: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -4133,13 +5532,13 @@ this['persian-datepicker-next-version'] = (function () {
     		});
 
     		const { ctx } = this.$$;
-    		const props = options.props || {};
+    		const props = options.props || ({});
 
-    		if (/*selectedUnix*/ ctx[3] === undefined && !("selectedUnix" in props)) {
+    		if (ctx.selectedUnix === undefined && !("selectedUnix" in props)) {
     			console.warn("<YearView> was created without expected prop 'selectedUnix'");
     		}
 
-    		if (/*viewUnix*/ ctx[4] === undefined && !("viewUnix" in props)) {
+    		if (ctx.viewUnix === undefined && !("viewUnix" in props)) {
     			console.warn("<YearView> was created without expected prop 'viewUnix'");
     		}
     	}
@@ -4161,51 +5560,56 @@ this['persian-datepicker-next-version'] = (function () {
     	}
     }
 
-    /* src/components/MonthView.svelte generated by Svelte v3.18.2 */
+    /* src/components/MonthView.svelte generated by Svelte v3.15.0 */
     const file$1 = "src/components/MonthView.svelte";
 
     function get_each_context$1(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[8] = list[i];
-    	child_ctx[10] = i;
+    	const child_ctx = Object.create(ctx);
+    	child_ctx.month = list[i];
+    	child_ctx.index = i;
     	return child_ctx;
     }
 
     // (2:2) {#each monthRange as month, index}
     function create_each_block$1(ctx) {
+    	let div;
     	let span;
-    	let t0_value = /*month*/ ctx[8] + "";
+    	let t0_value = ctx.month + "";
     	let t0;
     	let t1;
     	let dispose;
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[7](/*index*/ ctx[10], ...args);
+    		return ctx.click_handler(ctx, ...args);
     	}
 
     	const block = {
     		c: function create() {
+    			div = element("div");
     			span = element("span");
     			t0 = text(t0_value);
     			t1 = space();
-    			toggle_class(span, "selected", /*currentMonth*/ ctx[0] - 1 === /*index*/ ctx[10]);
-    			add_location(span, file$1, 2, 4, 75);
+    			attr_dev(span, "class", "pwt-text");
+    			add_location(span, file$1, 5, 3, 225);
+    			toggle_class(div, "selected", ctx.currentMonth - 1 === ctx.index && ctx.currentViewYear === ctx.currentSelectedYear);
+    			add_location(div, file$1, 2, 4, 75);
+    			dispose = listen_dev(div, "click", click_handler, false, false, false);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, span, anchor);
+    			insert_dev(target, div, anchor);
+    			append_dev(div, span);
     			append_dev(span, t0);
-    			append_dev(span, t1);
-    			dispose = listen_dev(span, "click", click_handler, false, false, false);
+    			append_dev(div, t1);
     		},
-    		p: function update(new_ctx, dirty) {
+    		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
 
-    			if (dirty & /*currentMonth*/ 1) {
-    				toggle_class(span, "selected", /*currentMonth*/ ctx[0] - 1 === /*index*/ ctx[10]);
+    			if (changed.currentMonth || changed.currentViewYear || changed.currentSelectedYear) {
+    				toggle_class(div, "selected", ctx.currentMonth - 1 === ctx.index && ctx.currentViewYear === ctx.currentSelectedYear);
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(span);
+    			if (detaching) detach_dev(div);
     			dispose();
     		}
     	};
@@ -4223,7 +5627,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     function create_fragment$1(ctx) {
     	let div;
-    	let each_value = /*monthRange*/ ctx[2];
+    	let each_value = ctx.monthRange;
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -4251,16 +5655,16 @@ this['persian-datepicker-next-version'] = (function () {
     				each_blocks[i].m(div, null);
     			}
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*currentMonth, select, monthRange*/ 7) {
-    				each_value = /*monthRange*/ ctx[2];
+    		p: function update(changed, ctx) {
+    			if (changed.currentMonth || changed.currentViewYear || changed.currentSelectedYear || changed.select || changed.monthRange) {
+    				each_value = ctx.monthRange;
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
     					const child_ctx = get_each_context$1(ctx, each_value, i);
 
     					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
+    						each_blocks[i].p(changed, child_ctx);
     					} else {
     						each_blocks[i] = create_each_block$1(child_ctx);
     						each_blocks[i].c();
@@ -4300,7 +5704,7 @@ this['persian-datepicker-next-version'] = (function () {
     	const dispatch = createEventDispatcher();
 
     	function select(payload) {
-    		dispatch("select", { payload });
+    		dispatch("select", payload);
     	}
 
     	let monthRange = new persianDate$1().rangeName().months;
@@ -4310,11 +5714,11 @@ this['persian-datepicker-next-version'] = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<MonthView> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = (index, event) => select(index + 1);
+    	const click_handler = ({ index }, event) => select(index + 1);
 
     	$$self.$set = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(3, selectedUnix = $$props.selectedUnix);
-    		if ("viewUnix" in $$props) $$invalidate(4, viewUnix = $$props.viewUnix);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
     	};
 
     	$$self.$capture_state = () => {
@@ -4322,48 +5726,55 @@ this['persian-datepicker-next-version'] = (function () {
     			selectedUnix,
     			viewUnix,
     			monthRange,
-    			currentUnixDate,
-    			currentMonth
+    			currentMonth,
+    			currentSelectedYear,
+    			currentViewYear
     		};
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(3, selectedUnix = $$props.selectedUnix);
-    		if ("viewUnix" in $$props) $$invalidate(4, viewUnix = $$props.viewUnix);
-    		if ("monthRange" in $$props) $$invalidate(2, monthRange = $$props.monthRange);
-    		if ("currentUnixDate" in $$props) currentUnixDate = $$props.currentUnixDate;
-    		if ("currentMonth" in $$props) $$invalidate(0, currentMonth = $$props.currentMonth);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("monthRange" in $$props) $$invalidate("monthRange", monthRange = $$props.monthRange);
+    		if ("currentMonth" in $$props) $$invalidate("currentMonth", currentMonth = $$props.currentMonth);
+    		if ("currentSelectedYear" in $$props) $$invalidate("currentSelectedYear", currentSelectedYear = $$props.currentSelectedYear);
+    		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
     	};
 
-    	let currentUnixDate;
     	let currentMonth;
+    	let currentSelectedYear;
+    	let currentViewYear;
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*viewUnix*/ 16) {
-    			 currentUnixDate = new persianDate$1(viewUnix).format("MMMM");
+    	$$self.$$.update = (changed = { selectedUnix: 1, viewUnix: 1 }) => {
+    		if (changed.selectedUnix) {
+    			 $$invalidate("currentMonth", currentMonth = new persianDate$1(selectedUnix).month());
     		}
 
-    		if ($$self.$$.dirty & /*selectedUnix*/ 8) {
-    			 $$invalidate(0, currentMonth = new persianDate$1(selectedUnix).month());
+    		if (changed.selectedUnix) {
+    			 $$invalidate("currentSelectedYear", currentSelectedYear = new persianDate$1(selectedUnix).year());
+    		}
+
+    		if (changed.viewUnix) {
+    			 $$invalidate("currentViewYear", currentViewYear = new persianDate$1(viewUnix).year());
     		}
     	};
 
-    	return [
-    		currentMonth,
-    		select,
-    		monthRange,
+    	return {
     		selectedUnix,
     		viewUnix,
-    		currentUnixDate,
-    		dispatch,
+    		select,
+    		monthRange,
+    		currentMonth,
+    		currentSelectedYear,
+    		currentViewYear,
     		click_handler
-    	];
+    	};
     }
 
     class MonthView extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { selectedUnix: 3, viewUnix: 4 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { selectedUnix: 0, viewUnix: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -4373,13 +5784,13 @@ this['persian-datepicker-next-version'] = (function () {
     		});
 
     		const { ctx } = this.$$;
-    		const props = options.props || {};
+    		const props = options.props || ({});
 
-    		if (/*selectedUnix*/ ctx[3] === undefined && !("selectedUnix" in props)) {
+    		if (ctx.selectedUnix === undefined && !("selectedUnix" in props)) {
     			console.warn("<MonthView> was created without expected prop 'selectedUnix'");
     		}
 
-    		if (/*viewUnix*/ ctx[4] === undefined && !("viewUnix" in props)) {
+    		if (ctx.viewUnix === undefined && !("viewUnix" in props)) {
     			console.warn("<MonthView> was created without expected prop 'viewUnix'");
     		}
     	}
@@ -4401,32 +5812,32 @@ this['persian-datepicker-next-version'] = (function () {
     	}
     }
 
-    /* src/components/DateView.svelte generated by Svelte v3.18.2 */
+    /* src/components/DateView.svelte generated by Svelte v3.15.0 */
     const file$2 = "src/components/DateView.svelte";
 
     function get_each_context_1(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[14] = list[i];
+    	const child_ctx = Object.create(ctx);
+    	child_ctx.day = list[i];
     	return child_ctx;
     }
 
     function get_each_context$2(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[11] = list[i];
-    	child_ctx[13] = i;
+    	const child_ctx = Object.create(ctx);
+    	child_ctx.week = list[i];
+    	child_ctx.i = i;
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[14] = list[i];
+    	const child_ctx = Object.create(ctx);
+    	child_ctx.day = list[i];
     	return child_ctx;
     }
 
-    // (4:6) {#if groupedDay[0]}
+    // (6:6) {#if groupedDay[0]}
     function create_if_block(ctx) {
     	let each_1_anchor;
-    	let each_value_2 = /*groupedDay*/ ctx[1][0];
+    	let each_value_2 = ctx.groupedDay[0];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_2.length; i += 1) {
@@ -4448,16 +5859,16 @@ this['persian-datepicker-next-version'] = (function () {
 
     			insert_dev(target, each_1_anchor, anchor);
     		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*groupedDay*/ 2) {
-    				each_value_2 = /*groupedDay*/ ctx[1][0];
+    		p: function update(changed, ctx) {
+    			if (changed.groupedDay) {
+    				each_value_2 = ctx.groupedDay[0];
     				let i;
 
     				for (i = 0; i < each_value_2.length; i += 1) {
     					const child_ctx = get_each_context_2(ctx, each_value_2, i);
 
     					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
+    						each_blocks[i].p(changed, child_ctx);
     					} else {
     						each_blocks[i] = create_each_block_2(child_ctx);
     						each_blocks[i].c();
@@ -4482,31 +5893,31 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(4:6) {#if groupedDay[0]}",
+    		source: "(6:6) {#if groupedDay[0]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (5:8) {#each groupedDay[0] as day}
+    // (7:8) {#each groupedDay[0] as day}
     function create_each_block_2(ctx) {
     	let th;
-    	let t_value = /*day*/ ctx[14].format("ddd") + "";
+    	let t_value = ctx.day.format("ddd") + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			th = element("th");
     			t = text(t_value);
-    			add_location(th, file$2, 5, 10, 156);
+    			add_location(th, file$2, 7, 10, 161);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, th, anchor);
     			append_dev(th, t);
     		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*groupedDay*/ 2 && t_value !== (t_value = /*day*/ ctx[14].format("ddd") + "")) set_data_dev(t, t_value);
+    		p: function update(changed, ctx) {
+    			if (changed.groupedDay && t_value !== (t_value = ctx.day.format("ddd") + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(th);
@@ -4517,47 +5928,57 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(5:8) {#each groupedDay[0] as day}",
+    		source: "(7:8) {#each groupedDay[0] as day}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (12:8) {#each week as day}
+    // (14:8) {#each week as day}
     function create_each_block_1(ctx) {
     	let td;
-    	let t_value = /*day*/ ctx[14].format("D") + "";
+    	let t_value = ctx.day.format("D") + "";
     	let t;
     	let dispose;
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[10](/*day*/ ctx[14], ...args);
+    		return ctx.click_handler(ctx, ...args);
     	}
 
     	const block = {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			toggle_class(td, "selected", /*isSameDate*/ ctx[2](/*day*/ ctx[14], /*selectedDay*/ ctx[0]));
-    			toggle_class(td, "today", /*isSameDate*/ ctx[2](/*day*/ ctx[14], /*today*/ ctx[4]));
-    			add_location(td, file$2, 12, 10, 306);
+    			toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
+    			toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
+    			add_location(td, file$2, 14, 10, 311);
+
+    			dispose = listen_dev(
+    				td,
+    				"click",
+    				function () {
+    					click_handler.apply(this, arguments);
+    				},
+    				false,
+    				false,
+    				false
+    			);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
     			append_dev(td, t);
-    			dispose = listen_dev(td, "click", click_handler, false, false, false);
     		},
-    		p: function update(new_ctx, dirty) {
+    		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
-    			if (dirty & /*groupedDay*/ 2 && t_value !== (t_value = /*day*/ ctx[14].format("D") + "")) set_data_dev(t, t_value);
+    			if (changed.groupedDay && t_value !== (t_value = ctx.day.format("D") + "")) set_data_dev(t, t_value);
 
-    			if (dirty & /*isSameDate, groupedDay, selectedDay*/ 7) {
-    				toggle_class(td, "selected", /*isSameDate*/ ctx[2](/*day*/ ctx[14], /*selectedDay*/ ctx[0]));
+    			if (changed.isSameDate || changed.groupedDay || changed.selectedDay) {
+    				toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
     			}
 
-    			if (dirty & /*isSameDate, groupedDay, today*/ 22) {
-    				toggle_class(td, "today", /*isSameDate*/ ctx[2](/*day*/ ctx[14], /*today*/ ctx[4]));
+    			if (changed.isSameDate || changed.groupedDay || changed.today) {
+    				toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
     			}
     		},
     		d: function destroy(detaching) {
@@ -4570,18 +5991,18 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(12:8) {#each week as day}",
+    		source: "(14:8) {#each week as day}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (10:4) {#each groupedDay as week, i}
+    // (12:4) {#each groupedDay as week, i}
     function create_each_block$2(ctx) {
     	let tr;
     	let t;
-    	let each_value_1 = /*week*/ ctx[11];
+    	let each_value_1 = ctx.week;
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -4597,7 +6018,7 @@ this['persian-datepicker-next-version'] = (function () {
     			}
 
     			t = space();
-    			add_location(tr, file$2, 10, 6, 263);
+    			add_location(tr, file$2, 12, 6, 268);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -4608,16 +6029,16 @@ this['persian-datepicker-next-version'] = (function () {
 
     			append_dev(tr, t);
     		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*isSameDate, groupedDay, selectedDay, today, selectDate*/ 31) {
-    				each_value_1 = /*week*/ ctx[11];
+    		p: function update(changed, ctx) {
+    			if (changed.isSameDate || changed.groupedDay || changed.selectedDay || changed.today || changed.selectDate) {
+    				each_value_1 = ctx.week;
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
     					const child_ctx = get_each_context_1(ctx, each_value_1, i);
 
     					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
+    						each_blocks[i].p(changed, child_ctx);
     					} else {
     						each_blocks[i] = create_each_block_1(child_ctx);
     						each_blocks[i].c();
@@ -4642,7 +6063,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(10:4) {#each groupedDay as week, i}",
+    		source: "(12:4) {#each groupedDay as week, i}",
     		ctx
     	});
 
@@ -4654,8 +6075,8 @@ this['persian-datepicker-next-version'] = (function () {
     	let table;
     	let tr;
     	let t;
-    	let if_block = /*groupedDay*/ ctx[1][0] && create_if_block(ctx);
-    	let each_value = /*groupedDay*/ ctx[1];
+    	let if_block = ctx.groupedDay[0] && create_if_block(ctx);
+    	let each_value = ctx.groupedDay;
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -4674,10 +6095,10 @@ this['persian-datepicker-next-version'] = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(tr, file$2, 2, 4, 78);
+    			add_location(tr, file$2, 4, 4, 83);
     			attr_dev(table, "class", "month-table next");
-    			attr_dev(table, "border", "1");
-    			add_location(table, file$2, 1, 2, 30);
+    			attr_dev(table, "border", "0");
+    			add_location(table, file$2, 1, 1, 29);
     			attr_dev(div, "class", "pwt-date-view");
     			add_location(div, file$2, 0, 0, 0);
     		},
@@ -4695,10 +6116,10 @@ this['persian-datepicker-next-version'] = (function () {
     				each_blocks[i].m(table, null);
     			}
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (/*groupedDay*/ ctx[1][0]) {
+    		p: function update(changed, ctx) {
+    			if (ctx.groupedDay[0]) {
     				if (if_block) {
-    					if_block.p(ctx, dirty);
+    					if_block.p(changed, ctx);
     				} else {
     					if_block = create_if_block(ctx);
     					if_block.c();
@@ -4709,15 +6130,15 @@ this['persian-datepicker-next-version'] = (function () {
     				if_block = null;
     			}
 
-    			if (dirty & /*groupedDay, isSameDate, selectedDay, today, selectDate*/ 31) {
-    				each_value = /*groupedDay*/ ctx[1];
+    			if (changed.groupedDay || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
+    				each_value = ctx.groupedDay;
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
     					const child_ctx = get_each_context$2(ctx, each_value, i);
 
     					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
+    						each_blocks[i].p(changed, child_ctx);
     					} else {
     						each_blocks[i] = create_each_block$2(child_ctx);
     						each_blocks[i].c();
@@ -4763,13 +6184,13 @@ this['persian-datepicker-next-version'] = (function () {
     	const dispatch = createEventDispatcher();
 
     	function selectDate(payload) {
-    		dispatch("selectDate", { payload });
+    		dispatch("selectDate", payload);
     	}
 
     	let selectedDay = new persianDate$1(selectedUnix).startOf("day");
 
     	afterUpdate(async () => {
-    		$$invalidate(0, selectedDay = new persianDate$1(selectedUnix).startOf("day"));
+    		$$invalidate("selectedDay", selectedDay = new persianDate$1(selectedUnix).startOf("day"));
     	});
 
     	let today = new persianDate$1(todayUnix);
@@ -4780,12 +6201,12 @@ this['persian-datepicker-next-version'] = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<DateView> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = (day, event) => selectDate(day);
+    	const click_handler = ({ day }, event) => selectDate(day);
 
     	$$self.$set = $$props => {
-    		if ("viewUnix" in $$props) $$invalidate(5, viewUnix = $$props.viewUnix);
-    		if ("selectedUnix" in $$props) $$invalidate(6, selectedUnix = $$props.selectedUnix);
-    		if ("todayUnix" in $$props) $$invalidate(7, todayUnix = $$props.todayUnix);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("todayUnix" in $$props) $$invalidate("todayUnix", todayUnix = $$props.todayUnix);
     	};
 
     	$$self.$capture_state = () => {
@@ -4801,25 +6222,25 @@ this['persian-datepicker-next-version'] = (function () {
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("viewUnix" in $$props) $$invalidate(5, viewUnix = $$props.viewUnix);
-    		if ("selectedUnix" in $$props) $$invalidate(6, selectedUnix = $$props.selectedUnix);
-    		if ("todayUnix" in $$props) $$invalidate(7, todayUnix = $$props.todayUnix);
-    		if ("selectedDay" in $$props) $$invalidate(0, selectedDay = $$props.selectedDay);
-    		if ("today" in $$props) $$invalidate(4, today = $$props.today);
-    		if ("groupedDay" in $$props) $$invalidate(1, groupedDay = $$props.groupedDay);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("todayUnix" in $$props) $$invalidate("todayUnix", todayUnix = $$props.todayUnix);
+    		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
+    		if ("today" in $$props) $$invalidate("today", today = $$props.today);
+    		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
     		if ("viewUnixDate" in $$props) viewUnixDate = $$props.viewUnixDate;
     	};
 
     	let viewUnixDate;
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*viewUnix*/ 32) {
+    	$$self.$$.update = (changed = { viewUnix: 1, groupedDay: 1 }) => {
+    		if (changed.viewUnix) {
     			 viewUnixDate = new persianDate$1(viewUnix).format("MMMM YYYY");
     		}
 
-    		if ($$self.$$.dirty & /*viewUnix, groupedDay*/ 34) {
+    		if (changed.viewUnix || changed.groupedDay) {
     			 {
-    				$$invalidate(1, groupedDay = []);
+    				$$invalidate("groupedDay", groupedDay = []);
     				let days = [];
     				let dateObj = new persianDate$1(viewUnix);
     				let day = dateObj.startOf("month");
@@ -4832,8 +6253,6 @@ this['persian-datepicker-next-version'] = (function () {
 
     				while (i < daysInMonth) {
     					i++;
-
-    					// days.push(day.add('day', i))
     					days.push(new persianDate$1([day.year(), day.month(), i]));
     				}
 
@@ -4855,7 +6274,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     				days.forEach((item, index) => {
     					if (index % 7 == 0) {
-    						$$invalidate(1, groupedDay[weekindex] = [], groupedDay);
+    						$$invalidate("groupedDay", groupedDay[weekindex] = [], groupedDay);
     					}
 
     					groupedDay[weekindex].push(item);
@@ -4868,19 +6287,17 @@ this['persian-datepicker-next-version'] = (function () {
     		}
     	};
 
-    	return [
-    		selectedDay,
-    		groupedDay,
+    	return {
     		isSameDate,
-    		selectDate,
-    		today,
     		viewUnix,
     		selectedUnix,
     		todayUnix,
-    		viewUnixDate,
-    		dispatch,
+    		selectDate,
+    		selectedDay,
+    		today,
+    		groupedDay,
     		click_handler
-    	];
+    	};
     }
 
     class DateView extends SvelteComponentDev {
@@ -4888,9 +6305,9 @@ this['persian-datepicker-next-version'] = (function () {
     		super(options);
 
     		init(this, options, instance$2, create_fragment$2, safe_not_equal, {
-    			viewUnix: 5,
-    			selectedUnix: 6,
-    			todayUnix: 7
+    			viewUnix: 0,
+    			selectedUnix: 0,
+    			todayUnix: 0
     		});
 
     		dispatch_dev("SvelteRegisterComponent", {
@@ -4901,17 +6318,17 @@ this['persian-datepicker-next-version'] = (function () {
     		});
 
     		const { ctx } = this.$$;
-    		const props = options.props || {};
+    		const props = options.props || ({});
 
-    		if (/*viewUnix*/ ctx[5] === undefined && !("viewUnix" in props)) {
+    		if (ctx.viewUnix === undefined && !("viewUnix" in props)) {
     			console.warn("<DateView> was created without expected prop 'viewUnix'");
     		}
 
-    		if (/*selectedUnix*/ ctx[6] === undefined && !("selectedUnix" in props)) {
+    		if (ctx.selectedUnix === undefined && !("selectedUnix" in props)) {
     			console.warn("<DateView> was created without expected prop 'selectedUnix'");
     		}
 
-    		if (/*todayUnix*/ ctx[7] === undefined && !("todayUnix" in props)) {
+    		if (ctx.todayUnix === undefined && !("todayUnix" in props)) {
     			console.warn("<DateView> was created without expected prop 'todayUnix'");
     		}
     	}
@@ -4941,7 +6358,7 @@ this['persian-datepicker-next-version'] = (function () {
     	}
     }
 
-    /* src/components/TimeView.svelte generated by Svelte v3.18.2 */
+    /* src/components/TimeView.svelte generated by Svelte v3.15.0 */
     const file$3 = "src/components/TimeView.svelte";
 
     function create_fragment$3(ctx) {
@@ -4951,8 +6368,8 @@ this['persian-datepicker-next-version'] = (function () {
     	const block = {
     		c: function create() {
     			div = element("div");
-    			t = text(/*currentUnixDate*/ ctx[0]);
-    			attr_dev(div, "class", "pwt-date-navigator");
+    			t = text(ctx.currentUnixDate);
+    			attr_dev(div, "class", "pwt-date-time");
     			add_location(div, file$3, 0, 0, 0);
     		},
     		l: function claim(nodes) {
@@ -4962,8 +6379,8 @@ this['persian-datepicker-next-version'] = (function () {
     			insert_dev(target, div, anchor);
     			append_dev(div, t);
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*currentUnixDate*/ 1) set_data_dev(t, /*currentUnixDate*/ ctx[0]);
+    		p: function update(changed, ctx) {
+    			if (changed.currentUnixDate) set_data_dev(t, ctx.currentUnixDate);
     		},
     		i: noop,
     		o: noop,
@@ -4988,7 +6405,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let currentUnixDate = new persianDate$1(selectedUnix).format("HH:mm:ss");
 
     	afterUpdate(async () => {
-    		$$invalidate(0, currentUnixDate = new persianDate$1(selectedUnix).format("HH:mm:ss"));
+    		$$invalidate("currentUnixDate", currentUnixDate = new persianDate$1(selectedUnix).format("HH:mm:ss"));
     	});
 
     	const writable_props = ["selectedUnix"];
@@ -4998,7 +6415,7 @@ this['persian-datepicker-next-version'] = (function () {
     	});
 
     	$$self.$set = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(1, selectedUnix = $$props.selectedUnix);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     	};
 
     	$$self.$capture_state = () => {
@@ -5006,17 +6423,17 @@ this['persian-datepicker-next-version'] = (function () {
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(1, selectedUnix = $$props.selectedUnix);
-    		if ("currentUnixDate" in $$props) $$invalidate(0, currentUnixDate = $$props.currentUnixDate);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("currentUnixDate" in $$props) $$invalidate("currentUnixDate", currentUnixDate = $$props.currentUnixDate);
     	};
 
-    	return [currentUnixDate, selectedUnix];
+    	return { selectedUnix, currentUnixDate };
     }
 
     class TimeView extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { selectedUnix: 1 });
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { selectedUnix: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -5026,9 +6443,9 @@ this['persian-datepicker-next-version'] = (function () {
     		});
 
     		const { ctx } = this.$$;
-    		const props = options.props || {};
+    		const props = options.props || ({});
 
-    		if (/*selectedUnix*/ ctx[1] === undefined && !("selectedUnix" in props)) {
+    		if (ctx.selectedUnix === undefined && !("selectedUnix" in props)) {
     			console.warn("<TimeView> was created without expected prop 'selectedUnix'");
     		}
     	}
@@ -5042,34 +6459,267 @@ this['persian-datepicker-next-version'] = (function () {
     	}
     }
 
-    /* src/components/Navigator.svelte generated by Svelte v3.18.2 */
+    /* src/components/Navigator.svelte generated by Svelte v3.15.0 */
     const file$4 = "src/components/Navigator.svelte";
 
-    function create_fragment$4(ctx) {
-    	let div;
-    	let t;
+    // (16:2) {#if viewMode === 'year'}
+    function create_if_block_2(ctx) {
+    	let button;
+    	let t0;
+    	let t1;
+    	let t2_value = ctx.startYear + 11 + "";
+    	let t2;
+    	let dispose;
 
     	const block = {
     		c: function create() {
-    			div = element("div");
-    			t = text(/*selectedUnixDate*/ ctx[0]);
-    			attr_dev(div, "class", "pwt-date-navigator");
-    			add_location(div, file$4, 0, 0, 0);
+    			button = element("button");
+    			t0 = text(ctx.startYear);
+    			t1 = text(" - ");
+    			t2 = text(t2_value);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 16, 3, 603);
+    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.startYear) set_data_dev(t0, ctx.startYear);
+    			if (changed.startYear && t2_value !== (t2_value = ctx.startYear + 11 + "")) set_data_dev(t2, t2_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(16:2) {#if viewMode === 'year'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (23:2) {#if viewMode === 'month'}
+    function create_if_block_1(ctx) {
+    	let button;
+    	let t;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t = text(ctx.selectedYear);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 23, 3, 780);
+    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t);
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.selectedYear) set_data_dev(t, ctx.selectedYear);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(23:2) {#if viewMode === 'month'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (30:2) {#if viewMode === 'date'}
+    function create_if_block$1(ctx) {
+    	let button;
+    	let t0;
+    	let t1;
+    	let t2;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t0 = text(ctx.selectedYear);
+    			t1 = space();
+    			t2 = text(ctx.selectedMonth);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 30, 3, 940);
+    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.selectedYear) set_data_dev(t0, ctx.selectedYear);
+    			if (changed.selectedMonth) set_data_dev(t2, ctx.selectedMonth);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$1.name,
+    		type: "if",
+    		source: "(30:2) {#if viewMode === 'date'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$4(ctx) {
+    	let div1;
+    	let button0;
+    	let svg0;
+    	let path0;
+    	let t0;
+    	let div0;
+    	let t1;
+    	let t2;
+    	let t3;
+    	let button1;
+    	let svg1;
+    	let path1;
+    	let dispose;
+    	let if_block0 = ctx.viewMode === "year" && create_if_block_2(ctx);
+    	let if_block1 = ctx.viewMode === "month" && create_if_block_1(ctx);
+    	let if_block2 = ctx.viewMode === "date" && create_if_block$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div1 = element("div");
+    			button0 = element("button");
+    			svg0 = svg_element("svg");
+    			path0 = svg_element("path");
+    			t0 = space();
+    			div0 = element("div");
+    			if (if_block0) if_block0.c();
+    			t1 = space();
+    			if (if_block1) if_block1.c();
+    			t2 = space();
+    			if (if_block2) if_block2.c();
+    			t3 = space();
+    			button1 = element("button");
+    			svg1 = svg_element("svg");
+    			path1 = svg_element("path");
+    			attr_dev(path0, "d", "M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875\n\t\t\t\t\tC5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126\n\t\t\t\t\tc0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z");
+    			add_location(path0, file$4, 8, 4, 161);
+    			attr_dev(svg0, "width", "20");
+    			attr_dev(svg0, "height", "20");
+    			attr_dev(svg0, "viewBox", "0 0 24 24");
+    			add_location(svg0, file$4, 4, 2, 98);
+    			attr_dev(button0, "class", "pwt-date-navigator-prev");
+    			add_location(button0, file$4, 1, 1, 34);
+    			attr_dev(div0, "class", "pwt-date-navigator-center");
+    			add_location(div0, file$4, 13, 1, 530);
+    			attr_dev(path1, "d", "M18.401,24c-0.122,0-0.24-0.044-0.331-0.125L5.495,12.748c-0.03-0.027-0.058-0.055-0.084-0.084\n\t\t\t\tc-0.366-0.413-0.329-1.047,0.083-1.412L18.069,0.125C18.161,0.044,18.279,0,18.401,0c0.143,0,0.28,0.062,0.375,0.169\n\t\t\t\tc0.182,0.206,0.163,0.523-0.043,0.705L6.157,12l12.575,11.125c0.206,0.183,0.226,0.5,0.043,0.706C18.68,23.939,18.544,24,18.401,24\n\t\t\t\tz");
+    			add_location(path1, file$4, 45, 3, 1227);
+    			attr_dev(svg1, "width", "20");
+    			attr_dev(svg1, "height", "20");
+    			attr_dev(svg1, "viewBox", "0 0 24 24");
+    			add_location(svg1, file$4, 41, 2, 1165);
+    			attr_dev(button1, "class", "pwt-date-navigator-next");
+    			add_location(button1, file$4, 38, 1, 1099);
+    			attr_dev(div1, "class", "pwt-date-navigator");
+    			add_location(div1, file$4, 0, 0, 0);
+
+    			dispose = [
+    				listen_dev(button0, "click", ctx.prev, false, false, false),
+    				listen_dev(button1, "click", ctx.next, false, false, false)
+    			];
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, t);
+    			insert_dev(target, div1, anchor);
+    			append_dev(div1, button0);
+    			append_dev(button0, svg0);
+    			append_dev(svg0, path0);
+    			append_dev(div1, t0);
+    			append_dev(div1, div0);
+    			if (if_block0) if_block0.m(div0, null);
+    			append_dev(div0, t1);
+    			if (if_block1) if_block1.m(div0, null);
+    			append_dev(div0, t2);
+    			if (if_block2) if_block2.m(div0, null);
+    			append_dev(div1, t3);
+    			append_dev(div1, button1);
+    			append_dev(button1, svg1);
+    			append_dev(svg1, path1);
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*selectedUnixDate*/ 1) set_data_dev(t, /*selectedUnixDate*/ ctx[0]);
+    		p: function update(changed, ctx) {
+    			if (ctx.viewMode === "year") {
+    				if (if_block0) {
+    					if_block0.p(changed, ctx);
+    				} else {
+    					if_block0 = create_if_block_2(ctx);
+    					if_block0.c();
+    					if_block0.m(div0, t1);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
+    			}
+
+    			if (ctx.viewMode === "month") {
+    				if (if_block1) {
+    					if_block1.p(changed, ctx);
+    				} else {
+    					if_block1 = create_if_block_1(ctx);
+    					if_block1.c();
+    					if_block1.m(div0, t2);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
+    			}
+
+    			if (ctx.viewMode === "date") {
+    				if (if_block2) {
+    					if_block2.p(changed, ctx);
+    				} else {
+    					if_block2 = create_if_block$1(ctx);
+    					if_block2.c();
+    					if_block2.m(div0, null);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
+    			if (detaching) detach_dev(div1);
+    			if (if_block0) if_block0.d();
+    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			run_all(dispose);
     		}
     	};
 
@@ -5085,41 +6735,94 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     function instance$4($$self, $$props, $$invalidate) {
-    	let { selectedUnix } = $$props;
-    	const writable_props = ["selectedUnix"];
+    	let { viewUnix } = $$props;
+    	let { viewMode } = $$props;
+    	const dispatch = createEventDispatcher();
+
+    	function setViewMode(payload) {
+    		dispatch("selectmode", payload);
+    	}
+
+    	function next(payload) {
+    		dispatch("next", payload);
+    	}
+
+    	function prev(payload) {
+    		dispatch("prev", payload);
+    	}
+
+    	let startYear;
+    	const writable_props = ["viewUnix", "viewMode"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Navigator> was created with unknown prop '${key}'`);
     	});
 
+    	const click_handler = () => setViewMode("year");
+    	const click_handler_1 = () => setViewMode("year");
+    	const click_handler_2 = () => setViewMode("month");
+
     	$$self.$set = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(1, selectedUnix = $$props.selectedUnix);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
     	};
 
     	$$self.$capture_state = () => {
-    		return { selectedUnix, selectedUnixDate };
+    		return {
+    			viewUnix,
+    			viewMode,
+    			startYear,
+    			selectedYear,
+    			selectedMonth
+    		};
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("selectedUnix" in $$props) $$invalidate(1, selectedUnix = $$props.selectedUnix);
-    		if ("selectedUnixDate" in $$props) $$invalidate(0, selectedUnixDate = $$props.selectedUnixDate);
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
+    		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
+    		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
+    		if ("selectedMonth" in $$props) $$invalidate("selectedMonth", selectedMonth = $$props.selectedMonth);
     	};
 
-    	let selectedUnixDate;
+    	let selectedYear;
+    	let selectedMonth;
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*selectedUnix*/ 2) {
-    			 $$invalidate(0, selectedUnixDate = new persianDate$1(selectedUnix).format("MMMM YYYY DD"));
+    	$$self.$$.update = (changed = { viewUnix: 1, selectedYear: 1 }) => {
+    		if (changed.viewUnix) {
+    			 $$invalidate("selectedYear", selectedYear = new persianDate$1(viewUnix).year());
+    		}
+
+    		if (changed.viewUnix) {
+    			 $$invalidate("selectedMonth", selectedMonth = new persianDate$1(viewUnix).format("MMMM"));
+    		}
+
+    		if (changed.selectedYear) {
+    			 {
+    				$$invalidate("startYear", startYear = selectedYear - selectedYear % 12);
+    			}
     		}
     	};
 
-    	return [selectedUnixDate, selectedUnix];
+    	return {
+    		viewUnix,
+    		viewMode,
+    		setViewMode,
+    		next,
+    		prev,
+    		startYear,
+    		selectedYear,
+    		selectedMonth,
+    		click_handler,
+    		click_handler_1,
+    		click_handler_2
+    	};
     }
 
     class Navigator extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { selectedUnix: 1 });
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { viewUnix: 0, viewMode: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -5129,217 +6832,177 @@ this['persian-datepicker-next-version'] = (function () {
     		});
 
     		const { ctx } = this.$$;
-    		const props = options.props || {};
+    		const props = options.props || ({});
 
-    		if (/*selectedUnix*/ ctx[1] === undefined && !("selectedUnix" in props)) {
-    			console.warn("<Navigator> was created without expected prop 'selectedUnix'");
+    		if (ctx.viewUnix === undefined && !("viewUnix" in props)) {
+    			console.warn("<Navigator> was created without expected prop 'viewUnix'");
+    		}
+
+    		if (ctx.viewMode === undefined && !("viewMode" in props)) {
+    			console.warn("<Navigator> was created without expected prop 'viewMode'");
     		}
     	}
 
-    	get selectedUnix() {
+    	get viewUnix() {
     		throw new Error("<Navigator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	set selectedUnix(value) {
+    	set viewUnix(value) {
+    		throw new Error("<Navigator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get viewMode() {
+    		throw new Error("<Navigator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set viewMode(value) {
     		throw new Error("<Navigator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
-    ({
-        /**
-         * @desc monthTitleFormat
-         */
-        monthTitleFormat: "MMMM",
+    /* src/components/Infobox.svelte generated by Svelte v3.15.0 */
+    const file$5 = "src/components/Infobox.svelte";
 
-        /**
-         * @desc startDate
-         */
-        startDate: new persianDate$1([new persianDate$1().year(), 1, 3, 1, 1, 1, 1]),
+    // (3:1) {#if visbility}
+    function create_if_block_1$1(ctx) {
+    	let span;
+    	let t;
+    	let span_intro;
+    	let span_outro;
+    	let current;
 
+    	const block = {
+    		c: function create() {
+    			span = element("span");
+    			t = text(ctx.otherPart);
+    			add_location(span, file$5, 3, 2, 71);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span, anchor);
+    			append_dev(span, t);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.otherPart) set_data_dev(t, ctx.otherPart);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
 
-        /**
-         * @desc  endDate
-         */
-        endDate: new persianDate$1().endOf('year'),
+    			add_render_callback(() => {
+    				if (span_outro) span_outro.end(1);
 
+    				if (!span_intro) span_intro = create_in_transition(span, slide, {
+    					delay: 10,
+    					duration: 400,
+    					easing: quintOut
+    				});
 
-        /**
-         * @desc weekDayTitle
-         */
-        weekDayTitle: ["شنبه", "", "دوشنبه", "", "چهارشنبه", "", "جمعه"],
+    				span_intro.start();
+    			});
 
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (span_intro) span_intro.invalidate();
 
-        /**
-         * @desc dayWidth
-         */
-        dayWidth: "30",
+    			span_outro = create_out_transition(span, slide, {
+    				delay: 0,
+    				duration: 400,
+    				easing: quintOut
+    			});
 
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(span);
+    			if (detaching && span_outro) span_outro.end();
+    		}
+    	};
 
-        /**
-         * @desc dayHeight
-         */
-        dayHeight: "30",
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$1.name,
+    		type: "if",
+    		source: "(3:1) {#if visbility}",
+    		ctx
+    	});
 
+    	return block;
+    }
 
-        /**
-         * @desc data
-         */
-        data: {
+    // (10:1) {#if !visbility}
+    function create_if_block$2(ctx) {
+    	let span;
+    	let t;
+    	let span_outro;
+    	let current;
 
-        },
+    	const block = {
+    		c: function create() {
+    			span = element("span");
+    			t = text(ctx.otherPart);
+    			add_location(span, file$5, 10, 2, 254);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span, anchor);
+    			append_dev(span, t);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.otherPart) set_data_dev(t, ctx.otherPart);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			if (span_outro) span_outro.end(1);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			span_outro = create_out_transition(span, slide, {
+    				delay: 10,
+    				duration: 400,
+    				easing: quintOut
+    			});
 
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(span);
+    			if (detaching && span_outro) span_outro.end();
+    		}
+    	};
 
-        /**
-         * @desc days
-         */
-        days: {
-            /**
-             * @desc render data function()
-             * @type function
-             */
-            renderData: function ($day, data) {
-            },
-            label: {
-                enabled: true,
-                format: "DD",
-                formatter: function (Obj, date) {
-                    return date.format("DD");
-                }
-            },
-            tooltip: {
-                enabled: true,
-                formatter: function (Obj, date) {
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$2.name,
+    		type: "if",
+    		source: "(10:1) {#if !visbility}",
+    		ctx
+    	});
 
-                },
-                background_color: "#333333",
-                color: "#ffffff",
-                animation_speed: 250,
-                animation_offset: 20,
-                close_on_click: true,
-                default_position: "above",
-                hide_delay: 100,
-                keep_visible: true,
-                max_width: 200,
-                opacity: 0.85,
-                position: "center",
-                prerender: false,
-                show_delay: 100,
-                vertical_offset: 0
-            }
-        }
-    });
-
-    /* src/App.svelte generated by Svelte v3.18.2 */
-    const file$5 = "src/App.svelte";
+    	return block;
+    }
 
     function create_fragment$5(ctx) {
     	let div;
-    	let button0;
+    	let span;
+    	let t0;
     	let t1;
-    	let button1;
-    	let t3;
-    	let button2;
-    	let t5;
-    	let t6;
-    	let br0;
-    	let t7;
-    	let t8;
-    	let br1;
-    	let t9;
-    	let t10;
-    	let br2;
-    	let t11;
-    	let t12;
-    	let br3;
-    	let t13;
+    	let t2;
     	let current;
-    	let dispose;
-
-    	const navigator = new Navigator({
-    			props: { selectedUnix: /*$selectedUnix*/ ctx[0] },
-    			$$inline: true
-    		});
-
-    	const yearview = new YearView({
-    			props: {
-    				viewUnix: /*$viewUnix*/ ctx[1],
-    				selectedUnix: /*$selectedUnix*/ ctx[0]
-    			},
-    			$$inline: true
-    		});
-
-    	yearview.$on("select", /*onSelectYear*/ ctx[5]);
-
-    	const monthview = new MonthView({
-    			props: {
-    				viewUnix: /*$viewUnix*/ ctx[1],
-    				selectedUnix: /*$selectedUnix*/ ctx[0]
-    			},
-    			$$inline: true
-    		});
-
-    	monthview.$on("select", /*onSelectMonth*/ ctx[4]);
-
-    	const timeview = new TimeView({
-    			props: { selectedUnix: /*$selectedUnix*/ ctx[0] },
-    			$$inline: true
-    		});
-
-    	const dateview = new DateView({
-    			props: {
-    				todayUnix: /*todayUnix*/ ctx[2],
-    				selectedUnix: /*$selectedUnix*/ ctx[0],
-    				viewUnix: /*$viewUnix*/ ctx[1]
-    			},
-    			$$inline: true
-    		});
-
-    	dateview.$on("selectDate", /*onSelectDate*/ ctx[3]);
+    	let if_block0 = ctx.visbility && create_if_block_1$1(ctx);
+    	let if_block1 = !ctx.visbility && create_if_block$2(ctx);
 
     	const block = {
     		c: function create() {
     			div = element("div");
-    			button0 = element("button");
-    			button0.textContent = "Today";
+    			span = element("span");
+    			t0 = text(ctx.yearPrt);
     			t1 = space();
-    			button1 = element("button");
-    			button1.textContent = "Next";
-    			t3 = space();
-    			button2 = element("button");
-    			button2.textContent = "Prev";
-    			t5 = space();
-    			create_component(navigator.$$.fragment);
-    			t6 = space();
-    			br0 = element("br");
-    			t7 = space();
-    			create_component(yearview.$$.fragment);
-    			t8 = space();
-    			br1 = element("br");
-    			t9 = space();
-    			create_component(monthview.$$.fragment);
-    			t10 = space();
-    			br2 = element("br");
-    			t11 = space();
-    			create_component(timeview.$$.fragment);
-    			t12 = space();
-    			br3 = element("br");
-    			t13 = space();
-    			create_component(dateview.$$.fragment);
-    			attr_dev(button0, "class", "svelte-12ruqcy");
-    			add_location(button0, file$5, 1, 2, 31);
-    			attr_dev(button1, "class", "svelte-12ruqcy");
-    			add_location(button1, file$5, 2, 2, 75);
-    			attr_dev(button2, "class", "svelte-12ruqcy");
-    			add_location(button2, file$5, 3, 2, 120);
-    			attr_dev(br0, "class", "svelte-12ruqcy");
-    			add_location(br0, file$5, 6, 2, 233);
-    			attr_dev(br1, "class", "svelte-12ruqcy");
-    			add_location(br1, file$5, 12, 2, 371);
-    			attr_dev(br2, "class", "svelte-12ruqcy");
-    			add_location(br2, file$5, 18, 2, 512);
-    			attr_dev(br3, "class", "svelte-12ruqcy");
-    			add_location(br3, file$5, 21, 2, 588);
-    			attr_dev(div, "class", "pwt-datepicker svelte-12ruqcy");
+    			if (if_block0) if_block0.c();
+    			t2 = space();
+    			if (if_block1) if_block1.c();
+    			add_location(span, file$5, 1, 1, 29);
+    			attr_dev(div, "class", "pwt-date-info");
     			add_location(div, file$5, 0, 0, 0);
     		},
     		l: function claim(nodes) {
@@ -5347,82 +7010,72 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
-    			append_dev(div, button0);
+    			append_dev(div, span);
+    			append_dev(span, t0);
     			append_dev(div, t1);
-    			append_dev(div, button1);
-    			append_dev(div, t3);
-    			append_dev(div, button2);
-    			append_dev(div, t5);
-    			mount_component(navigator, div, null);
-    			append_dev(div, t6);
-    			append_dev(div, br0);
-    			append_dev(div, t7);
-    			mount_component(yearview, div, null);
-    			append_dev(div, t8);
-    			append_dev(div, br1);
-    			append_dev(div, t9);
-    			mount_component(monthview, div, null);
-    			append_dev(div, t10);
-    			append_dev(div, br2);
-    			append_dev(div, t11);
-    			mount_component(timeview, div, null);
-    			append_dev(div, t12);
-    			append_dev(div, br3);
-    			append_dev(div, t13);
-    			mount_component(dateview, div, null);
+    			if (if_block0) if_block0.m(div, null);
+    			append_dev(div, t2);
+    			if (if_block1) if_block1.m(div, null);
     			current = true;
-
-    			dispose = [
-    				listen_dev(button0, "click", /*today*/ ctx[7], false, false, false),
-    				listen_dev(button1, "click", /*navNext*/ ctx[6], false, false, false),
-    				listen_dev(button2, "click", /*navPrev*/ ctx[8], false, false, false)
-    			];
     		},
-    		p: function update(ctx, [dirty]) {
-    			const navigator_changes = {};
-    			if (dirty & /*$selectedUnix*/ 1) navigator_changes.selectedUnix = /*$selectedUnix*/ ctx[0];
-    			navigator.$set(navigator_changes);
-    			const yearview_changes = {};
-    			if (dirty & /*$viewUnix*/ 2) yearview_changes.viewUnix = /*$viewUnix*/ ctx[1];
-    			if (dirty & /*$selectedUnix*/ 1) yearview_changes.selectedUnix = /*$selectedUnix*/ ctx[0];
-    			yearview.$set(yearview_changes);
-    			const monthview_changes = {};
-    			if (dirty & /*$viewUnix*/ 2) monthview_changes.viewUnix = /*$viewUnix*/ ctx[1];
-    			if (dirty & /*$selectedUnix*/ 1) monthview_changes.selectedUnix = /*$selectedUnix*/ ctx[0];
-    			monthview.$set(monthview_changes);
-    			const timeview_changes = {};
-    			if (dirty & /*$selectedUnix*/ 1) timeview_changes.selectedUnix = /*$selectedUnix*/ ctx[0];
-    			timeview.$set(timeview_changes);
-    			const dateview_changes = {};
-    			if (dirty & /*$selectedUnix*/ 1) dateview_changes.selectedUnix = /*$selectedUnix*/ ctx[0];
-    			if (dirty & /*$viewUnix*/ 2) dateview_changes.viewUnix = /*$viewUnix*/ ctx[1];
-    			dateview.$set(dateview_changes);
+    		p: function update(changed, ctx) {
+    			if (!current || changed.yearPrt) set_data_dev(t0, ctx.yearPrt);
+
+    			if (ctx.visbility) {
+    				if (if_block0) {
+    					if_block0.p(changed, ctx);
+    					transition_in(if_block0, 1);
+    				} else {
+    					if_block0 = create_if_block_1$1(ctx);
+    					if_block0.c();
+    					transition_in(if_block0, 1);
+    					if_block0.m(div, t2);
+    				}
+    			} else if (if_block0) {
+    				group_outros();
+
+    				transition_out(if_block0, 1, 1, () => {
+    					if_block0 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (!ctx.visbility) {
+    				if (if_block1) {
+    					if_block1.p(changed, ctx);
+    					transition_in(if_block1, 1);
+    				} else {
+    					if_block1 = create_if_block$2(ctx);
+    					if_block1.c();
+    					transition_in(if_block1, 1);
+    					if_block1.m(div, null);
+    				}
+    			} else if (if_block1) {
+    				group_outros();
+
+    				transition_out(if_block1, 1, 1, () => {
+    					if_block1 = null;
+    				});
+
+    				check_outros();
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(navigator.$$.fragment, local);
-    			transition_in(yearview.$$.fragment, local);
-    			transition_in(monthview.$$.fragment, local);
-    			transition_in(timeview.$$.fragment, local);
-    			transition_in(dateview.$$.fragment, local);
+    			transition_in(if_block0);
+    			transition_in(if_block1);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(navigator.$$.fragment, local);
-    			transition_out(yearview.$$.fragment, local);
-    			transition_out(monthview.$$.fragment, local);
-    			transition_out(timeview.$$.fragment, local);
-    			transition_out(dateview.$$.fragment, local);
+    			transition_out(if_block0);
+    			transition_out(if_block1);
     			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
-    			destroy_component(navigator);
-    			destroy_component(yearview);
-    			destroy_component(monthview);
-    			destroy_component(timeview);
-    			destroy_component(dateview);
-    			run_all(dispose);
+    			if (if_block0) if_block0.d();
+    			if (if_block1) if_block1.d();
     		}
     	};
 
@@ -5438,17 +7091,1069 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     function instance$5($$self, $$props, $$invalidate) {
-    	let $selectedUnix;
-    	let $viewUnix;
-    	validate_store(selectedUnix, "selectedUnix");
-    	component_subscribe($$self, selectedUnix, $$value => $$invalidate(0, $selectedUnix = $$value));
-    	validate_store(viewUnix, "viewUnix");
-    	component_subscribe($$self, viewUnix, $$value => $$invalidate(1, $viewUnix = $$value));
-    	let { options = {} } = $$props;
-    	const todayUnix = persianDateToUnix(new persianDate$1());
-    	//options = Object.assign(Options, options)
+    	let { viewUnix } = $$props;
+    	let { selectedUnix } = $$props;
+    	let oldotherPart;
+    	let visbility;
+    	const writable_props = ["viewUnix", "selectedUnix"];
 
-    	// Public events
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Infobox> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$set = $$props => {
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    	};
+
+    	$$self.$capture_state = () => {
+    		return {
+    			viewUnix,
+    			selectedUnix,
+    			oldotherPart,
+    			visbility,
+    			yearPrt,
+    			otherPart
+    		};
+    	};
+
+    	$$self.$inject_state = $$props => {
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("oldotherPart" in $$props) oldotherPart = $$props.oldotherPart;
+    		if ("visbility" in $$props) $$invalidate("visbility", visbility = $$props.visbility);
+    		if ("yearPrt" in $$props) $$invalidate("yearPrt", yearPrt = $$props.yearPrt);
+    		if ("otherPart" in $$props) $$invalidate("otherPart", otherPart = $$props.otherPart);
+    	};
+
+    	let yearPrt;
+    	let otherPart;
+
+    	$$self.$$.update = (changed = { selectedUnix: 1, otherPart: 1 }) => {
+    		if (changed.selectedUnix) {
+    			 $$invalidate("yearPrt", yearPrt = new persianDate$1(selectedUnix).format("YYYY"));
+    		}
+
+    		if (changed.selectedUnix) {
+    			 $$invalidate("otherPart", otherPart = new persianDate$1(selectedUnix).format("dddd DD MMMM"));
+    		}
+
+    		if (changed.otherPart) {
+    			 if (otherPart) {
+    				$$invalidate("visbility", visbility = false);
+
+    				setTimeout(
+    					() => {
+    						$$invalidate("visbility", visbility = true);
+    					},
+    					10
+    				);
+    			}
+    		}
+    	};
+
+    	return {
+    		viewUnix,
+    		selectedUnix,
+    		visbility,
+    		yearPrt,
+    		otherPart
+    	};
+    }
+
+    class Infobox extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { viewUnix: 0, selectedUnix: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Infobox",
+    			options,
+    			id: create_fragment$5.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || ({});
+
+    		if (ctx.viewUnix === undefined && !("viewUnix" in props)) {
+    			console.warn("<Infobox> was created without expected prop 'viewUnix'");
+    		}
+
+    		if (ctx.selectedUnix === undefined && !("selectedUnix" in props)) {
+    			console.warn("<Infobox> was created without expected prop 'selectedUnix'");
+    		}
+    	}
+
+    	get viewUnix() {
+    		throw new Error("<Infobox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set viewUnix(value) {
+    		throw new Error("<Infobox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get selectedUnix() {
+    		throw new Error("<Infobox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set selectedUnix(value) {
+    		throw new Error("<Infobox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/components/Toolbox.svelte generated by Svelte v3.15.0 */
+    const file$6 = "src/components/Toolbox.svelte";
+
+    function create_fragment$6(ctx) {
+    	let div;
+    	let button;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			button = element("button");
+    			button.textContent = "Today";
+    			add_location(button, file$6, 1, 1, 32);
+    			attr_dev(div, "class", "pwt-date-toolbox");
+    			add_location(div, file$6, 0, 0, 0);
+    			dispose = listen_dev(button, "click", ctx.today, false, false, false);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, button);
+    		},
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$6.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$6($$self, $$props, $$invalidate) {
+    	let { viewUnix } = $$props;
+    	let { viewMode } = $$props;
+    	const dispatch = createEventDispatcher();
+
+    	function today(payload) {
+    		dispatch("today", payload);
+    	}
+
+    	let yearRange;
+    	let startYear;
+    	const writable_props = ["viewUnix", "viewMode"];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Toolbox> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$set = $$props => {
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
+    	};
+
+    	$$self.$capture_state = () => {
+    		return {
+    			viewUnix,
+    			viewMode,
+    			yearRange,
+    			startYear,
+    			selectedYear,
+    			selectedMonth
+    		};
+    	};
+
+    	$$self.$inject_state = $$props => {
+    		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
+    		if ("yearRange" in $$props) $$invalidate("yearRange", yearRange = $$props.yearRange);
+    		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
+    		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
+    		if ("selectedMonth" in $$props) selectedMonth = $$props.selectedMonth;
+    	};
+
+    	let selectedYear;
+    	let selectedMonth;
+
+    	$$self.$$.update = (changed = { viewUnix: 1, selectedYear: 1, yearRange: 1, startYear: 1 }) => {
+    		if (changed.viewUnix) {
+    			 $$invalidate("selectedYear", selectedYear = new persianDate$1(viewUnix).year());
+    		}
+
+    		if (changed.viewUnix) {
+    			 selectedMonth = new persianDate$1(viewUnix).format("MMMM");
+    		}
+
+    		if (changed.selectedYear || changed.yearRange || changed.startYear) {
+    			 {
+    				$$invalidate("yearRange", yearRange = []);
+    				$$invalidate("startYear", startYear = selectedYear - selectedYear % 12);
+    				let i = 0;
+
+    				while (i < 12) {
+    					yearRange.push(startYear + i);
+    					i++;
+    				}
+    			}
+    		}
+    	};
+
+    	return { viewUnix, viewMode, today };
+    }
+
+    class Toolbox extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { viewUnix: 0, viewMode: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Toolbox",
+    			options,
+    			id: create_fragment$6.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || ({});
+
+    		if (ctx.viewUnix === undefined && !("viewUnix" in props)) {
+    			console.warn("<Toolbox> was created without expected prop 'viewUnix'");
+    		}
+
+    		if (ctx.viewMode === undefined && !("viewMode" in props)) {
+    			console.warn("<Toolbox> was created without expected prop 'viewMode'");
+    		}
+    	}
+
+    	get viewUnix() {
+    		throw new Error("<Toolbox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set viewUnix(value) {
+    		throw new Error("<Toolbox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get viewMode() {
+    		throw new Error("<Toolbox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set viewMode(value) {
+    		throw new Error("<Toolbox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/components/Input.svelte generated by Svelte v3.15.0 */
+
+    function create_fragment$7(ctx) {
+    	const block = {
+    		c: noop,
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: noop,
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: noop
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$7.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$7($$self, $$props, $$invalidate) {
+    	let $selectedUnix;
+    	let $config;
+    	validate_store(selectedUnix, "selectedUnix");
+    	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
+    	validate_store(config$1, "config");
+    	component_subscribe($$self, config$1, $$value => $$invalidate("$config", $config = $$value));
+    	let { originalContainer } = $$props;
+    	let { plotarea } = $$props;
+    	const dispatch = createEventDispatcher();
+
+    	let setPlotPostion = function () {
+    		let set = () => {
+    			if (plotarea) {
+    				if (originalContainer && originalContainer.tagName === "INPUT") {
+    					$$invalidate("plotarea", plotarea.style.position = "absolute", plotarea);
+    					$$invalidate("plotarea", plotarea.style.left = originalContainer.offsetLeft + "px", plotarea);
+    					$$invalidate("plotarea", plotarea.style.top = parseInt(originalContainer.offsetTop) + parseInt(originalContainer.clientHeight) + document.body.scrollTop + "px", plotarea);
+    				}
+    			}
+    		};
+
+    		setTimeout(
+    			() => {
+    				set();
+    			},
+    			100
+    		);
+
+    		setTimeout(
+    			() => {
+    				set();
+    			},
+    			200
+    		);
+
+    		setTimeout(
+    			() => {
+    				set();
+    			},
+    			300
+    		);
+
+    		setTimeout(
+    			() => {
+    				set();
+    			},
+    			1000
+    		);
+
+    		setTimeout(
+    			() => {
+    				set();
+    			},
+    			1500
+    		);
+    	};
+
+    	let initInputEvents = function () {
+    		let bodyListener = e => {
+    			if (plotarea && plotarea.contains(e.target) || e.target == originalContainer || e.target.className === "pwt-date-navigator-button") ; else {
+    				dispatch("setvisibility", false);
+    				document.removeEventListener("click", bodyListener);
+    			}
+    		};
+
+    		if (originalContainer && originalContainer.tagName === "INPUT") {
+    			originalContainer.addEventListener("focus", () => {
+    				dispatch("setvisibility", true);
+    				setPlotPostion();
+    				document.addEventListener("click", bodyListener);
+    			});
+    		}
+    	};
+
+    	setPlotPostion();
+    	initInputEvents();
+    	const writable_props = ["originalContainer", "plotarea"];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Input> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$set = $$props => {
+    		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+    		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
+    	};
+
+    	$$self.$capture_state = () => {
+    		return {
+    			originalContainer,
+    			plotarea,
+    			setPlotPostion,
+    			initInputEvents,
+    			$selectedUnix,
+    			$config
+    		};
+    	};
+
+    	$$self.$inject_state = $$props => {
+    		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+    		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
+    		if ("setPlotPostion" in $$props) setPlotPostion = $$props.setPlotPostion;
+    		if ("initInputEvents" in $$props) initInputEvents = $$props.initInputEvents;
+    		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
+    		if ("$config" in $$props) config$1.set($config = $$props.$config);
+    	};
+
+    	$$self.$$.update = (changed = { $selectedUnix: 1, $config: 1 }) => {
+    		if (changed.$selectedUnix || changed.$config) {
+    			 {
+    				if (selectedUnix) {
+    					let currentYear = new persianDate$1($selectedUnix).format($config.format);
+    					$$invalidate("originalContainer", originalContainer.value = currentYear, originalContainer);
+
+    					if ($config.altField) {
+    						let altField = document.querySelector($config.altField);
+    						let currentYear;
+    						if ($config.altFormat === "unix") currentYear = new persianDate$1($selectedUnix).valueOf(); else currentYear = new persianDate$1($selectedUnix).format($config.altField);
+    						altField.value = currentYear;
+    					}
+    				}
+    			}
+    		}
+    	};
+
+    	return { originalContainer, plotarea };
+    }
+
+    class Input extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, { originalContainer: 0, plotarea: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Input",
+    			options,
+    			id: create_fragment$7.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || ({});
+
+    		if (ctx.originalContainer === undefined && !("originalContainer" in props)) {
+    			console.warn("<Input> was created without expected prop 'originalContainer'");
+    		}
+
+    		if (ctx.plotarea === undefined && !("plotarea" in props)) {
+    			console.warn("<Input> was created without expected prop 'plotarea'");
+    		}
+    	}
+
+    	get originalContainer() {
+    		throw new Error("<Input>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set originalContainer(value) {
+    		throw new Error("<Input>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get plotarea() {
+    		throw new Error("<Input>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set plotarea(value) {
+    		throw new Error("<Input>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/App.svelte generated by Svelte v3.15.0 */
+
+    const { Object: Object_1 } = globals;
+    const file$7 = "src/App.svelte";
+
+    // (1:0) {#if isVisbile}
+    function create_if_block$3(ctx) {
+    	let div;
+    	let t0;
+    	let t1;
+    	let t2;
+    	let t3;
+    	let t4;
+    	let t5;
+    	let t6;
+    	let if_block4_anchor;
+    	let current;
+
+    	const infobox = new Infobox({
+    			props: {
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	const navigator = new Navigator({
+    			props: {
+    				viewMode: ctx.$viewMode,
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	navigator.$on("selectmode", ctx.setViewMode);
+    	navigator.$on("today", ctx.today);
+    	navigator.$on("next", ctx.navNext);
+    	navigator.$on("prev", ctx.navPrev);
+    	let if_block0 = ctx.$viewMode === "year" && create_if_block_5(ctx);
+    	let if_block1 = ctx.$viewMode === "month" && create_if_block_4(ctx);
+    	let if_block2 = ctx.$viewMode === "date" && create_if_block_3(ctx);
+    	let if_block3 = ctx.$viewMode === "time" && create_if_block_2$1(ctx);
+
+    	const toolbox = new Toolbox({
+    			props: {
+    				viewMode: ctx.$viewMode,
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	toolbox.$on("selectmode", ctx.setViewMode);
+    	toolbox.$on("today", ctx.today);
+    	toolbox.$on("next", ctx.navNext);
+    	toolbox.$on("prev", ctx.navPrev);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			create_component(infobox.$$.fragment);
+    			t0 = space();
+    			create_component(navigator.$$.fragment);
+    			t1 = space();
+    			if (if_block0) if_block0.c();
+    			t2 = space();
+    			if (if_block1) if_block1.c();
+    			t3 = space();
+    			if (if_block2) if_block2.c();
+    			t4 = space();
+    			if (if_block3) if_block3.c();
+    			t5 = space();
+    			create_component(toolbox.$$.fragment);
+    			t6 = space();
+    			if_block4_anchor = empty();
+    			attr_dev(div, "class", "pwt-datepicker svelte-zc0mb5");
+    			add_location(div, file$7, 1, 0, 16);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			mount_component(infobox, div, null);
+    			append_dev(div, t0);
+    			mount_component(navigator, div, null);
+    			append_dev(div, t1);
+    			if (if_block0) if_block0.m(div, null);
+    			append_dev(div, t2);
+    			if (if_block1) if_block1.m(div, null);
+    			append_dev(div, t3);
+    			if (if_block2) if_block2.m(div, null);
+    			append_dev(div, t4);
+    			if (if_block3) if_block3.m(div, null);
+    			append_dev(div, t5);
+    			mount_component(toolbox, div, null);
+    			ctx.div_binding(div);
+    			insert_dev(target, t6, anchor);
+    			insert_dev(target, if_block4_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const infobox_changes = {};
+    			if (changed.$viewUnix) infobox_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) infobox_changes.selectedUnix = ctx.$selectedUnix;
+    			infobox.$set(infobox_changes);
+    			const navigator_changes = {};
+    			if (changed.$viewMode) navigator_changes.viewMode = ctx.$viewMode;
+    			if (changed.$viewUnix) navigator_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) navigator_changes.selectedUnix = ctx.$selectedUnix;
+    			navigator.$set(navigator_changes);
+
+    			if (ctx.$viewMode === "year") {
+    				if (if_block0) {
+    					if_block0.p(changed, ctx);
+    					transition_in(if_block0, 1);
+    				} else {
+    					if_block0 = create_if_block_5(ctx);
+    					if_block0.c();
+    					transition_in(if_block0, 1);
+    					if_block0.m(div, t2);
+    				}
+    			} else if (if_block0) {
+    				group_outros();
+
+    				transition_out(if_block0, 1, 1, () => {
+    					if_block0 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.$viewMode === "month") {
+    				if (if_block1) {
+    					if_block1.p(changed, ctx);
+    					transition_in(if_block1, 1);
+    				} else {
+    					if_block1 = create_if_block_4(ctx);
+    					if_block1.c();
+    					transition_in(if_block1, 1);
+    					if_block1.m(div, t3);
+    				}
+    			} else if (if_block1) {
+    				group_outros();
+
+    				transition_out(if_block1, 1, 1, () => {
+    					if_block1 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.$viewMode === "date") {
+    				if (if_block2) {
+    					if_block2.p(changed, ctx);
+    					transition_in(if_block2, 1);
+    				} else {
+    					if_block2 = create_if_block_3(ctx);
+    					if_block2.c();
+    					transition_in(if_block2, 1);
+    					if_block2.m(div, t4);
+    				}
+    			} else if (if_block2) {
+    				group_outros();
+
+    				transition_out(if_block2, 1, 1, () => {
+    					if_block2 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.$viewMode === "time") {
+    				if (if_block3) {
+    					if_block3.p(changed, ctx);
+    					transition_in(if_block3, 1);
+    				} else {
+    					if_block3 = create_if_block_2$1(ctx);
+    					if_block3.c();
+    					transition_in(if_block3, 1);
+    					if_block3.m(div, t5);
+    				}
+    			} else if (if_block3) {
+    				group_outros();
+
+    				transition_out(if_block3, 1, 1, () => {
+    					if_block3 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			const toolbox_changes = {};
+    			if (changed.$viewMode) toolbox_changes.viewMode = ctx.$viewMode;
+    			if (changed.$viewUnix) toolbox_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) toolbox_changes.selectedUnix = ctx.$selectedUnix;
+    			toolbox.$set(toolbox_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(infobox.$$.fragment, local);
+    			transition_in(navigator.$$.fragment, local);
+    			transition_in(if_block0);
+    			transition_in(if_block1);
+    			transition_in(if_block2);
+    			transition_in(if_block3);
+    			transition_in(toolbox.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(infobox.$$.fragment, local);
+    			transition_out(navigator.$$.fragment, local);
+    			transition_out(if_block0);
+    			transition_out(if_block1);
+    			transition_out(if_block2);
+    			transition_out(if_block3);
+    			transition_out(toolbox.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_component(infobox);
+    			destroy_component(navigator);
+    			if (if_block0) if_block0.d();
+    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			if (if_block3) if_block3.d();
+    			destroy_component(toolbox);
+    			ctx.div_binding(null);
+    			if (detaching) detach_dev(t6);
+    			if (detaching) detach_dev(if_block4_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(1:0) {#if isVisbile}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (16:1) {#if $viewMode === 'year'}
+    function create_if_block_5(ctx) {
+    	let div;
+    	let div_transition;
+    	let current;
+
+    	const yearview = new YearView({
+    			props: {
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	yearview.$on("select", ctx.onSelectYear);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			create_component(yearview.$$.fragment);
+    			attr_dev(div, "class", "svelte-zc0mb5");
+    			add_location(div, file$7, 16, 2, 364);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			mount_component(yearview, div, null);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const yearview_changes = {};
+    			if (changed.$viewUnix) yearview_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) yearview_changes.selectedUnix = ctx.$selectedUnix;
+    			yearview.$set(yearview_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(yearview.$$.fragment, local);
+
+    			add_render_callback(() => {
+    				if (!div_transition) div_transition = create_bidirectional_transition(div, fade, { duration: 0 }, true);
+    				div_transition.run(1);
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(yearview.$$.fragment, local);
+    			if (!div_transition) div_transition = create_bidirectional_transition(div, fade, { duration: 0 }, false);
+    			div_transition.run(0);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_component(yearview);
+    			if (detaching && div_transition) div_transition.end();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_5.name,
+    		type: "if",
+    		source: "(16:1) {#if $viewMode === 'year'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (25:1) {#if $viewMode === 'month'}
+    function create_if_block_4(ctx) {
+    	let div;
+    	let div_transition;
+    	let current;
+
+    	const monthview = new MonthView({
+    			props: {
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	monthview.$on("select", ctx.onSelectMonth);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			create_component(monthview.$$.fragment);
+    			attr_dev(div, "class", "svelte-zc0mb5");
+    			add_location(div, file$7, 25, 2, 561);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			mount_component(monthview, div, null);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const monthview_changes = {};
+    			if (changed.$viewUnix) monthview_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) monthview_changes.selectedUnix = ctx.$selectedUnix;
+    			monthview.$set(monthview_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(monthview.$$.fragment, local);
+
+    			add_render_callback(() => {
+    				if (!div_transition) div_transition = create_bidirectional_transition(div, fade, { duration: 0 }, true);
+    				div_transition.run(1);
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(monthview.$$.fragment, local);
+    			if (!div_transition) div_transition = create_bidirectional_transition(div, fade, { duration: 0 }, false);
+    			div_transition.run(0);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_component(monthview);
+    			if (detaching && div_transition) div_transition.end();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4.name,
+    		type: "if",
+    		source: "(25:1) {#if $viewMode === 'month'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (34:1) {#if $viewMode === 'date'}
+    function create_if_block_3(ctx) {
+    	let div;
+    	let div_transition;
+    	let current;
+
+    	const dateview = new DateView({
+    			props: {
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	dateview.$on("prev", ctx.navPrev);
+    	dateview.$on("next", ctx.navNext);
+    	dateview.$on("selectDate", ctx.onSelectDate);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			create_component(dateview.$$.fragment);
+    			attr_dev(div, "class", "svelte-zc0mb5");
+    			add_location(div, file$7, 34, 2, 759);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			mount_component(dateview, div, null);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const dateview_changes = {};
+    			if (changed.$viewUnix) dateview_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) dateview_changes.selectedUnix = ctx.$selectedUnix;
+    			dateview.$set(dateview_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(dateview.$$.fragment, local);
+
+    			add_render_callback(() => {
+    				if (!div_transition) div_transition = create_bidirectional_transition(div, fade, { duration: 0 }, true);
+    				div_transition.run(1);
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(dateview.$$.fragment, local);
+    			if (!div_transition) div_transition = create_bidirectional_transition(div, fade, { duration: 0 }, false);
+    			div_transition.run(0);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_component(dateview);
+    			if (detaching && div_transition) div_transition.end();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3.name,
+    		type: "if",
+    		source: "(34:1) {#if $viewMode === 'date'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (45:1) {#if $viewMode === 'time'}
+    function create_if_block_2$1(ctx) {
+    	let current;
+
+    	const timeview = new TimeView({
+    			props: { selectedUnix: ctx.$selectedUnix },
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(timeview.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(timeview, target, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const timeview_changes = {};
+    			if (changed.$selectedUnix) timeview_changes.selectedUnix = ctx.$selectedUnix;
+    			timeview.$set(timeview_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(timeview.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(timeview.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(timeview, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$1.name,
+    		type: "if",
+    		source: "(45:1) {#if $viewMode === 'time'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$8(ctx) {
+    	let t;
+    	let current;
+    	let if_block = ctx.isVisbile && create_if_block$3(ctx);
+
+    	const input = new Input({
+    			props: {
+    				plotarea: ctx.plotarea,
+    				originalContainer: ctx.originalContainer
+    			},
+    			$$inline: true
+    		});
+
+    	input.$on("setvisibility", ctx.setvisibility);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			t = space();
+    			create_component(input.$$.fragment);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, t, anchor);
+    			mount_component(input, target, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (ctx.isVisbile) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block$3(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(t.parentNode, t);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			const input_changes = {};
+    			if (changed.plotarea) input_changes.plotarea = ctx.plotarea;
+    			if (changed.originalContainer) input_changes.originalContainer = ctx.originalContainer;
+    			input.$set(input_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			transition_in(input.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			transition_out(input.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(t);
+    			destroy_component(input, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$8.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$8($$self, $$props, $$invalidate) {
+    	let $viewUnix;
+    	let $selectedUnix;
+    	let $viewMode;
+    	let $config;
+    	validate_store(viewUnix, "viewUnix");
+    	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
+    	validate_store(selectedUnix, "selectedUnix");
+    	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
+    	validate_store(viewMode, "viewMode");
+    	component_subscribe($$self, viewMode, $$value => $$invalidate("$viewMode", $viewMode = $$value));
+    	validate_store(config$1, "config");
+    	component_subscribe($$self, config$1, $$value => $$invalidate("$config", $config = $$value));
+    	let { options = {} } = $$props;
+    	let { originalContainer = null } = $$props;
     	const dispatch = createEventDispatcher();
 
     	const dispatcher = function (input) {
@@ -5456,9 +8161,36 @@ this['persian-datepicker-next-version'] = (function () {
     			return event => options[input](event);
     		} else {
     			return event => {
-    				actions[input](event.detail.payload);
+    				actions[input](event);
     			};
     		}
+    	};
+
+    	if (!options) {
+    		$$invalidate("options", options = config);
+    	} else {
+    		$$invalidate("options", options = Object.assign(config, options));
+    	}
+
+    	dispatcher("setConfig")(options);
+    	let plotarea;
+    	let isVisbile = false;
+
+    	const setvisibility = function (payload) {
+    		$$invalidate("isVisbile", isVisbile = payload.detail);
+
+    		setTimeout(
+    			() => {
+    				if (plotarea) {
+    					$$invalidate("plotarea", plotarea.style.display = isVisbile ? "block" : "none", plotarea);
+    				}
+    			},
+    			0
+    		);
+    	};
+
+    	const setViewMode = function (event) {
+    		dispatcher("setViewMode")(event.detail);
     	};
 
     	const onSelectDate = function (event) {
@@ -5466,11 +8198,11 @@ this['persian-datepicker-next-version'] = (function () {
     	};
 
     	const onSelectMonth = function (event) {
-    		dispatcher("onSelectMonth")(event);
+    		dispatcher("onSelectMonth")(event.detail);
     	};
 
     	const onSelectYear = function (event) {
-    		dispatcher("onSelectYear")(event);
+    		dispatcher("onSelectYear")(event.detail);
     	};
 
     	const navNext = event => {
@@ -5485,50 +8217,78 @@ this['persian-datepicker-next-version'] = (function () {
     		dispatcher("onSelectPrevView")(event);
     	};
 
-    	const writable_props = ["options"];
+    	const writable_props = ["options", "originalContainer"];
 
-    	Object.keys($$props).forEach(key => {
+    	Object_1.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
+    	function div_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			$$invalidate("plotarea", plotarea = $$value);
+    		});
+    	}
+
     	$$self.$set = $$props => {
-    		if ("options" in $$props) $$invalidate(9, options = $$props.options);
+    		if ("options" in $$props) $$invalidate("options", options = $$props.options);
+    		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
     	};
 
     	$$self.$capture_state = () => {
-    		return { options, $selectedUnix, $viewUnix };
+    		return {
+    			options,
+    			originalContainer,
+    			plotarea,
+    			isVisbile,
+    			$viewUnix,
+    			$selectedUnix,
+    			$viewMode,
+    			$config
+    		};
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("options" in $$props) $$invalidate(9, options = $$props.options);
-    		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
+    		if ("options" in $$props) $$invalidate("options", options = $$props.options);
+    		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+    		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
+    		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
     		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
+    		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
+    		if ("$viewMode" in $$props) viewMode.set($viewMode = $$props.$viewMode);
+    		if ("$config" in $$props) config$1.set($config = $$props.$config);
     	};
 
-    	return [
-    		$selectedUnix,
-    		$viewUnix,
-    		todayUnix,
+    	return {
+    		options,
+    		originalContainer,
+    		plotarea,
+    		isVisbile,
+    		setvisibility,
+    		setViewMode,
     		onSelectDate,
     		onSelectMonth,
     		onSelectYear,
     		navNext,
     		today,
     		navPrev,
-    		options
-    	];
+    		$viewUnix,
+    		$selectedUnix,
+    		$viewMode,
+    		$config,
+    		div_binding
+    	};
     }
 
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { options: 9 });
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { options: 0, originalContainer: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "App",
     			options,
-    			id: create_fragment$5.name
+    			id: create_fragment$8.name
     		});
     	}
 
@@ -5537,6 +8297,14 @@ this['persian-datepicker-next-version'] = (function () {
     	}
 
     	set options(value) {
+    		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get originalContainer() {
+    		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set originalContainer(value) {
     		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
