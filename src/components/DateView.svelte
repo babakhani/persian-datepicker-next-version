@@ -3,8 +3,8 @@
 		class="month-table next" 
 		border="0">
     <tr>
-      {#if groupedDay[0]}
-        {#each groupedDay[0] as day}
+      {#if groupedDay[1]}
+        {#each groupedDay[1] as day}
           <th>{day.format('ddd')}</th>
         {/each}
       {/if}
@@ -14,12 +14,12 @@
 				{#if week.length > 1}
         {#each week as day}
           <td
-						on:click="{(event) => { if (!isDisable(day) && currentViewMonth === day.month()) selectDate(day) }}"
-						class:othermonth="{currentViewMonth !== day.month()}"
+						on:click="{(event) => { if (!isDisable(day) && day.month && currentViewMonth === day.month()) selectDate(day) }}"
+						class:othermonth="{!day.month}"
 						class:disable="{isDisable(day)}"
             class:selected="{isSameDate(day, selectedDay)}"
             class:today="{isSameDate(day, today)}">
-						{#if currentViewMonth === day.month()}
+						{#if day && day.month && day.format && currentViewMonth === day.month()}
 							<span>
 								{day.format('D')}
 							</span>
@@ -39,22 +39,24 @@
 	import { config, dateObject } from '../stores.js'
 
   const isSameDate = (a, b) => {
-    return a.format('YYYY/MM/DD') === b.format('YYYY/MM/DD')
+    return a.format && a.format('YYYY/MM/DD') === b.format('YYYY/MM/DD')
 	}
 
 	const isDisable = (day) => {
-		let unixtimespan  = day.valueOf()
-		if ($config.minDate && $config.maxDate) {
-			if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
-				return true;
-			}
-		} else if ($config.minDate) {
-			if (unixtimespan <= $config.minDate) {
-				return true;
-			}
-		} else if ($config.maxDate) {
-			if (unixtimespan >= $config.maxDate) {
-				return true;
+		if (day.valueOf) {
+			let unixtimespan  = day.valueOf()
+			if ($config.minDate && $config.maxDate) {
+				if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
+					return true;
+				}
+			} else if ($config.minDate) {
+				if (unixtimespan <= $config.minDate) {
+					return true;
+				}
+			} else if ($config.maxDate) {
+				if (unixtimespan >= $config.maxDate) {
+					return true;
+				}
 			}
 		}
 	}
@@ -92,12 +94,22 @@
 		}
 		let endVisualDelta = 8 - dateObj.endOf('month').day()
 		let visualLenght = daysInMonth + startVisualDelta + endVisualDelta
-		let firstVisualDate = day.subtract('day', startVisualDelta).hour(6)
+		let firstVisualDate = day.subtract('day', startVisualDelta)
 		let startDateOfView = day.subtract('day', startVisualDelta)
+		let j = 0
+		while (j < startVisualDelta) {
+			days.push({})
+			j++
+		}
 		let i = 0
-		while (i < visualLenght - 1) {
-			days.push(firstVisualDate.add('day', i))
+		while (i < daysInMonth) {
+			days.push(new $dateObject([day.year(), day.month(), day.date() + i]))
 			i++
+		}
+		let f = 0
+		while (f < endVisualDelta) {
+			days.push({})
+			f++
 		}
 		let weekindex = 0
 		//let cacheDate = null

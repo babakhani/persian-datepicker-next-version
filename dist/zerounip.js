@@ -5893,10 +5893,10 @@ this['persian-datepicker-next-version'] = (function () {
     	return child_ctx;
     }
 
-    // (6:6) {#if groupedDay[0]}
+    // (6:6) {#if groupedDay[1]}
     function create_if_block_2(ctx) {
     	let each_1_anchor;
-    	let each_value_2 = ctx.groupedDay[0];
+    	let each_value_2 = ctx.groupedDay[1];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_2.length; i += 1) {
@@ -5920,7 +5920,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		p: function update(changed, ctx) {
     			if (changed.groupedDay) {
-    				each_value_2 = ctx.groupedDay[0];
+    				each_value_2 = ctx.groupedDay[1];
     				let i;
 
     				for (i = 0; i < each_value_2.length; i += 1) {
@@ -5952,14 +5952,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(6:6) {#if groupedDay[0]}",
+    		source: "(6:6) {#if groupedDay[1]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (7:8) {#each groupedDay[0] as day}
+    // (7:8) {#each groupedDay[1] as day}
     function create_each_block_2(ctx) {
     	let th;
     	let t_value = ctx.day.format("ddd") + "";
@@ -5987,7 +5987,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(7:8) {#each groupedDay[0] as day}",
+    		source: "(7:8) {#each groupedDay[1] as day}",
     		ctx
     	});
 
@@ -6020,7 +6020,7 @@ this['persian-datepicker-next-version'] = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.currentViewMonth || changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
+    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate) {
     				each_value_1 = ctx.week;
     				let i;
 
@@ -6060,7 +6060,7 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
-    // (22:6) {#if currentViewMonth === day.month()}
+    // (22:6) {#if day && day.month && day.format && currentViewMonth === day.month()}
     function create_if_block_1(ctx) {
     	let span;
     	let t_value = ctx.day.format("D") + "";
@@ -6070,7 +6070,7 @@ this['persian-datepicker-next-version'] = (function () {
     		c: function create() {
     			span = element("span");
     			t = text(t_value);
-    			add_location(span, file$2, 22, 7, 708);
+    			add_location(span, file$2, 22, 7, 733);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -6088,7 +6088,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(22:6) {#if currentViewMonth === day.month()}",
+    		source: "(22:6) {#if day && day.month && day.format && currentViewMonth === day.month()}",
     		ctx
     	});
 
@@ -6098,7 +6098,7 @@ this['persian-datepicker-next-version'] = (function () {
     // (15:8) {#each week as day}
     function create_each_block_1(ctx) {
     	let td;
-    	let show_if = ctx.currentViewMonth === ctx.day.month();
+    	let show_if = ctx.day && ctx.day.month && ctx.day.format && ctx.currentViewMonth === ctx.day.month();
     	let t;
     	let dispose;
     	let if_block = show_if && create_if_block_1(ctx);
@@ -6112,7 +6112,7 @@ this['persian-datepicker-next-version'] = (function () {
     			td = element("td");
     			if (if_block) if_block.c();
     			t = space();
-    			toggle_class(td, "othermonth", ctx.currentViewMonth !== ctx.day.month());
+    			toggle_class(td, "othermonth", !ctx.day.month);
     			toggle_class(td, "disable", ctx.isDisable(ctx.day));
     			toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
     			toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
@@ -6136,7 +6136,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
-    			if (changed.currentViewMonth || changed.groupedDay) show_if = ctx.currentViewMonth === ctx.day.month();
+    			if (changed.groupedDay || changed.currentViewMonth) show_if = ctx.day && ctx.day.month && ctx.day.format && ctx.currentViewMonth === ctx.day.month();
 
     			if (show_if) {
     				if (if_block) {
@@ -6151,8 +6151,8 @@ this['persian-datepicker-next-version'] = (function () {
     				if_block = null;
     			}
 
-    			if (changed.currentViewMonth || changed.groupedDay) {
-    				toggle_class(td, "othermonth", ctx.currentViewMonth !== ctx.day.month());
+    			if (changed.groupedDay) {
+    				toggle_class(td, "othermonth", !ctx.day.month);
     			}
 
     			if (changed.isDisable || changed.groupedDay) {
@@ -6239,7 +6239,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let table;
     	let tr;
     	let t;
-    	let if_block = ctx.groupedDay[0] && create_if_block_2(ctx);
+    	let if_block = ctx.groupedDay[1] && create_if_block_2(ctx);
     	let each_value = ctx.groupedDay;
     	let each_blocks = [];
 
@@ -6281,7 +6281,7 @@ this['persian-datepicker-next-version'] = (function () {
     			}
     		},
     		p: function update(changed, ctx) {
-    			if (ctx.groupedDay[0]) {
+    			if (ctx.groupedDay[1]) {
     				if (if_block) {
     					if_block.p(changed, ctx);
     				} else {
@@ -6294,7 +6294,7 @@ this['persian-datepicker-next-version'] = (function () {
     				if_block = null;
     			}
 
-    			if (changed.groupedDay || changed.currentViewMonth || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.selectDate) {
+    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate) {
     				each_value = ctx.groupedDay;
     				let i;
 
@@ -6346,23 +6346,25 @@ this['persian-datepicker-next-version'] = (function () {
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
 
     	const isSameDate = (a, b) => {
-    		return a.format("YYYY/MM/DD") === b.format("YYYY/MM/DD");
+    		return a.format && a.format("YYYY/MM/DD") === b.format("YYYY/MM/DD");
     	};
 
     	const isDisable = day => {
-    		let unixtimespan = day.valueOf();
+    		if (day.valueOf) {
+    			let unixtimespan = day.valueOf();
 
-    		if ($config.minDate && $config.maxDate) {
-    			if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
-    				return true;
-    			}
-    		} else if ($config.minDate) {
-    			if (unixtimespan <= $config.minDate) {
-    				return true;
-    			}
-    		} else if ($config.maxDate) {
-    			if (unixtimespan >= $config.maxDate) {
-    				return true;
+    			if ($config.minDate && $config.maxDate) {
+    				if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
+    					return true;
+    				}
+    			} else if ($config.minDate) {
+    				if (unixtimespan <= $config.minDate) {
+    					return true;
+    				}
+    			} else if ($config.maxDate) {
+    				if (unixtimespan >= $config.maxDate) {
+    					return true;
+    				}
     			}
     		}
     	};
@@ -6391,7 +6393,7 @@ this['persian-datepicker-next-version'] = (function () {
     	});
 
     	const click_handler = ({ day }, event) => {
-    		if (!isDisable(day) && currentViewMonth === day.month()) selectDate(day);
+    		if (!isDisable(day) && day.month && currentViewMonth === day.month()) selectDate(day);
     	};
 
     	$$self.$set = $$props => {
@@ -6455,14 +6457,27 @@ this['persian-datepicker-next-version'] = (function () {
     				}
 
     				let endVisualDelta = 8 - dateObj.endOf("month").day();
-    				let visualLenght = daysInMonth + startVisualDelta + endVisualDelta;
-    				let firstVisualDate = day.subtract("day", startVisualDelta).hour(6);
+    				let firstVisualDate = day.subtract("day", startVisualDelta);
     				let startDateOfView = day.subtract("day", startVisualDelta);
+    				let j = 0;
+
+    				while (j < startVisualDelta) {
+    					days.push({});
+    					j++;
+    				}
+
     				let i = 0;
 
-    				while (i < visualLenght - 1) {
-    					days.push(firstVisualDate.add("day", i));
+    				while (i < daysInMonth) {
+    					days.push(new $dateObject([day.year(), day.month(), day.date() + i]));
     					i++;
+    				}
+
+    				let f = 0;
+
+    				while (f < endVisualDelta) {
+    					days.push({});
+    					f++;
     				}
 
     				let weekindex = 0;
