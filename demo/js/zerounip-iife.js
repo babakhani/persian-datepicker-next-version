@@ -10079,7 +10079,6 @@ this.zerounip = (function () {
     }
 
     const Plugin = function(container, config) {
-      console.log(container.tagName);
       let softContainer = container;
       if (container.tagName === 'INPUT') {
         softContainer = document.body;
