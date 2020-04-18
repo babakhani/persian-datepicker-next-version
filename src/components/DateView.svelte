@@ -1,45 +1,83 @@
 <div class="pwt-date-view">
-	<table 
-		class="month-table next" 
-		border="0">
-    <tr>
-      {#if groupedDay[1]}
-        {#each groupedDay[1] as day}
-          <th>{day.format('ddd')}</th>
-        {/each}
-      {/if}
-    </tr>
-    {#each groupedDay as week, i}
-			<tr>
-				{#if week.length > 1}
-        {#each week as day}
-          <td
-						on:click="{(event) => { if (!isDisable(day) && day.month && currentViewMonth === day.month()) selectDate(day) }}"
-						class:othermonth="{!day.month}"
-						class:disable="{isDisable(day)}"
-            class:selected="{isSameDate(day, selectedDay)}"
-            class:today="{isSameDate(day, today)}">
-						{#if day && day.month && day.format && currentViewMonth === day.month()}
-							<span>
-								{day.format('D')}
-							</span>
+			<table 
+				class="month-table next" 
+				border="0">
+				<tr>
+					{#if groupedDay[1]}
+						{#each groupedDay[1] as day}
+							<th>
+								<span>
+	                {day.format('ddd')}
+								</span>
+							</th>
+						{/each}
+					{/if}
+				</tr>
+	{#if visible}
+				{#each groupedDay as week, i}
+					<tr
+			out:fadeOut="{{duration: animateSpeed}}" 
+			in:fadeIn="{{duration: animateSpeed}}" >
+						{#if week.length > 1}
+							{#each week as day}
+								<td
+									on:click="{(event) => { if (!isDisable(day) && day.month && currentViewMonth === day.month()) selectDate(day) }}"
+									class:othermonth="{!day.month}"
+									class:disable="{isDisable(day)}"
+									class:selected="{isSameDate(day, selectedDay)}"
+									class:today="{isSameDate(day, today)}">
+									{#if day && day.month && day.format && currentViewMonth === day.month()}
+										<span>
+											{day.format('D')}
+										</span>
+									{/if}
+								</td>
+							{/each}
 						{/if}
-          </td>
-        {/each}
-				{/if}
-      </tr>
-    {/each}
-  </table>
-</div>
+					</tr>
+				{/each}
+{/if}
+			</table>
+	</div>
 
 <script>
 	import { afterUpdate } from 'svelte'
 	import { flip } from 'svelte/animate'
-  import { time, elapsed, countable } from '../stores.js'
+	import { time, elapsed, countable } from '../stores.js'
 	import { config, dateObject } from '../stores.js'
+	import { fade, slide } from 'svelte/transition'
+	import { elasticOut } from 'svelte/easing'
 
-  const isSameDate = (a, b) => {
-    return a.isSameDay && a.isSameDay(b)
+	function fadeOut(node, { duration, delay }) {
+		return {
+			duration,
+			delay,
+			css: t => {
+				//console.log(t)
+				return `
+				transform: translate(-${80 - (t * 80)}px, 0);
+				opacity: ${t};
+				`
+			}
+		};
+	}
+	function fadeIn(node, { duration, delay }) {
+		return {
+		duration,
+		  delay,
+			css: t => {
+				console.log(t)
+				return `
+				transform: translate(${80 - (t * 80)}px, 0);
+				opacity: ${t};
+				`
+			}
+		};
+	}
+
+
+	const isSameDate = (a, b) => {
+		return a.isSameDay && a.isSameDay(b)
 	}
 
 	const isDisable = (day) => {
@@ -61,26 +99,28 @@
 		}
 	}
 
-  export let viewUnix
-  export let selectedUnix
-  export let todayUnix
+	export let viewUnix
+	export let selectedUnix
+	export let todayUnix
 
-  import { createEventDispatcher } from 'svelte'
-  const dispatch = createEventDispatcher()
-	
-  function selectDate(payload) { dispatch('selectDate', payload) }
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 
-  let selectedDay = new $dateObject(selectedUnix).startOf('day');
+	function selectDate(payload) { dispatch('selectDate', payload) }
 
-  afterUpdate(async () => {
-    selectedDay = new $dateObject(selectedUnix).startOf('day')
+	let selectedDay = new $dateObject(selectedUnix).startOf('day');
+
+	afterUpdate(async () => {
+		selectedDay = new $dateObject(selectedUnix).startOf('day')
 	});
 
-  let groupedDay = []
+	let groupedDay = []
 
-  $: today = new $dateObject(todayUnix)
-  $: currentViewMonth = new $dateObject(viewUnix).month()
-  $: viewUnixDate = new $dateObject(viewUnix).format('MMMM YYYY')
+	$: today = new $dateObject(todayUnix)
+	$: currentViewMonth = new $dateObject(viewUnix).month()
+	$: viewUnixDate = new $dateObject(viewUnix).format('MMMM YYYY')
+	let visible = true
+	let animateSpeed = 100
 	$: {
 		groupedDay = []
 		let days = []
@@ -132,26 +172,42 @@
 				weekindex++
 			}
 		})
+		if (viewUnix) {
+			visible = false
+			setTimeout(() => {
+				visible = true 
+			}, 200)
+		}
 	}
 </script>
 
 <style global lang="scss">
-  @import './theme.scss';
-  .pwt-date-view {
-    width: 100%;
-    height: 100%;
+	@import './theme.scss';
+	.pwt-animated {
+		width: 100%;
+		height: 100%;
+	}
+	.pwt-date-view {
+		width: 100%;
+		height: 100%;
 		position: relative;
 		.month-table {
 			width: 100%;
 			height: 100%;
 		}
 		tr {
-      width: 100%;
+			width: 100%;
 			height: calc(100/8%);
+			max-height: 48px;
 		}
 		th {
 			height: calc(100/8%);
 			text-align: center;
+			vertical-align: top;
+			span {
+			  max-height: 48px;
+			  height: 48px;
+			}
 		}
 		td {
 			text-align: center;
@@ -161,7 +217,7 @@
 
 			&:hover {
 				span {
-				  background: #ededed;
+					background: #ededed;
 				}
 			}
 
@@ -172,7 +228,7 @@
 			}
 
 			&.othermonth {
-			  cursor: default !important;
+				cursor: default !important;
 				span {
 					color: #ccc !important;
 				}

@@ -10,33 +10,41 @@
 					C5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126
 					c0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z"/>
 	 </svg>
-	</button>
-	<div
-		class="pwt-date-navigator-center">
-		{#if viewMode === 'year'}
-			<button 
-				class="pwt-date-navigator-button"
-				on:click={() => setViewMode("year")}>
-				{startYear} - {startYear + 11}
-			</button>
-		{/if}
-		{#if viewMode === 'month'}
-			<button 
-				class="pwt-date-navigator-button"
-				on:click={() => setViewMode("year")}>
-				{selectedYear}
-			</button>
-		{/if}
-		{#if viewMode === 'date'}
-			<button 
-				class="pwt-date-navigator-button"
-				on:click={() => setViewMode("month")}>
-				{selectedYear}
-				{selectedMonth}
-			</button>
-		{/if}
-	</div>
-	<button 
+ </button>
+ {#if visible}
+	 <div
+		 class="pwt-date-navigator-center">
+		 {#if viewMode === 'year'}
+			 <button 
+				 out:fadeOut="{{duration: animateSpeed}}" 
+				 in:fadeIn="{{duration: animateSpeed}}" 
+				 class="pwt-date-navigator-button"
+				 on:click={() => setViewMode("year")}>
+				 {startYear} - {startYear + 11}
+			 </button>
+		 {/if}
+		 {#if viewMode === 'month'}
+			 <button 
+				 out:fadeOut="{{duration: animateSpeed}}" 
+				 in:fadeIn="{{duration: animateSpeed}}" 
+				 class="pwt-date-navigator-button"
+				 on:click={() => setViewMode("year")}>
+				 {selectedYear}
+			 </button>
+		 {/if}
+		 {#if viewMode === 'date'}
+			 <button 
+				 out:fadeOut="{{duration: animateSpeed}}" 
+				 in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
+				 class="pwt-date-navigator-button pwt-animated"
+				 on:click={() => setViewMode("month")}>
+				 {selectedYear}
+				 {selectedMonth}
+			 </button>
+		 {/if}
+	 </div>
+ {/if}
+ <button 
 		class="pwt-date-navigator-next"
 		on:click="{next}">
 		<svg 
@@ -54,6 +62,34 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import { config, dateObject } from '../stores.js'
+  import { fade } from 'svelte/transition'
+	import { elasticOut } from 'svelte/easing'
+
+	function fadeOut(node, { duration }) {
+		return {
+			duration,
+			css: t => {
+				return `
+				right: auto;
+				left: ${t * 30}px;
+		    opacity: ${t};
+				`
+			}
+		};
+	}
+	function fadeIn(node, { duration }) {
+		return {
+			duration,
+			css: t => {
+				return `
+				left: auto;
+				right: ${t * 20}px;
+		    opacity: ${t};
+				`
+			}
+		};
+	}
+
 
 	export let viewUnix
 	export let viewMode
@@ -69,13 +105,28 @@
 	$: selectedMonth = new $dateObject(viewUnix).format('MMMM')
 
 	let startYear
+	let visible = true
+	let animateSpeed = 200
 	$: {
-		startYear = selectedYear - (selectedYear % 12)
+		if (viewUnix) {
+			startYear = selectedYear - (selectedYear % 12)
+			visible = false
+			setTimeout(() => {
+				visible = true 
+			}, 200)
+		}
 	}
 </script>
 
 <style global lang="scss">
 	@import './theme.scss';
+	.pwt-animated {
+		display: block;
+		//border:2px dashed red !important;
+		position: absolute;
+		//opacity: 1;
+		//transition: all 400ms;
+	}
 	.pwt-date-navigator {
 		height: 60px;
 		line-height: 60px;
