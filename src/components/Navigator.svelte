@@ -70,7 +70,6 @@
 			duration,
 			delay,
 			css: t => {
-				//console.log(t)
 				return `
 				transform: translate(${transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
 				opacity: ${t};
@@ -83,7 +82,6 @@
 			duration,
 			delay,
 			css: t => {
-				console.log(t)
 				return `
 				transform: translate(${!transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
 				opacity: ${t};

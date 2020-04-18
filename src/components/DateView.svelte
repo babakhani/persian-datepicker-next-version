@@ -66,7 +66,6 @@
 			duration,
 			delay,
 			css: t => {
-				console.log(t)
 				return `
 				transform: translate(${!transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
 				opacity: ${t};
@@ -76,26 +75,26 @@
 	}
 
 	const isSameDate = (a, b) => {
-	return a.isSameDay && a.isSameDay(b)
+		return a.isSameDay && a.isSameDay(b)
 	}
 
 	const isDisable = (day) => {
-	if (day.valueOf) {
-	let unixtimespan  = day.valueOf()
-	if ($config.minDate && $config.maxDate) {
-	if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
-	return true;
-	}
-	} else if ($config.minDate) {
-	if (unixtimespan <= $config.minDate) {
-	return true;
-	}
-	} else if ($config.maxDate) {
-	if (unixtimespan >= $config.maxDate) {
-	return true;
-	}
-	}
-	}
+		if (day.valueOf) {
+			let unixtimespan  = day.valueOf()
+			if ($config.minDate && $config.maxDate) {
+				if (!(unixtimespan >= $config.minDate && unixtimespan <= $config.maxDate)) {
+					return true;
+				}
+			} else if ($config.minDate) {
+				if (unixtimespan <= $config.minDate) {
+					return true;
+				}
+			} else if ($config.maxDate) {
+				if (unixtimespan >= $config.maxDate) {
+					return true;
+				}
+			}
+		}
 	}
 
 	export let viewUnix
@@ -110,7 +109,7 @@
 	let selectedDay = new $dateObject(selectedUnix).startOf('day');
 
 	afterUpdate(async () => {
-	selectedDay = new $dateObject(selectedUnix).startOf('day')
+		selectedDay = new $dateObject(selectedUnix).startOf('day')
 	});
 
 	let groupedDay = []
