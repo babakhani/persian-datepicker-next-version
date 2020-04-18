@@ -1,4 +1,5 @@
 <div class="pwt-date-navigator">
+{#if viewMode !== 'time'}
 	<button 
 		class="pwt-date-navigator-prev"
 		on:click={prev}>
@@ -24,6 +25,7 @@
 				z"/>
 		</svg>
 	</button>
+  {/if}
 	<div
 		class="pwt-date-navigator-center">
 		{#if viewMode === 'year'}

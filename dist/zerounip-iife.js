@@ -7014,29 +7014,51 @@ this.zerounip = (function () {
     	let div4;
     	let div0;
     	let button0;
+    	let svg0;
+    	let path0;
+    	let t0;
+    	let span0;
     	let t1;
     	let t2;
-    	let t3;
     	let button1;
-    	let t5;
+    	let svg1;
+    	let path1;
+    	let t3;
     	let div1;
     	let button2;
-    	let t7;
-    	let t8;
-    	let t9;
+    	let svg2;
+    	let path2;
+    	let t4;
+    	let span1;
+    	let t5;
+    	let t6;
     	let button3;
-    	let t11;
+    	let svg3;
+    	let path3;
+    	let t7;
     	let div2;
     	let button4;
-    	let t13;
-    	let t14;
-    	let t15;
+    	let svg4;
+    	let path4;
+    	let t8;
+    	let span2;
+    	let t9;
+    	let t10;
     	let button5;
-    	let t17;
+    	let svg5;
+    	let path5;
+    	let t11;
     	let div3;
     	let button6;
-    	let t19;
+    	let svg6;
+    	let path6;
+    	let t12;
+    	let span3;
+    	let t13;
+    	let t14;
     	let button7;
+    	let svg7;
+    	let path7;
     	let dispose;
 
     	const block = {
@@ -7044,61 +7066,127 @@ this.zerounip = (function () {
     			div4 = element("div");
     			div0 = element("div");
     			button0 = element("button");
-    			button0.textContent = "Up";
-    			t1 = space();
-    			t2 = text(ctx.currentHour);
-    			t3 = space();
+    			svg0 = svg_element("svg");
+    			path0 = svg_element("path");
+    			t0 = space();
+    			span0 = element("span");
+    			t1 = text(ctx.currentHour);
+    			t2 = space();
     			button1 = element("button");
-    			button1.textContent = "Down";
-    			t5 = space();
+    			svg1 = svg_element("svg");
+    			path1 = svg_element("path");
+    			t3 = space();
     			div1 = element("div");
     			button2 = element("button");
-    			button2.textContent = "Up";
-    			t7 = space();
-    			t8 = text(ctx.currentMinute);
-    			t9 = space();
+    			svg2 = svg_element("svg");
+    			path2 = svg_element("path");
+    			t4 = space();
+    			span1 = element("span");
+    			t5 = text(ctx.currentMinute);
+    			t6 = space();
     			button3 = element("button");
-    			button3.textContent = "Down";
-    			t11 = space();
+    			svg3 = svg_element("svg");
+    			path3 = svg_element("path");
+    			t7 = space();
     			div2 = element("div");
     			button4 = element("button");
-    			button4.textContent = "Up";
-    			t13 = space();
-    			t14 = text(ctx.currentSecond);
-    			t15 = space();
+    			svg4 = svg_element("svg");
+    			path4 = svg_element("path");
+    			t8 = space();
+    			span2 = element("span");
+    			t9 = text(ctx.currentSecond);
+    			t10 = space();
     			button5 = element("button");
-    			button5.textContent = "Down";
-    			t17 = space();
+    			svg5 = svg_element("svg");
+    			path5 = svg_element("path");
+    			t11 = space();
     			div3 = element("div");
     			button6 = element("button");
-    			button6.textContent = "Up";
-    			t19 = text("\n\t\t  Meridian\n\t\t");
+    			svg6 = svg_element("svg");
+    			path6 = svg_element("path");
+    			t12 = space();
+    			span3 = element("span");
+    			t13 = text(ctx.currentMeridian);
+    			t14 = space();
     			button7 = element("button");
-    			button7.textContent = "Down";
+    			svg7 = svg_element("svg");
+    			path7 = svg_element("path");
+    			attr_dev(path0, "d", "M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155\n\t\t\t\t\tc4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155\n\t\t\t\t\tL129.007,57.819z");
+    			add_location(path0, file$3, 9, 4, 253);
+    			attr_dev(svg0, "width", "12");
+    			attr_dev(svg0, "height", "12");
+    			attr_dev(svg0, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg0, file$3, 5, 3, 176);
     			attr_dev(button0, "class", "pwt-date-time-arrow");
-    			add_location(button0, file$3, 2, 2, 64);
+    			add_location(button0, file$3, 2, 2, 86);
+    			add_location(span0, file$3, 14, 2, 533);
+    			attr_dev(path1, "d", "M220.088,57.667l-99.671,99.695L20.746,57.655c-4.752-4.752-12.439-4.752-17.191,0\n\t\t\t\t\tc-4.74,4.752-4.74,12.451,0,17.203l108.261,108.297l0,0l0,0c4.74,4.752,12.439,4.752,17.179,0L237.256,74.859\n\t\t\t\t\tc4.74-4.752,4.74-12.463,0-17.215C232.528,52.915,224.828,52.915,220.088,57.667z");
+    			add_location(path1, file$3, 24, 4, 739);
+    			attr_dev(svg1, "width", "12");
+    			attr_dev(svg1, "height", "12");
+    			attr_dev(svg1, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg1, file$3, 20, 3, 663);
     			attr_dev(button1, "class", "pwt-date-time-arrow");
-    			add_location(button1, file$3, 8, 2, 195);
-    			attr_dev(div0, "class", "pwt-date-time-hour");
+    			add_location(button1, file$3, 17, 2, 571);
+    			attr_dev(div0, "class", "pwt-date-time-section pwt-date-time-hour");
     			add_location(div0, file$3, 1, 1, 29);
+    			attr_dev(path2, "d", "M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155\n\t\t\t\t\tc4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155\n\t\t\t\t\tL129.007,57.819z");
+    			add_location(path2, file$3, 38, 4, 1285);
+    			attr_dev(svg2, "width", "12");
+    			attr_dev(svg2, "height", "12");
+    			attr_dev(svg2, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg2, file$3, 34, 3, 1208);
     			attr_dev(button2, "class", "pwt-date-time-arrow");
-    			add_location(button2, file$3, 15, 2, 357);
+    			add_location(button2, file$3, 31, 2, 1116);
+    			add_location(span1, file$3, 43, 2, 1565);
+    			attr_dev(path3, "d", "M220.088,57.667l-99.671,99.695L20.746,57.655c-4.752-4.752-12.439-4.752-17.191,0\n\t\t\t\t\tc-4.74,4.752-4.74,12.451,0,17.203l108.261,108.297l0,0l0,0c4.74,4.752,12.439,4.752,17.179,0L237.256,74.859\n\t\t\t\t\tc4.74-4.752,4.74-12.463,0-17.215C232.528,52.915,224.828,52.915,220.088,57.667z");
+    			add_location(path3, file$3, 53, 4, 1775);
+    			attr_dev(svg3, "width", "12");
+    			attr_dev(svg3, "height", "12");
+    			attr_dev(svg3, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg3, file$3, 49, 3, 1699);
     			attr_dev(button3, "class", "pwt-date-time-arrow");
-    			add_location(button3, file$3, 21, 2, 489);
-    			attr_dev(div1, "class", "pwt-date-time-minute");
-    			add_location(div1, file$3, 14, 1, 320);
+    			add_location(button3, file$3, 46, 2, 1605);
+    			attr_dev(div1, "class", "pwt-date-time-section pwt-date-time-minute");
+    			add_location(div1, file$3, 30, 1, 1057);
+    			attr_dev(path4, "d", "M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155\n\t\t\t\t\tc4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155\n\t\t\t\t\tL129.007,57.819z");
+    			add_location(path4, file$3, 67, 4, 2321);
+    			attr_dev(svg4, "width", "12");
+    			attr_dev(svg4, "height", "12");
+    			attr_dev(svg4, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg4, file$3, 63, 3, 2244);
     			attr_dev(button4, "class", "pwt-date-time-arrow");
-    			add_location(button4, file$3, 28, 2, 653);
+    			add_location(button4, file$3, 60, 2, 2152);
+    			add_location(span2, file$3, 72, 2, 2601);
+    			attr_dev(path5, "d", "M220.088,57.667l-99.671,99.695L20.746,57.655c-4.752-4.752-12.439-4.752-17.191,0\n\t\t\t\t\tc-4.74,4.752-4.74,12.451,0,17.203l108.261,108.297l0,0l0,0c4.74,4.752,12.439,4.752,17.179,0L237.256,74.859\n\t\t\t\t\tc4.74-4.752,4.74-12.463,0-17.215C232.528,52.915,224.828,52.915,220.088,57.667z");
+    			add_location(path5, file$3, 82, 4, 2811);
+    			attr_dev(svg5, "width", "12");
+    			attr_dev(svg5, "height", "12");
+    			attr_dev(svg5, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg5, file$3, 78, 3, 2735);
     			attr_dev(button5, "class", "pwt-date-time-arrow");
-    			add_location(button5, file$3, 34, 2, 788);
-    			attr_dev(div2, "class", "pwt-date-time-second");
-    			add_location(div2, file$3, 27, 1, 616);
+    			add_location(button5, file$3, 75, 2, 2641);
+    			attr_dev(div2, "class", "pwt-date-time-section pwt-date-time-second");
+    			add_location(div2, file$3, 59, 1, 2093);
+    			attr_dev(path6, "d", "M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155\n\t\t\t\t\tc4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155\n\t\t\t\t\tL129.007,57.819z");
+    			add_location(path6, file$3, 96, 4, 3360);
+    			attr_dev(svg6, "width", "12");
+    			attr_dev(svg6, "height", "12");
+    			attr_dev(svg6, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg6, file$3, 92, 3, 3283);
     			attr_dev(button6, "class", "pwt-date-time-arrow");
-    			add_location(button6, file$3, 41, 2, 954);
+    			add_location(button6, file$3, 89, 2, 3190);
+    			add_location(span3, file$3, 101, 2, 3640);
+    			attr_dev(path7, "d", "M220.088,57.667l-99.671,99.695L20.746,57.655c-4.752-4.752-12.439-4.752-17.191,0\n\t\t\t\t\tc-4.74,4.752-4.74,12.451,0,17.203l108.261,108.297l0,0l0,0c4.74,4.752,12.439,4.752,17.179,0L237.256,74.859\n\t\t\t\t\tc4.74-4.752,4.74-12.463,0-17.215C232.528,52.915,224.828,52.915,220.088,57.667z");
+    			add_location(path7, file$3, 111, 4, 3854);
+    			attr_dev(svg7, "width", "12");
+    			attr_dev(svg7, "height", "12");
+    			attr_dev(svg7, "viewBox", "0 0 240.811 240.811");
+    			add_location(svg7, file$3, 107, 3, 3778);
     			attr_dev(button7, "class", "pwt-date-time-arrow");
-    			add_location(button7, file$3, 45, 2, 1028);
-    			attr_dev(div3, "class", "pwt-date-time-meridian");
-    			add_location(div3, file$3, 40, 1, 915);
+    			add_location(button7, file$3, 104, 2, 3682);
+    			attr_dev(div3, "class", "pwt-date-time-section pwt-date-time-meridian");
+    			add_location(div3, file$3, 88, 1, 3129);
     			attr_dev(div4, "class", "pwt-date-time");
     			add_location(div4, file$3, 0, 0, 0);
 
@@ -7108,7 +7196,9 @@ this.zerounip = (function () {
     				listen_dev(button2, "click", ctx.click_handler_2, false, false, false),
     				listen_dev(button3, "click", ctx.click_handler_3, false, false, false),
     				listen_dev(button4, "click", ctx.click_handler_4, false, false, false),
-    				listen_dev(button5, "click", ctx.click_handler_5, false, false, false)
+    				listen_dev(button5, "click", ctx.click_handler_5, false, false, false),
+    				listen_dev(button6, "click", ctx.click_handler_6, false, false, false),
+    				listen_dev(button7, "click", ctx.click_handler_7, false, false, false)
     			];
     		},
     		l: function claim(nodes) {
@@ -7118,34 +7208,57 @@ this.zerounip = (function () {
     			insert_dev(target, div4, anchor);
     			append_dev(div4, div0);
     			append_dev(div0, button0);
-    			append_dev(div0, t1);
+    			append_dev(button0, svg0);
+    			append_dev(svg0, path0);
+    			append_dev(div0, t0);
+    			append_dev(div0, span0);
+    			append_dev(span0, t1);
     			append_dev(div0, t2);
-    			append_dev(div0, t3);
     			append_dev(div0, button1);
-    			append_dev(div4, t5);
+    			append_dev(button1, svg1);
+    			append_dev(svg1, path1);
+    			append_dev(div4, t3);
     			append_dev(div4, div1);
     			append_dev(div1, button2);
-    			append_dev(div1, t7);
-    			append_dev(div1, t8);
-    			append_dev(div1, t9);
+    			append_dev(button2, svg2);
+    			append_dev(svg2, path2);
+    			append_dev(div1, t4);
+    			append_dev(div1, span1);
+    			append_dev(span1, t5);
+    			append_dev(div1, t6);
     			append_dev(div1, button3);
-    			append_dev(div4, t11);
+    			append_dev(button3, svg3);
+    			append_dev(svg3, path3);
+    			append_dev(div4, t7);
     			append_dev(div4, div2);
     			append_dev(div2, button4);
-    			append_dev(div2, t13);
-    			append_dev(div2, t14);
-    			append_dev(div2, t15);
+    			append_dev(button4, svg4);
+    			append_dev(svg4, path4);
+    			append_dev(div2, t8);
+    			append_dev(div2, span2);
+    			append_dev(span2, t9);
+    			append_dev(div2, t10);
     			append_dev(div2, button5);
-    			append_dev(div4, t17);
+    			append_dev(button5, svg5);
+    			append_dev(svg5, path5);
+    			append_dev(div4, t11);
     			append_dev(div4, div3);
     			append_dev(div3, button6);
-    			append_dev(div3, t19);
+    			append_dev(button6, svg6);
+    			append_dev(svg6, path6);
+    			append_dev(div3, t12);
+    			append_dev(div3, span3);
+    			append_dev(span3, t13);
+    			append_dev(div3, t14);
     			append_dev(div3, button7);
+    			append_dev(button7, svg7);
+    			append_dev(svg7, path7);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.currentHour) set_data_dev(t2, ctx.currentHour);
-    			if (changed.currentMinute) set_data_dev(t8, ctx.currentMinute);
-    			if (changed.currentSecond) set_data_dev(t14, ctx.currentSecond);
+    			if (changed.currentHour) set_data_dev(t1, ctx.currentHour);
+    			if (changed.currentMinute) set_data_dev(t5, ctx.currentMinute);
+    			if (changed.currentSecond) set_data_dev(t9, ctx.currentSecond);
+    			if (changed.currentMeridian) set_data_dev(t13, ctx.currentMeridian);
     		},
     		i: noop,
     		o: noop,
@@ -7172,14 +7285,23 @@ this.zerounip = (function () {
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	const dispatch = createEventDispatcher();
     	let { selectedUnix } = $$props;
+    	let tempDate = $dateObject;
 
     	const updateTime = function (mode, direction) {
     		let selectedObj = new $dateObject(selectedUnix);
 
-    		if (direction === "up") {
-    			selectedObj = selectedObj.add(mode, 1).clone();
+    		if (mode === "meridian") {
+    			if (currentGregorianMeridian === "PM") {
+    				selectedObj = selectedObj.add("hour", 12).clone();
+    			} else {
+    				selectedObj = selectedObj.subtract("hour", 12).clone();
+    			}
     		} else {
-    			selectedObj = selectedObj.subtract(mode, 1).clone();
+    			if (direction === "up") {
+    				selectedObj = selectedObj.add(mode, 1).clone();
+    			} else {
+    				selectedObj = selectedObj.subtract(mode, 1).clone();
+    			}
     		}
 
     		selectDate(selectedObj);
@@ -7201,6 +7323,8 @@ this.zerounip = (function () {
     	const click_handler_3 = () => updateTime("minute", "down");
     	const click_handler_4 = () => updateTime("second", "up");
     	const click_handler_5 = () => updateTime("second", "down");
+    	const click_handler_6 = () => updateTime("meridian", "up");
+    	const click_handler_7 = () => updateTime("meridian", "down");
 
     	$$self.$set = $$props => {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
@@ -7209,28 +7333,36 @@ this.zerounip = (function () {
     	$$self.$capture_state = () => {
     		return {
     			selectedUnix,
+    			tempDate,
     			currentHour,
     			$dateObject,
     			currentMinute,
-    			currentSecond
+    			currentSecond,
+    			currentMeridian,
+    			currentGregorianMeridian
     		};
     	};
 
     	$$self.$inject_state = $$props => {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
+    		if ("tempDate" in $$props) $$invalidate("tempDate", tempDate = $$props.tempDate);
     		if ("currentHour" in $$props) $$invalidate("currentHour", currentHour = $$props.currentHour);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("currentMinute" in $$props) $$invalidate("currentMinute", currentMinute = $$props.currentMinute);
     		if ("currentSecond" in $$props) $$invalidate("currentSecond", currentSecond = $$props.currentSecond);
+    		if ("currentMeridian" in $$props) $$invalidate("currentMeridian", currentMeridian = $$props.currentMeridian);
+    		if ("currentGregorianMeridian" in $$props) currentGregorianMeridian = $$props.currentGregorianMeridian;
     	};
 
     	let currentHour;
     	let currentMinute;
     	let currentSecond;
+    	let currentMeridian;
+    	let currentGregorianMeridian;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, tempDate: 1 }) => {
     		if (changed.$dateObject || changed.selectedUnix) {
-    			 $$invalidate("currentHour", currentHour = new $dateObject(selectedUnix).hour());
+    			 $$invalidate("currentHour", currentHour = new $dateObject(selectedUnix).format("hh"));
     		}
 
     		if (changed.$dateObject || changed.selectedUnix) {
@@ -7240,6 +7372,14 @@ this.zerounip = (function () {
     		if (changed.$dateObject || changed.selectedUnix) {
     			 $$invalidate("currentSecond", currentSecond = new $dateObject(selectedUnix).second());
     		}
+
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("currentMeridian", currentMeridian = new $dateObject(selectedUnix).format("a"));
+    		}
+
+    		if (changed.tempDate || changed.selectedUnix) {
+    			 currentGregorianMeridian = new tempDate(selectedUnix).toLocale("en").format("a");
+    		}
     	};
 
     	return {
@@ -7248,12 +7388,15 @@ this.zerounip = (function () {
     		currentHour,
     		currentMinute,
     		currentSecond,
+    		currentMeridian,
     		click_handler,
     		click_handler_1,
     		click_handler_2,
     		click_handler_3,
     		click_handler_4,
-    		click_handler_5
+    		click_handler_5,
+    		click_handler_6,
+    		click_handler_7
     	};
     }
 
@@ -7289,7 +7432,78 @@ this.zerounip = (function () {
     /* src/components/Navigator.svelte generated by Svelte v3.15.0 */
     const file$4 = "src/components/Navigator.svelte";
 
-    // (29:2) {#if viewMode === 'year'}
+    // (2:0) {#if viewMode !== 'time'}
+    function create_if_block_8(ctx) {
+    	let button0;
+    	let svg0;
+    	let path0;
+    	let t;
+    	let button1;
+    	let svg1;
+    	let path1;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button0 = element("button");
+    			svg0 = svg_element("svg");
+    			path0 = svg_element("path");
+    			t = space();
+    			button1 = element("button");
+    			svg1 = svg_element("svg");
+    			path1 = svg_element("path");
+    			attr_dev(path0, "d", "M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875\n\t\t\t\tC5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126\n\t\t\t\tc0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z");
+    			add_location(path0, file$4, 9, 3, 186);
+    			attr_dev(svg0, "width", "12");
+    			attr_dev(svg0, "height", "12");
+    			attr_dev(svg0, "viewBox", "0 0 24 24");
+    			add_location(svg0, file$4, 5, 2, 124);
+    			attr_dev(button0, "class", "pwt-date-navigator-prev");
+    			add_location(button0, file$4, 2, 1, 60);
+    			attr_dev(path1, "d", "M18.401,24c-0.122,0-0.24-0.044-0.331-0.125L5.495,12.748c-0.03-0.027-0.058-0.055-0.084-0.084\n\t\t\t\tc-0.366-0.413-0.329-1.047,0.083-1.412L18.069,0.125C18.161,0.044,18.279,0,18.401,0c0.143,0,0.28,0.062,0.375,0.169\n\t\t\t\tc0.182,0.206,0.163,0.523-0.043,0.705L6.157,12l12.575,11.125c0.206,0.183,0.226,0.5,0.043,0.706C18.68,23.939,18.544,24,18.401,24\n\t\t\t\tz");
+    			add_location(path1, file$4, 21, 3, 681);
+    			attr_dev(svg1, "width", "12");
+    			attr_dev(svg1, "height", "12");
+    			attr_dev(svg1, "viewBox", "0 0 24 24");
+    			add_location(svg1, file$4, 17, 2, 619);
+    			attr_dev(button1, "class", "pwt-date-navigator-next");
+    			add_location(button1, file$4, 14, 1, 553);
+
+    			dispose = [
+    				listen_dev(button0, "click", ctx.prev, false, false, false),
+    				listen_dev(button1, "click", ctx.next, false, false, false)
+    			];
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button0, anchor);
+    			append_dev(button0, svg0);
+    			append_dev(svg0, path0);
+    			insert_dev(target, t, anchor);
+    			insert_dev(target, button1, anchor);
+    			append_dev(button1, svg1);
+    			append_dev(svg1, path1);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button0);
+    			if (detaching) detach_dev(t);
+    			if (detaching) detach_dev(button1);
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_8.name,
+    		type: "if",
+    		source: "(2:0) {#if viewMode !== 'time'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (31:2) {#if viewMode === 'year'}
     function create_if_block_6(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7345,14 +7559,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_6.name,
     		type: "if",
-    		source: "(29:2) {#if viewMode === 'year'}",
+    		source: "(31:2) {#if viewMode === 'year'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (30:3) {#if visible}
+    // (32:3) {#if visible}
     function create_if_block_7(ctx) {
     	let button;
     	let t0;
@@ -7371,7 +7585,7 @@ this.zerounip = (function () {
     			t1 = text(" - ");
     			t2 = text(t2_value);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 30, 4, 1125);
+    			add_location(button, file$4, 32, 4, 1159);
     			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -7412,14 +7626,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_7.name,
     		type: "if",
-    		source: "(30:3) {#if visible}",
+    		source: "(32:3) {#if visible}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (40:2) {#if viewMode === 'month'}
+    // (42:2) {#if viewMode === 'month'}
     function create_if_block_4(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7475,14 +7689,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(40:2) {#if viewMode === 'month'}",
+    		source: "(42:2) {#if viewMode === 'month'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (41:3) {#if visible}
+    // (43:3) {#if visible}
     function create_if_block_5(ctx) {
     	let button;
     	let t;
@@ -7496,7 +7710,7 @@ this.zerounip = (function () {
     			button = element("button");
     			t = text(ctx.selectedYear);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 41, 4, 1425);
+    			add_location(button, file$4, 43, 4, 1459);
     			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -7534,14 +7748,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(41:3) {#if visible}",
+    		source: "(43:3) {#if visible}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (51:2) {#if viewMode === 'date'}
+    // (53:2) {#if viewMode === 'date'}
     function create_if_block_2$1(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7597,14 +7811,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(51:2) {#if viewMode === 'date'}",
+    		source: "(53:2) {#if viewMode === 'date'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (52:3) {#if visible}
+    // (54:3) {#if visible}
     function create_if_block_3$1(ctx) {
     	let button;
     	let t0;
@@ -7622,7 +7836,7 @@ this.zerounip = (function () {
     			t1 = space();
     			t2 = text(ctx.selectedMonth);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 52, 4, 1708);
+    			add_location(button, file$4, 54, 4, 1742);
     			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -7663,14 +7877,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_3$1.name,
     		type: "if",
-    		source: "(52:3) {#if visible}",
+    		source: "(54:3) {#if visible}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (63:2) {#if viewMode === 'time'}
+    // (65:2) {#if viewMode === 'time'}
     function create_if_block$3(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7726,14 +7940,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(63:2) {#if viewMode === 'time'}",
+    		source: "(65:2) {#if viewMode === 'time'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (64:3) {#if visible}
+    // (66:3) {#if visible}
     function create_if_block_1$1(ctx) {
     	let button;
     	let t0;
@@ -7751,7 +7965,7 @@ this.zerounip = (function () {
     			t1 = space();
     			t2 = text(ctx.selectedDate);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 64, 4, 2024);
+    			add_location(button, file$4, 66, 4, 2058);
     			dispose = listen_dev(button, "click", ctx.click_handler_3, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -7792,7 +8006,7 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(64:3) {#if visible}",
+    		source: "(66:3) {#if visible}",
     		ctx
     	});
 
@@ -7801,123 +8015,76 @@ this.zerounip = (function () {
 
     function create_fragment$4(ctx) {
     	let div1;
-    	let button0;
-    	let svg0;
-    	let path0;
     	let t0;
-    	let button1;
-    	let svg1;
-    	let path1;
-    	let t1;
     	let div0;
+    	let t1;
     	let t2;
     	let t3;
-    	let t4;
     	let current;
-    	let dispose;
-    	let if_block0 = ctx.viewMode === "year" && create_if_block_6(ctx);
-    	let if_block1 = ctx.viewMode === "month" && create_if_block_4(ctx);
-    	let if_block2 = ctx.viewMode === "date" && create_if_block_2$1(ctx);
-    	let if_block3 = ctx.viewMode === "time" && create_if_block$3(ctx);
+    	let if_block0 = ctx.viewMode !== "time" && create_if_block_8(ctx);
+    	let if_block1 = ctx.viewMode === "year" && create_if_block_6(ctx);
+    	let if_block2 = ctx.viewMode === "month" && create_if_block_4(ctx);
+    	let if_block3 = ctx.viewMode === "date" && create_if_block_2$1(ctx);
+    	let if_block4 = ctx.viewMode === "time" && create_if_block$3(ctx);
 
     	const block = {
     		c: function create() {
     			div1 = element("div");
-    			button0 = element("button");
-    			svg0 = svg_element("svg");
-    			path0 = svg_element("path");
-    			t0 = space();
-    			button1 = element("button");
-    			svg1 = svg_element("svg");
-    			path1 = svg_element("path");
-    			t1 = space();
-    			div0 = element("div");
     			if (if_block0) if_block0.c();
-    			t2 = space();
+    			t0 = space();
+    			div0 = element("div");
     			if (if_block1) if_block1.c();
-    			t3 = space();
+    			t1 = space();
     			if (if_block2) if_block2.c();
-    			t4 = space();
+    			t2 = space();
     			if (if_block3) if_block3.c();
-    			attr_dev(path0, "d", "M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875\n\t\t\t\tC5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126\n\t\t\t\tc0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z");
-    			add_location(path0, file$4, 8, 3, 160);
-    			attr_dev(svg0, "width", "12");
-    			attr_dev(svg0, "height", "12");
-    			attr_dev(svg0, "viewBox", "0 0 24 24");
-    			add_location(svg0, file$4, 4, 2, 98);
-    			attr_dev(button0, "class", "pwt-date-navigator-prev");
-    			add_location(button0, file$4, 1, 1, 34);
-    			attr_dev(path1, "d", "M18.401,24c-0.122,0-0.24-0.044-0.331-0.125L5.495,12.748c-0.03-0.027-0.058-0.055-0.084-0.084\n\t\t\t\tc-0.366-0.413-0.329-1.047,0.083-1.412L18.069,0.125C18.161,0.044,18.279,0,18.401,0c0.143,0,0.28,0.062,0.375,0.169\n\t\t\t\tc0.182,0.206,0.163,0.523-0.043,0.705L6.157,12l12.575,11.125c0.206,0.183,0.226,0.5,0.043,0.706C18.68,23.939,18.544,24,18.401,24\n\t\t\t\tz");
-    			add_location(path1, file$4, 20, 3, 655);
-    			attr_dev(svg1, "width", "12");
-    			attr_dev(svg1, "height", "12");
-    			attr_dev(svg1, "viewBox", "0 0 24 24");
-    			add_location(svg1, file$4, 16, 2, 593);
-    			attr_dev(button1, "class", "pwt-date-navigator-next");
-    			add_location(button1, file$4, 13, 1, 527);
+    			t3 = space();
+    			if (if_block4) if_block4.c();
     			attr_dev(div0, "class", "pwt-date-navigator-center");
-    			add_location(div0, file$4, 26, 1, 1034);
+    			add_location(div0, file$4, 28, 1, 1068);
     			attr_dev(div1, "class", "pwt-date-navigator");
     			add_location(div1, file$4, 0, 0, 0);
-
-    			dispose = [
-    				listen_dev(button0, "click", ctx.prev, false, false, false),
-    				listen_dev(button1, "click", ctx.next, false, false, false)
-    			];
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
-    			append_dev(div1, button0);
-    			append_dev(button0, svg0);
-    			append_dev(svg0, path0);
+    			if (if_block0) if_block0.m(div1, null);
     			append_dev(div1, t0);
-    			append_dev(div1, button1);
-    			append_dev(button1, svg1);
-    			append_dev(svg1, path1);
-    			append_dev(div1, t1);
     			append_dev(div1, div0);
-    			if (if_block0) if_block0.m(div0, null);
-    			append_dev(div0, t2);
     			if (if_block1) if_block1.m(div0, null);
-    			append_dev(div0, t3);
+    			append_dev(div0, t1);
     			if (if_block2) if_block2.m(div0, null);
-    			append_dev(div0, t4);
+    			append_dev(div0, t2);
     			if (if_block3) if_block3.m(div0, null);
+    			append_dev(div0, t3);
+    			if (if_block4) if_block4.m(div0, null);
     			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (ctx.viewMode === "year") {
+    			if (ctx.viewMode !== "time") {
     				if (if_block0) {
     					if_block0.p(changed, ctx);
-    					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_6(ctx);
+    					if_block0 = create_if_block_8(ctx);
     					if_block0.c();
-    					transition_in(if_block0, 1);
-    					if_block0.m(div0, t2);
+    					if_block0.m(div1, t0);
     				}
     			} else if (if_block0) {
-    				group_outros();
-
-    				transition_out(if_block0, 1, 1, () => {
-    					if_block0 = null;
-    				});
-
-    				check_outros();
+    				if_block0.d(1);
+    				if_block0 = null;
     			}
 
-    			if (ctx.viewMode === "month") {
+    			if (ctx.viewMode === "year") {
     				if (if_block1) {
     					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
     				} else {
-    					if_block1 = create_if_block_4(ctx);
+    					if_block1 = create_if_block_6(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
-    					if_block1.m(div0, t3);
+    					if_block1.m(div0, t1);
     				}
     			} else if (if_block1) {
     				group_outros();
@@ -7929,15 +8096,15 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			if (ctx.viewMode === "date") {
+    			if (ctx.viewMode === "month") {
     				if (if_block2) {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_2$1(ctx);
+    					if_block2 = create_if_block_4(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
-    					if_block2.m(div0, t4);
+    					if_block2.m(div0, t2);
     				}
     			} else if (if_block2) {
     				group_outros();
@@ -7949,15 +8116,15 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			if (ctx.viewMode === "time") {
+    			if (ctx.viewMode === "date") {
     				if (if_block3) {
     					if_block3.p(changed, ctx);
     					transition_in(if_block3, 1);
     				} else {
-    					if_block3 = create_if_block$3(ctx);
+    					if_block3 = create_if_block_2$1(ctx);
     					if_block3.c();
     					transition_in(if_block3, 1);
-    					if_block3.m(div0, null);
+    					if_block3.m(div0, t3);
     				}
     			} else if (if_block3) {
     				group_outros();
@@ -7968,20 +8135,40 @@ this.zerounip = (function () {
 
     				check_outros();
     			}
+
+    			if (ctx.viewMode === "time") {
+    				if (if_block4) {
+    					if_block4.p(changed, ctx);
+    					transition_in(if_block4, 1);
+    				} else {
+    					if_block4 = create_if_block$3(ctx);
+    					if_block4.c();
+    					transition_in(if_block4, 1);
+    					if_block4.m(div0, null);
+    				}
+    			} else if (if_block4) {
+    				group_outros();
+
+    				transition_out(if_block4, 1, 1, () => {
+    					if_block4 = null;
+    				});
+
+    				check_outros();
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(if_block0);
     			transition_in(if_block1);
     			transition_in(if_block2);
     			transition_in(if_block3);
+    			transition_in(if_block4);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(if_block0);
     			transition_out(if_block1);
     			transition_out(if_block2);
     			transition_out(if_block3);
+    			transition_out(if_block4);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -7990,7 +8177,7 @@ this.zerounip = (function () {
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
     			if (if_block3) if_block3.d();
-    			run_all(dispose);
+    			if (if_block4) if_block4.d();
     		}
     	};
 
