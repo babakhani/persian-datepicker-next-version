@@ -45,8 +45,6 @@
 	import { flip } from 'svelte/animate'
 	import { time, elapsed, countable } from '../stores.js'
 	import { config, dateObject } from '../stores.js'
-	import { fade, slide } from 'svelte/transition'
-	import { elasticOut } from 'svelte/easing'
 
 	function fadeOut(node, { duration, delay }) {
 		return {

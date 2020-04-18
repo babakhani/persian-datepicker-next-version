@@ -66,8 +66,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import { config, dateObject } from '../stores.js'
-  import { fade } from 'svelte/transition'
-	import { elasticOut } from 'svelte/easing'
 
 	function fadeOut(node, { duration, delay }) {
 		return {

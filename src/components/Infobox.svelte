@@ -13,7 +13,6 @@
 	import { slide, fly } from 'svelte/transition'
 	import { quintOut } from 'svelte/easing'
 	import { config, dateObject } from '../stores.js'
-	import { fade } from 'svelte/transition'
 
 	function fadeOut(node, { duration, delay, offset }) {
 		return {
