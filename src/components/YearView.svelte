@@ -94,7 +94,7 @@
 			height: 25%; 
 			vertical-align: middle;
 			text-align: center;
-			float: right;
+			float: left;
 			display: block;
 			position: relative;
 			cursor: pointer;

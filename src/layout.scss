@@ -3,11 +3,12 @@
   font-family: "IRANSansWeb", tahoma;
   direction: ltr;
   padding: 10px;
+  color: #333333;
   border: 1px solid #ededed;
   box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .5);
   position: relative;
-  width: 328px;
-  height: 490px;
+  width: 300px;
+  height: 460px;
   border-radius: 6px;
   overflow: hidden;
   margin: 0 auto;
@@ -34,7 +35,10 @@
   .pwt-date-view {
     background: white;
     right: 0;
-    left: 0; width: 100%;
+    left: 0; 
+    width: calc(100% - 20px);
+    padding-right: 10px;
+    padding-left: 10px;
     bottom: 40px;
     top: 140px;
     height: calc(100% - 160px);
@@ -50,7 +54,9 @@
   }
 
   .pwt-date-info {
-    width: 100%;
+    width: calc(100% - 20px);
+    padding-right: 10px;
+    padding-left: 10px;
     right: 0;
     left: 0;
     top: 0;
@@ -58,15 +64,19 @@
   }
 
   .pwt-date-navigator {
+    width: calc(100% - 20px);
+    padding-right: 10px;
+    padding-left: 10px;
     top: 100px;
     height: 48px;
     right: 0;
     left: 0;
-    width: 100%;
   }
   .pwt-date-year-view,
   .pwt-date-month-view {
     padding-top: 20px;
+    padding-right: 10px;
+    padding-left: 10px;
     > div {
       height: 48px;
       > span {
@@ -78,8 +88,7 @@
     height: calc(100% - 200px);
     bottom: 40px;
     table {
-      width: calc(100% - 20px);
-      margin: 0 10px;
+      width: 100%;
       border-spacing: 0;
     }
     tr,
@@ -105,7 +114,7 @@
         border-radius: 100px;
         width: 38px;
         height: 38px;
-        line-height: 40px;
+        line-height: 44px;
       }
     }
   }

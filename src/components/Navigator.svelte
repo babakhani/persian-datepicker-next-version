@@ -2,7 +2,7 @@
 {#if viewMode !== 'time'}
 	<button 
 		class="pwt-date-navigator-prev"
-		on:click={prev}>
+		on:click={next}>
 		<svg 
 			width="12"
 			height="12"
@@ -14,7 +14,7 @@
 	</button>
 	<button 
 		class="pwt-date-navigator-next"
-		on:click="{next}">
+		on:click="{prev}">
 		<svg 
 			width="12"
 			height="12"
@@ -57,8 +57,8 @@
 					in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
 					class="pwt-date-navigator-button"
 					on:click={() => setViewMode("month")}>
-					{selectedYear}
 					{selectedMonth}
+					{visualYear}
 				</button>
 			{/if}
 		{/if}
@@ -117,6 +117,7 @@
 	function prev(payload) { dispatch('prev', payload) }
 
 	$: selectedYear = new $dateObject(viewUnix).year()
+	$: visualYear = new $dateObject(viewUnix).format('YYYY')
 	$: selectedMonth = new $dateObject(viewUnix).format('MMMM')
 	$: selectedDate = new $dateObject(viewUnix).format('DD')
 
@@ -144,13 +145,6 @@
 
 <style global lang="scss">
 	@import './theme.scss';
-	.pwt-animated {
-		display: block;
-		//border:2px dashed red !important;
-		position: absolute;
-		//opacity: 1;
-		//transition: all 400ms;
-	}
 	.pwt-date-navigator {
 		height: 60px;
 		line-height: 60px;
@@ -173,7 +167,7 @@
 				width: 80%;
 				margin: 0;
 				right: auto;
-				left: 10%;
+				left: 10px;
 				top: 5px;
 				bottom: 5px;
 			  text-align: left;
@@ -199,6 +193,7 @@
 			border: 0;
 			outline: 0;
       border-radius: 6px;
+
 			&:hover {
 				background: #f1f1f1;
 			}

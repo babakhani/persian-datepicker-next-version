@@ -6876,9 +6876,11 @@ this.zerounip = (function () {
     				let startDateOfView = day.subtract("day", startVisualDelta);
     				let j = 0;
 
-    				while (j < startVisualDelta) {
-    					days.push({});
-    					j++;
+    				if (startVisualDelta < 7) {
+    					while (j < startVisualDelta) {
+    						days.push({});
+    						j++;
+    					}
     				}
 
     				let i = 0;
@@ -7470,8 +7472,8 @@ this.zerounip = (function () {
     			add_location(button1, file$4, 14, 1, 553);
 
     			dispose = [
-    				listen_dev(button0, "click", ctx.prev, false, false, false),
-    				listen_dev(button1, "click", ctx.next, false, false, false)
+    				listen_dev(button0, "click", ctx.next, false, false, false),
+    				listen_dev(button1, "click", ctx.prev, false, false, false)
     			];
     		},
     		m: function mount(target, anchor) {
@@ -7832,9 +7834,9 @@ this.zerounip = (function () {
     	const block = {
     		c: function create() {
     			button = element("button");
-    			t0 = text(ctx.selectedYear);
+    			t0 = text(ctx.selectedMonth);
     			t1 = space();
-    			t2 = text(ctx.selectedMonth);
+    			t2 = text(ctx.visualYear);
     			attr_dev(button, "class", "pwt-date-navigator-button");
     			add_location(button, file$4, 54, 4, 1742);
     			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
@@ -7847,8 +7849,8 @@ this.zerounip = (function () {
     			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (!current || changed.selectedYear) set_data_dev(t0, ctx.selectedYear);
-    			if (!current || changed.selectedMonth) set_data_dev(t2, ctx.selectedMonth);
+    			if (!current || changed.selectedMonth) set_data_dev(t0, ctx.selectedMonth);
+    			if (!current || changed.visualYear) set_data_dev(t2, ctx.visualYear);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -7965,7 +7967,7 @@ this.zerounip = (function () {
     			t1 = space();
     			t2 = text(ctx.selectedDate);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 66, 4, 2058);
+    			add_location(button, file$4, 66, 4, 2056);
     			dispose = listen_dev(button, "click", ctx.click_handler_3, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -8272,6 +8274,7 @@ this.zerounip = (function () {
     			transitionDirectionForward,
     			selectedYear,
     			$dateObject,
+    			visualYear,
     			selectedMonth,
     			selectedDate
     		};
@@ -8287,17 +8290,23 @@ this.zerounip = (function () {
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("visualYear" in $$props) $$invalidate("visualYear", visualYear = $$props.visualYear);
     		if ("selectedMonth" in $$props) $$invalidate("selectedMonth", selectedMonth = $$props.selectedMonth);
     		if ("selectedDate" in $$props) $$invalidate("selectedDate", selectedDate = $$props.selectedDate);
     	};
 
     	let selectedYear;
+    	let visualYear;
     	let selectedMonth;
     	let selectedDate;
 
     	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, selectedYear: 1, cachedViewUnix: 1 }) => {
     		if (changed.$dateObject || changed.viewUnix) {
     			 $$invalidate("selectedYear", selectedYear = new $dateObject(viewUnix).year());
+    		}
+
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 $$invalidate("visualYear", visualYear = new $dateObject(viewUnix).format("YYYY"));
     		}
 
     		if (changed.$dateObject || changed.viewUnix) {
@@ -8344,6 +8353,7 @@ this.zerounip = (function () {
     		startYear,
     		visible,
     		selectedYear,
+    		visualYear,
     		selectedMonth,
     		selectedDate,
     		click_handler,
@@ -8616,7 +8626,7 @@ this.zerounip = (function () {
     		}
 
     		if (changed.$dateObject || changed.selectedUnix) {
-    			 $$invalidate("otherPart", otherPart = new $dateObject(selectedUnix).format("LLLL"));
+    			 $$invalidate("otherPart", otherPart = new $dateObject(selectedUnix).format(" dddd DD MMMM"));
     		}
 
     		if (changed.otherPart || changed.selectedUnix || changed.cachedSelectedUnix) {

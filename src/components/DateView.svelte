@@ -132,9 +132,11 @@
 		let firstVisualDate = day.subtract('day', startVisualDelta)
 		let startDateOfView = day.subtract('day', startVisualDelta)
 		let j = 0
-		while (j < startVisualDelta) {
-			days.push({})
-			j++
+		if (startVisualDelta < 7) {
+			while (j < startVisualDelta) {
+				days.push({})
+				j++
+			}
 		}
 		let i = 0
 		while (i < daysInMonth) {
@@ -184,10 +186,6 @@
 
 <style global lang="scss">
 	@import './theme.scss';
-	.pwt-animated {
-		width: 100%;
-		height: 100%;
-	}
 	.pwt-date-view {
 		width: 100%;
 		height: 100%;

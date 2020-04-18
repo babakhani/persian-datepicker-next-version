@@ -23,7 +23,7 @@
 				transform: translate(0, ${transitionDirectionForward ?  '-' : ''}${offset - (eased * offset)}px);
 				`
 			}
-		};
+		}
 	}
 	function fadeIn(node, { duration, delay, offset }) {
 		return {
@@ -34,7 +34,7 @@
 				transform: translate(0, ${!transitionDirectionForward ?  '-' : ''}${offset - (eased * offset)}px);
 				`
 			}
-		};
+		}
 	}
 
 
@@ -44,7 +44,7 @@
 	let oldotherPart
 
 	$: yearPrt = new $dateObject(selectedUnix).format('YYYY')
-	$: otherPart = new $dateObject(selectedUnix).format('LLLL')
+	$: otherPart = new $dateObject(selectedUnix).format(' dddd DD MMMM')
 
 	let visible
 	let animateSpeed = 100
@@ -69,9 +69,6 @@
 	.pwt-date-info {
 		height: 40px;
 		border: 0;
-		width: auto;
-		padding-right: 10px;
-		padding-left: 10px;
 		background: $primarycolor;
 		color: white;
 		span {
@@ -82,7 +79,8 @@
 				font-size: .8em;
 			}
 			&:nth-child(2) {
-				font-size: 1.1em;
+				margin-top: .8em;
+				font-size: 1.4em;
 			}
 		}
 	}
