@@ -39,7 +39,7 @@
 	import { config, dateObject } from '../stores.js'
 
   const isSameDate = (a, b) => {
-    return a.format && a.format('YYYY/MM/DD') === b.format('YYYY/MM/DD')
+    return a.isSameDay && a.isSameDay(b)
 	}
 
 	const isDisable = (day) => {
@@ -76,9 +76,9 @@
     selectedDay = new $dateObject(selectedUnix).startOf('day')
 	});
 
-  let today = new $dateObject(todayUnix)
   let groupedDay = []
 
+  $: today = new $dateObject(todayUnix)
   $: currentViewMonth = new $dateObject(viewUnix).month()
   $: viewUnixDate = new $dateObject(viewUnix).format('MMMM YYYY')
 	$: {

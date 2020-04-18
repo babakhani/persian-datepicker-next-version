@@ -101,7 +101,6 @@
 				left: 10%;
 				top: 5px;
 				bottom: 5px;
-				background: #f1f1f1;
 				&:hover {
 					background: #f1f1f1;
 				}

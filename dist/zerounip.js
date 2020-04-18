@@ -6346,7 +6346,7 @@ this['persian-datepicker-next-version'] = (function () {
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
 
     	const isSameDate = (a, b) => {
-    		return a.format && a.format("YYYY/MM/DD") === b.format("YYYY/MM/DD");
+    		return a.isSameDay && a.isSameDay(b);
     	};
 
     	const isDisable = day => {
@@ -6384,7 +6384,6 @@ this['persian-datepicker-next-version'] = (function () {
     		$$invalidate("selectedDay", selectedDay = new $dateObject(selectedUnix).startOf("day"));
     	});
 
-    	let today = new $dateObject(todayUnix);
     	let groupedDay = [];
     	const writable_props = ["viewUnix", "selectedUnix", "todayUnix"];
 
@@ -6408,10 +6407,10 @@ this['persian-datepicker-next-version'] = (function () {
     			selectedUnix,
     			todayUnix,
     			selectedDay,
-    			today,
     			groupedDay,
     			$config,
     			$dateObject,
+    			today,
     			currentViewMonth,
     			viewUnixDate
     		};
@@ -6422,18 +6421,23 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     		if ("todayUnix" in $$props) $$invalidate("todayUnix", todayUnix = $$props.todayUnix);
     		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
-    		if ("today" in $$props) $$invalidate("today", today = $$props.today);
     		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
     		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("today" in $$props) $$invalidate("today", today = $$props.today);
     		if ("currentViewMonth" in $$props) $$invalidate("currentViewMonth", currentViewMonth = $$props.currentViewMonth);
     		if ("viewUnixDate" in $$props) viewUnixDate = $$props.viewUnixDate;
     	};
 
+    	let today;
     	let currentViewMonth;
     	let viewUnixDate;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1 }) => {
+    		if (changed.$dateObject || changed.todayUnix) {
+    			 $$invalidate("today", today = new $dateObject(todayUnix));
+    		}
+
     		if (changed.$dateObject || changed.viewUnix) {
     			 $$invalidate("currentViewMonth", currentViewMonth = new $dateObject(viewUnix).month());
     		}
@@ -6505,8 +6509,8 @@ this['persian-datepicker-next-version'] = (function () {
     		todayUnix,
     		selectDate,
     		selectedDay,
-    		today,
     		groupedDay,
+    		today,
     		currentViewMonth,
     		click_handler
     	};
