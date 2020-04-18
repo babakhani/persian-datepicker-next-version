@@ -6,45 +6,49 @@
 			width="20"
 			height="20"
 			viewBox="0 0 24 24">
-				<path d="M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875
-					C5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126
-					c0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z"/>
-	 </svg>
- </button>
- {#if visible}
-	 <div
-		 class="pwt-date-navigator-center">
-		 {#if viewMode === 'year'}
-			 <button 
-				 out:fadeOut="{{duration: animateSpeed}}" 
-				 in:fadeIn="{{duration: animateSpeed}}" 
-				 class="pwt-date-navigator-button"
-				 on:click={() => setViewMode("year")}>
-				 {startYear} - {startYear + 11}
-			 </button>
-		 {/if}
-		 {#if viewMode === 'month'}
-			 <button 
-				 out:fadeOut="{{duration: animateSpeed}}" 
-				 in:fadeIn="{{duration: animateSpeed}}" 
-				 class="pwt-date-navigator-button"
-				 on:click={() => setViewMode("year")}>
-				 {selectedYear}
-			 </button>
-		 {/if}
-		 {#if viewMode === 'date'}
-			 <button 
-				 out:fadeOut="{{duration: animateSpeed}}" 
-				 in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
-				 class="pwt-date-navigator-button pwt-animated"
-				 on:click={() => setViewMode("month")}>
-				 {selectedYear}
-				 {selectedMonth}
-			 </button>
-		 {/if}
-	 </div>
- {/if}
- <button 
+			<path d="M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875
+				C5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126
+				c0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z"/>
+		</svg>
+	</button>
+	<div
+		class="pwt-date-navigator-center">
+		{#if viewMode === 'year'}
+			{#if visible}
+				<button 
+					out:fadeOut="{{duration: animateSpeed}}" 
+					in:fadeIn="{{duration: animateSpeed}}" 
+					class="pwt-date-navigator-button"
+					on:click={() => setViewMode("year")}>
+					{startYear} - {startYear + 11}
+				</button>
+			{/if}
+		{/if}
+		{#if viewMode === 'month'}
+			{#if visible}
+				<button 
+					out:fadeOut="{{duration: animateSpeed}}" 
+					in:fadeIn="{{duration: animateSpeed}}" 
+					class="pwt-date-navigator-button"
+					on:click={() => setViewMode("year")}>
+					{selectedYear}
+				</button>
+			{/if}
+		{/if}
+		{#if viewMode === 'date'}
+			{#if visible}
+				<button 
+					out:fadeOut="{{duration: animateSpeed}}" 
+					in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
+					class="pwt-date-navigator-button"
+					on:click={() => setViewMode("month")}>
+					{selectedYear}
+					{selectedMonth}
+				</button>
+			{/if}
+		{/if}
+	</div>
+	<button 
 		class="pwt-date-navigator-next"
 		on:click="{next}">
 		<svg 

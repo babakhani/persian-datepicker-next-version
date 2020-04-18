@@ -5311,7 +5311,98 @@ this['persian-datepicker-next-version'] = (function () {
     	return child_ctx;
     }
 
-    // (2:2) {#each yearRange as year}
+    // (1:0) {#if visible}
+    function create_if_block(ctx) {
+    	let div;
+    	let div_intro;
+    	let div_outro;
+    	let current;
+    	let each_value = ctx.yearRange;
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(div, "class", "pwt-date-year-view");
+    			add_location(div, file, 1, 0, 14);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.currentYear || changed.yearRange || changed.select) {
+    				each_value = ctx.yearRange;
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(changed, child_ctx);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (div_outro) div_outro.end(1);
+    				if (!div_intro) div_intro = create_in_transition(div, ctx.fadeIn, { duration: animateSpeed });
+    				div_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (div_intro) div_intro.invalidate();
+    			div_outro = create_out_transition(div, ctx.fadeOut, { duration: animateSpeed });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks, detaching);
+    			if (detaching && div_outro) div_outro.end();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(1:0) {#if visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (6:2) {#each yearRange as year}
     function create_each_block(ctx) {
     	let div;
     	let span;
@@ -5331,9 +5422,9 @@ this['persian-datepicker-next-version'] = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(span, "class", "pwt-text");
-    			add_location(span, file, 5, 3, 161);
+    			add_location(span, file, 9, 3, 263);
     			toggle_class(div, "selected", ctx.currentYear === ctx.year);
-    			add_location(div, file, 2, 4, 65);
+    			add_location(div, file, 6, 4, 167);
 
     			dispose = listen_dev(
     				div,
@@ -5370,7 +5461,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(2:2) {#each yearRange as year}",
+    		source: "(6:2) {#each yearRange as year}",
     		ctx
     	});
 
@@ -5378,64 +5469,56 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     function create_fragment(ctx) {
-    	let div;
-    	let each_value = ctx.yearRange;
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-    	}
+    	let if_block_anchor;
+    	let current;
+    	let if_block = ctx.visible && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
-    			div = element("div");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			attr_dev(div, "class", "pwt-date-year-view");
-    			add_location(div, file, 0, 0, 0);
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(div, null);
-    			}
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (changed.currentYear || changed.yearRange || changed.select) {
-    				each_value = ctx.yearRange;
-    				let i;
-
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(changed, child_ctx);
-    					} else {
-    						each_blocks[i] = create_each_block(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(div, null);
-    					}
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
+    			} else if (if_block) {
+    				group_outros();
 
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
 
-    				each_blocks.length = each_value.length;
+    				check_outros();
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			destroy_each(each_blocks, detaching);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
 
@@ -5450,12 +5533,41 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
+    let animateSpeed = 100;
+
     function instance($$self, $$props, $$invalidate) {
     	let $dateObject;
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { selectedUnix } = $$props;
     	let { viewUnix } = $$props;
+
+    	function fadeOut(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				return `
+				transform: translate(${transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
+
+    	function fadeIn(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				return `
+				transform: translate(${!transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
+
     	const dispatch = createEventDispatcher();
 
     	function select(payload) {
@@ -5464,6 +5576,9 @@ this['persian-datepicker-next-version'] = (function () {
 
     	let yearRange;
     	let startYear;
+    	let visible = true;
+    	let cachedViewUnix = viewUnix;
+    	let transitionDirectionForward = true;
     	const writable_props = ["selectedUnix", "viewUnix"];
 
     	Object.keys($$props).forEach(key => {
@@ -5483,6 +5598,10 @@ this['persian-datepicker-next-version'] = (function () {
     			viewUnix,
     			yearRange,
     			startYear,
+    			visible,
+    			animateSpeed,
+    			cachedViewUnix,
+    			transitionDirectionForward,
     			currentYear,
     			$dateObject,
     			currentViewYear
@@ -5494,6 +5613,10 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
     		if ("yearRange" in $$props) $$invalidate("yearRange", yearRange = $$props.yearRange);
     		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
+    		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
+    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
+    		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
+    		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("currentYear" in $$props) $$invalidate("currentYear", currentYear = $$props.currentYear);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
@@ -5502,7 +5625,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let currentYear;
     	let currentViewYear;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, currentViewYear: 1, yearRange: 1, startYear: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, currentViewYear: 1, yearRange: 1, startYear: 1, cachedViewUnix: 1 }) => {
     		if (changed.$dateObject || changed.selectedUnix) {
     			 $$invalidate("currentYear", currentYear = new $dateObject(selectedUnix).year());
     		}
@@ -5511,7 +5634,7 @@ this['persian-datepicker-next-version'] = (function () {
     			 $$invalidate("currentViewYear", currentViewYear = new $dateObject(viewUnix).year());
     		}
 
-    		if (changed.currentViewYear || changed.yearRange || changed.startYear) {
+    		if (changed.currentViewYear || changed.yearRange || changed.startYear || changed.viewUnix || changed.cachedViewUnix) {
     			 {
     				$$invalidate("yearRange", yearRange = []);
     				$$invalidate("startYear", startYear = currentViewYear - currentViewYear % 12);
@@ -5521,6 +5644,22 @@ this['persian-datepicker-next-version'] = (function () {
     					yearRange.push(startYear + i);
     					i++;
     				}
+
+    				if (viewUnix > cachedViewUnix) {
+    					transitionDirectionForward = true;
+    				} else {
+    					transitionDirectionForward = false;
+    				}
+
+    				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
+    				$$invalidate("visible", visible = false);
+
+    				setTimeout(
+    					() => {
+    						$$invalidate("visible", visible = true);
+    					},
+    					200
+    				);
     			}
     		}
     	};
@@ -5528,8 +5667,11 @@ this['persian-datepicker-next-version'] = (function () {
     	return {
     		selectedUnix,
     		viewUnix,
+    		fadeOut,
+    		fadeIn,
     		select,
     		yearRange,
+    		visible,
     		currentYear,
     		click_handler
     	};
@@ -5586,7 +5728,98 @@ this['persian-datepicker-next-version'] = (function () {
     	return child_ctx;
     }
 
-    // (2:2) {#each monthRange as month, index}
+    // (1:0) {#if visible}
+    function create_if_block$1(ctx) {
+    	let div;
+    	let div_intro;
+    	let div_outro;
+    	let current;
+    	let each_value = ctx.monthRange;
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(div, "class", "pwt-date-month-view");
+    			add_location(div, file$1, 1, 1, 15);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.currentMonth || changed.currentViewYear || changed.currentSelectedYear || changed.select || changed.monthRange) {
+    				each_value = ctx.monthRange;
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$1(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(changed, child_ctx);
+    					} else {
+    						each_blocks[i] = create_each_block$1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (div_outro) div_outro.end(1);
+    				if (!div_intro) div_intro = create_in_transition(div, ctx.fadeIn, { duration: animateSpeed$1 });
+    				div_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (div_intro) div_intro.invalidate();
+    			div_outro = create_out_transition(div, ctx.fadeOut, { duration: animateSpeed$1 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks, detaching);
+    			if (detaching && div_outro) div_outro.end();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$1.name,
+    		type: "if",
+    		source: "(1:0) {#if visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (6:2) {#each monthRange as month, index}
     function create_each_block$1(ctx) {
     	let div;
     	let span;
@@ -5606,9 +5839,9 @@ this['persian-datepicker-next-version'] = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(span, "class", "pwt-text");
-    			add_location(span, file$1, 5, 3, 225);
+    			add_location(span, file$1, 9, 4, 325);
     			toggle_class(div, "selected", ctx.currentMonth - 1 === ctx.index && ctx.currentViewYear === ctx.currentSelectedYear);
-    			add_location(div, file$1, 2, 4, 75);
+    			add_location(div, file$1, 6, 3, 178);
     			dispose = listen_dev(div, "click", click_handler, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -5635,7 +5868,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(2:2) {#each monthRange as month, index}",
+    		source: "(6:2) {#each monthRange as month, index}",
     		ctx
     	});
 
@@ -5643,64 +5876,56 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     function create_fragment$1(ctx) {
-    	let div;
-    	let each_value = ctx.monthRange;
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
-    	}
+    	let if_block_anchor;
+    	let current;
+    	let if_block = ctx.visible && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
-    			div = element("div");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			attr_dev(div, "class", "pwt-date-month-view");
-    			add_location(div, file$1, 0, 0, 0);
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(div, null);
-    			}
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (changed.currentMonth || changed.currentViewYear || changed.currentSelectedYear || changed.select || changed.monthRange) {
-    				each_value = ctx.monthRange;
-    				let i;
-
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$1(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(changed, child_ctx);
-    					} else {
-    						each_blocks[i] = create_each_block$1(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(div, null);
-    					}
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block$1(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
+    			} else if (if_block) {
+    				group_outros();
 
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
 
-    				each_blocks.length = each_value.length;
+    				check_outros();
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			destroy_each(each_blocks, detaching);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
 
@@ -5715,18 +5940,50 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
+    let animateSpeed$1 = 100;
+
     function instance$1($$self, $$props, $$invalidate) {
     	let $dateObject;
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { selectedUnix } = $$props;
     	let { viewUnix } = $$props;
+
+    	function fadeOut(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				return `
+				transform: translate(${transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
+
+    	function fadeIn(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				return `
+				transform: translate(${!transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
+
     	const dispatch = createEventDispatcher();
 
     	function select(payload) {
     		dispatch("select", payload);
     	}
 
+    	let visible = true;
+    	let cachedViewUnix = viewUnix;
+    	let transitionDirectionForward = true;
     	const writable_props = ["selectedUnix", "viewUnix"];
 
     	Object.keys($$props).forEach(key => {
@@ -5744,6 +6001,10 @@ this['persian-datepicker-next-version'] = (function () {
     		return {
     			selectedUnix,
     			viewUnix,
+    			visible,
+    			animateSpeed: animateSpeed$1,
+    			cachedViewUnix,
+    			transitionDirectionForward,
     			monthRange,
     			$dateObject,
     			currentMonth,
@@ -5755,6 +6016,10 @@ this['persian-datepicker-next-version'] = (function () {
     	$$self.$inject_state = $$props => {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
+    		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
+    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$1 = $$props.animateSpeed);
+    		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
+    		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("monthRange" in $$props) $$invalidate("monthRange", monthRange = $$props.monthRange);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("currentMonth" in $$props) $$invalidate("currentMonth", currentMonth = $$props.currentMonth);
@@ -5767,7 +6032,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let currentSelectedYear;
     	let currentViewYear;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, cachedViewUnix: 1 }) => {
     		if (changed.$dateObject) {
     			 $$invalidate("monthRange", monthRange = new $dateObject().rangeName().months);
     		}
@@ -5783,12 +6048,35 @@ this['persian-datepicker-next-version'] = (function () {
     		if (changed.$dateObject || changed.viewUnix) {
     			 $$invalidate("currentViewYear", currentViewYear = new $dateObject(viewUnix).year());
     		}
+
+    		if (changed.viewUnix || changed.cachedViewUnix) {
+    			 {
+    				if (viewUnix > cachedViewUnix) {
+    					transitionDirectionForward = true;
+    				} else {
+    					transitionDirectionForward = false;
+    				}
+
+    				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
+    				$$invalidate("visible", visible = false);
+
+    				setTimeout(
+    					() => {
+    						$$invalidate("visible", visible = true);
+    					},
+    					200
+    				);
+    			}
+    		}
     	};
 
     	return {
     		selectedUnix,
     		viewUnix,
+    		fadeOut,
+    		fadeIn,
     		select,
+    		visible,
     		monthRange,
     		currentMonth,
     		currentSelectedYear,
@@ -5969,7 +6257,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (16:2) {#if visible}
-    function create_if_block(ctx) {
+    function create_if_block$2(ctx) {
     	let each_1_anchor;
     	let current;
     	let each_value = ctx.groupedDay;
@@ -6053,7 +6341,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block.name,
+    		id: create_if_block$2.name,
     		type: "if",
     		source: "(16:2) {#if visible}",
     		ctx
@@ -6294,7 +6582,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     			add_render_callback(() => {
     				if (tr_outro) tr_outro.end(1);
-    				if (!tr_intro) tr_intro = create_in_transition(tr, ctx.fadeIn, { duration: animateSpeed });
+    				if (!tr_intro) tr_intro = create_in_transition(tr, ctx.fadeIn, { duration: animateSpeed$2 });
     				tr_intro.start();
     			});
 
@@ -6302,7 +6590,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		o: function outro(local) {
     			if (tr_intro) tr_intro.invalidate();
-    			tr_outro = create_out_transition(tr, ctx.fadeOut, { duration: animateSpeed });
+    			tr_outro = create_out_transition(tr, ctx.fadeOut, { duration: animateSpeed$2 });
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -6330,7 +6618,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let t;
     	let current;
     	let if_block0 = ctx.groupedDay[1] && create_if_block_3(ctx);
-    	let if_block1 = ctx.visible && create_if_block(ctx);
+    	let if_block1 = ctx.visible && create_if_block$2(ctx);
 
     	const block = {
     		c: function create() {
@@ -6378,7 +6666,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
     				} else {
-    					if_block1 = create_if_block(ctx);
+    					if_block1 = create_if_block$2(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(table, null);
@@ -6420,7 +6708,7 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
-    let animateSpeed = 100;
+    let animateSpeed$2 = 100;
 
     function instance$2($$self, $$props, $$invalidate) {
     	let $config;
@@ -6523,7 +6811,7 @@ this['persian-datepicker-next-version'] = (function () {
     			selectedDay,
     			groupedDay,
     			visible,
-    			animateSpeed,
+    			animateSpeed: animateSpeed$2,
     			cachedViewUnix,
     			transitionDirectionForward,
     			$config,
@@ -6541,7 +6829,7 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
     		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
     		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
-    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
+    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$2 = $$props.animateSpeed);
     		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("$config" in $$props) config.set($config = $$props.$config);
@@ -6822,34 +7110,468 @@ this['persian-datepicker-next-version'] = (function () {
     /* src/components/Navigator.svelte generated by Svelte v3.15.0 */
     const file$4 = "src/components/Navigator.svelte";
 
-    // (14:1) {#if visible}
-    function create_if_block$1(ctx) {
-    	let div;
-    	let t0;
-    	let t1;
+    // (16:2) {#if viewMode === 'year'}
+    function create_if_block_4(ctx) {
+    	let if_block_anchor;
     	let current;
-    	let if_block0 = ctx.viewMode === "year" && create_if_block_3$1(ctx);
-    	let if_block1 = ctx.viewMode === "month" && create_if_block_2$1(ctx);
-    	let if_block2 = ctx.viewMode === "date" && create_if_block_1$1(ctx);
+    	let if_block = ctx.visible && create_if_block_5(ctx);
 
     	const block = {
     		c: function create() {
-    			div = element("div");
-    			if (if_block0) if_block0.c();
-    			t0 = space();
-    			if (if_block1) if_block1.c();
-    			t1 = space();
-    			if (if_block2) if_block2.c();
-    			attr_dev(div, "class", "pwt-date-navigator-center");
-    			add_location(div, file$4, 14, 2, 546);
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			if (if_block0) if_block0.m(div, null);
-    			append_dev(div, t0);
-    			if (if_block1) if_block1.m(div, null);
-    			append_dev(div, t1);
-    			if (if_block2) if_block2.m(div, null);
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block_5(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4.name,
+    		type: "if",
+    		source: "(16:2) {#if viewMode === 'year'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (17:3) {#if visible}
+    function create_if_block_5(ctx) {
+    	let button;
+    	let t0;
+    	let t1;
+    	let t2_value = ctx.startYear + 11 + "";
+    	let t2;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t0 = text(ctx.startYear);
+    			t1 = text(" - ");
+    			t2 = text(t2_value);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 17, 4, 618);
+    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.startYear) set_data_dev(t0, ctx.startYear);
+    			if ((!current || changed.startYear) && t2_value !== (t2_value = ctx.startYear + 11 + "")) set_data_dev(t2, t2_value);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_5.name,
+    		type: "if",
+    		source: "(17:3) {#if visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (27:2) {#if viewMode === 'month'}
+    function create_if_block_2$1(ctx) {
+    	let if_block_anchor;
+    	let current;
+    	let if_block = ctx.visible && create_if_block_3$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block_3$1(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$1.name,
+    		type: "if",
+    		source: "(27:2) {#if viewMode === 'month'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (28:3) {#if visible}
+    function create_if_block_3$1(ctx) {
+    	let button;
+    	let t;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t = text(ctx.selectedYear);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 28, 4, 918);
+    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.selectedYear) set_data_dev(t, ctx.selectedYear);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3$1.name,
+    		type: "if",
+    		source: "(28:3) {#if visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (38:2) {#if viewMode === 'date'}
+    function create_if_block$3(ctx) {
+    	let if_block_anchor;
+    	let current;
+    	let if_block = ctx.visible && create_if_block_1$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block_1$1(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(38:2) {#if viewMode === 'date'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (39:3) {#if visible}
+    function create_if_block_1$1(ctx) {
+    	let button;
+    	let t0;
+    	let t1;
+    	let t2;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t0 = text(ctx.selectedYear);
+    			t1 = space();
+    			t2 = text(ctx.selectedMonth);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 39, 4, 1201);
+    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.selectedYear) set_data_dev(t0, ctx.selectedYear);
+    			if (!current || changed.selectedMonth) set_data_dev(t2, ctx.selectedMonth);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$1.name,
+    		type: "if",
+    		source: "(39:3) {#if visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$4(ctx) {
+    	let div1;
+    	let button0;
+    	let svg0;
+    	let path0;
+    	let t0;
+    	let div0;
+    	let t1;
+    	let t2;
+    	let t3;
+    	let button1;
+    	let svg1;
+    	let path1;
+    	let current;
+    	let dispose;
+    	let if_block0 = ctx.viewMode === "year" && create_if_block_4(ctx);
+    	let if_block1 = ctx.viewMode === "month" && create_if_block_2$1(ctx);
+    	let if_block2 = ctx.viewMode === "date" && create_if_block$3(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div1 = element("div");
+    			button0 = element("button");
+    			svg0 = svg_element("svg");
+    			path0 = svg_element("path");
+    			t0 = space();
+    			div0 = element("div");
+    			if (if_block0) if_block0.c();
+    			t1 = space();
+    			if (if_block1) if_block1.c();
+    			t2 = space();
+    			if (if_block2) if_block2.c();
+    			t3 = space();
+    			button1 = element("button");
+    			svg1 = svg_element("svg");
+    			path1 = svg_element("path");
+    			attr_dev(path0, "d", "M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875\n\t\t\t\tC5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126\n\t\t\t\tc0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z");
+    			add_location(path0, file$4, 8, 3, 160);
+    			attr_dev(svg0, "width", "20");
+    			attr_dev(svg0, "height", "20");
+    			attr_dev(svg0, "viewBox", "0 0 24 24");
+    			add_location(svg0, file$4, 4, 2, 98);
+    			attr_dev(button0, "class", "pwt-date-navigator-prev");
+    			add_location(button0, file$4, 1, 1, 34);
+    			attr_dev(div0, "class", "pwt-date-navigator-center");
+    			add_location(div0, file$4, 13, 1, 527);
+    			attr_dev(path1, "d", "M18.401,24c-0.122,0-0.24-0.044-0.331-0.125L5.495,12.748c-0.03-0.027-0.058-0.055-0.084-0.084\n\t\t\t\tc-0.366-0.413-0.329-1.047,0.083-1.412L18.069,0.125C18.161,0.044,18.279,0,18.401,0c0.143,0,0.28,0.062,0.375,0.169\n\t\t\t\tc0.182,0.206,0.163,0.523-0.043,0.705L6.157,12l12.575,11.125c0.206,0.183,0.226,0.5,0.043,0.706C18.68,23.939,18.544,24,18.401,24\n\t\t\t\tz");
+    			add_location(path1, file$4, 57, 3, 1605);
+    			attr_dev(svg1, "width", "20");
+    			attr_dev(svg1, "height", "20");
+    			attr_dev(svg1, "viewBox", "0 0 24 24");
+    			add_location(svg1, file$4, 53, 2, 1543);
+    			attr_dev(button1, "class", "pwt-date-navigator-next");
+    			add_location(button1, file$4, 50, 1, 1477);
+    			attr_dev(div1, "class", "pwt-date-navigator");
+    			add_location(div1, file$4, 0, 0, 0);
+
+    			dispose = [
+    				listen_dev(button0, "click", ctx.prev, false, false, false),
+    				listen_dev(button1, "click", ctx.next, false, false, false)
+    			];
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div1, anchor);
+    			append_dev(div1, button0);
+    			append_dev(button0, svg0);
+    			append_dev(svg0, path0);
+    			append_dev(div1, t0);
+    			append_dev(div1, div0);
+    			if (if_block0) if_block0.m(div0, null);
+    			append_dev(div0, t1);
+    			if (if_block1) if_block1.m(div0, null);
+    			append_dev(div0, t2);
+    			if (if_block2) if_block2.m(div0, null);
+    			append_dev(div1, t3);
+    			append_dev(div1, button1);
+    			append_dev(button1, svg1);
+    			append_dev(svg1, path1);
     			current = true;
     		},
     		p: function update(changed, ctx) {
@@ -6858,10 +7580,10 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block0.p(changed, ctx);
     					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_3$1(ctx);
+    					if_block0 = create_if_block_4(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
-    					if_block0.m(div, t0);
+    					if_block0.m(div0, t1);
     				}
     			} else if (if_block0) {
     				group_outros();
@@ -6881,7 +7603,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block1 = create_if_block_2$1(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
-    					if_block1.m(div, t1);
+    					if_block1.m(div0, t2);
     				}
     			} else if (if_block1) {
     				group_outros();
@@ -6898,10 +7620,10 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_1$1(ctx);
+    					if_block2 = create_if_block$3(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
-    					if_block2.m(div, null);
+    					if_block2.m(div0, null);
     				}
     			} else if (if_block2) {
     				group_outros();
@@ -6927,315 +7649,10 @@ this['persian-datepicker-next-version'] = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
+    			if (detaching) detach_dev(div1);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$1.name,
-    		type: "if",
-    		source: "(14:1) {#if visible}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (17:3) {#if viewMode === 'year'}
-    function create_if_block_3$1(ctx) {
-    	let button;
-    	let t0;
-    	let t1;
-    	let t2_value = ctx.startYear + 11 + "";
-    	let t2;
-    	let button_intro;
-    	let button_outro;
-    	let current;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			t0 = text(ctx.startYear);
-    			t1 = text(" - ");
-    			t2 = text(t2_value);
-    			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 17, 4, 622);
-    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t0);
-    			append_dev(button, t1);
-    			append_dev(button, t2);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (!current || changed.startYear) set_data_dev(t0, ctx.startYear);
-    			if ((!current || changed.startYear) && t2_value !== (t2_value = ctx.startYear + 11 + "")) set_data_dev(t2, t2_value);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			add_render_callback(() => {
-    				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$1 });
-    				button_intro.start();
-    			});
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$1 });
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching && button_outro) button_outro.end();
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_3$1.name,
-    		type: "if",
-    		source: "(17:3) {#if viewMode === 'year'}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (26:3) {#if viewMode === 'month'}
-    function create_if_block_2$1(ctx) {
-    	let button;
-    	let t;
-    	let button_intro;
-    	let button_outro;
-    	let current;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			t = text(ctx.selectedYear);
-    			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 26, 4, 898);
-    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (!current || changed.selectedYear) set_data_dev(t, ctx.selectedYear);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			add_render_callback(() => {
-    				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$1 });
-    				button_intro.start();
-    			});
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$1 });
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching && button_outro) button_outro.end();
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2$1.name,
-    		type: "if",
-    		source: "(26:3) {#if viewMode === 'month'}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (35:3) {#if viewMode === 'date'}
-    function create_if_block_1$1(ctx) {
-    	let button;
-    	let t0;
-    	let t1;
-    	let t2;
-    	let button_intro;
-    	let button_outro;
-    	let current;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			t0 = text(ctx.selectedYear);
-    			t1 = space();
-    			t2 = text(ctx.selectedMonth);
-    			attr_dev(button, "class", "pwt-date-navigator-button pwt-animated");
-    			add_location(button, file$4, 35, 4, 1157);
-    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t0);
-    			append_dev(button, t1);
-    			append_dev(button, t2);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (!current || changed.selectedYear) set_data_dev(t0, ctx.selectedYear);
-    			if (!current || changed.selectedMonth) set_data_dev(t2, ctx.selectedMonth);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			add_render_callback(() => {
-    				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$1, delay: 10 });
-    				button_intro.start();
-    			});
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$1 });
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching && button_outro) button_outro.end();
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1$1.name,
-    		type: "if",
-    		source: "(35:3) {#if viewMode === 'date'}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$4(ctx) {
-    	let div;
-    	let button0;
-    	let svg0;
-    	let path0;
-    	let t0;
-    	let t1;
-    	let button1;
-    	let svg1;
-    	let path1;
-    	let current;
-    	let dispose;
-    	let if_block = ctx.visible && create_if_block$1(ctx);
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			button0 = element("button");
-    			svg0 = svg_element("svg");
-    			path0 = svg_element("path");
-    			t0 = space();
-    			if (if_block) if_block.c();
-    			t1 = space();
-    			button1 = element("button");
-    			svg1 = svg_element("svg");
-    			path1 = svg_element("path");
-    			attr_dev(path0, "d", "M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875\n\t\t\t\t\tC5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126\n\t\t\t\t\tc0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z");
-    			add_location(path0, file$4, 8, 4, 161);
-    			attr_dev(svg0, "width", "20");
-    			attr_dev(svg0, "height", "20");
-    			attr_dev(svg0, "viewBox", "0 0 24 24");
-    			add_location(svg0, file$4, 4, 2, 98);
-    			attr_dev(button0, "class", "pwt-date-navigator-prev");
-    			add_location(button0, file$4, 1, 1, 34);
-    			attr_dev(path1, "d", "M18.401,24c-0.122,0-0.24-0.044-0.331-0.125L5.495,12.748c-0.03-0.027-0.058-0.055-0.084-0.084\n\t\t\t\tc-0.366-0.413-0.329-1.047,0.083-1.412L18.069,0.125C18.161,0.044,18.279,0,18.401,0c0.143,0,0.28,0.062,0.375,0.169\n\t\t\t\tc0.182,0.206,0.163,0.523-0.043,0.705L6.157,12l12.575,11.125c0.206,0.183,0.226,0.5,0.043,0.706C18.68,23.939,18.544,24,18.401,24\n\t\t\t\tz");
-    			add_location(path1, file$4, 53, 3, 1574);
-    			attr_dev(svg1, "width", "20");
-    			attr_dev(svg1, "height", "20");
-    			attr_dev(svg1, "viewBox", "0 0 24 24");
-    			add_location(svg1, file$4, 49, 2, 1512);
-    			attr_dev(button1, "class", "pwt-date-navigator-next");
-    			add_location(button1, file$4, 46, 1, 1446);
-    			attr_dev(div, "class", "pwt-date-navigator");
-    			add_location(div, file$4, 0, 0, 0);
-
-    			dispose = [
-    				listen_dev(button0, "click", ctx.prev, false, false, false),
-    				listen_dev(button1, "click", ctx.next, false, false, false)
-    			];
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, button0);
-    			append_dev(button0, svg0);
-    			append_dev(svg0, path0);
-    			append_dev(div, t0);
-    			if (if_block) if_block.m(div, null);
-    			append_dev(div, t1);
-    			append_dev(div, button1);
-    			append_dev(button1, svg1);
-    			append_dev(svg1, path1);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (ctx.visible) {
-    				if (if_block) {
-    					if_block.p(changed, ctx);
-    					transition_in(if_block, 1);
-    				} else {
-    					if_block = create_if_block$1(ctx);
-    					if_block.c();
-    					transition_in(if_block, 1);
-    					if_block.m(div, t1);
-    				}
-    			} else if (if_block) {
-    				group_outros();
-
-    				transition_out(if_block, 1, 1, () => {
-    					if_block = null;
-    				});
-
-    				check_outros();
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (if_block) if_block.d();
     			run_all(dispose);
     		}
     	};
@@ -7251,7 +7668,7 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
-    let animateSpeed$1 = 200;
+    let animateSpeed$3 = 200;
 
     function instance$4($$self, $$props, $$invalidate) {
     	let $dateObject;
@@ -7325,7 +7742,7 @@ this['persian-datepicker-next-version'] = (function () {
     			viewMode,
     			startYear,
     			visible,
-    			animateSpeed: animateSpeed$1,
+    			animateSpeed: animateSpeed$3,
     			cachedViewUnix,
     			transitionDirectionForward,
     			selectedYear,
@@ -7339,7 +7756,7 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
     		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
     		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
-    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$1 = $$props.animateSpeed);
+    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$3 = $$props.animateSpeed);
     		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
@@ -7447,7 +7864,7 @@ this['persian-datepicker-next-version'] = (function () {
     const file$5 = "src/components/Infobox.svelte";
 
     // (3:1) {#if visible}
-    function create_if_block$2(ctx) {
+    function create_if_block$4(ctx) {
     	let span;
     	let t;
     	let span_intro;
@@ -7473,7 +7890,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     			add_render_callback(() => {
     				if (span_outro) span_outro.end(1);
-    				if (!span_intro) span_intro = create_in_transition(span, ctx.fadeIn, { duration: animateSpeed$2, offset: 10 });
+    				if (!span_intro) span_intro = create_in_transition(span, ctx.fadeIn, { duration: animateSpeed$4, offset: 10 });
     				span_intro.start();
     			});
 
@@ -7481,7 +7898,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		o: function outro(local) {
     			if (span_intro) span_intro.invalidate();
-    			span_outro = create_out_transition(span, ctx.fadeOut, { duration: animateSpeed$2, offset: 10 });
+    			span_outro = create_out_transition(span, ctx.fadeOut, { duration: animateSpeed$4, offset: 10 });
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -7492,7 +7909,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$2.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(3:1) {#if visible}",
     		ctx
@@ -7507,7 +7924,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let t0;
     	let t1;
     	let current;
-    	let if_block = ctx.visible && create_if_block$2(ctx);
+    	let if_block = ctx.visible && create_if_block$4(ctx);
 
     	const block = {
     		c: function create() {
@@ -7539,7 +7956,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block.p(changed, ctx);
     					transition_in(if_block, 1);
     				} else {
-    					if_block = create_if_block$2(ctx);
+    					if_block = create_if_block$4(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(div, null);
@@ -7580,7 +7997,7 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
-    let animateSpeed$2 = 100;
+    let animateSpeed$4 = 100;
 
     function instance$5($$self, $$props, $$invalidate) {
     	let $dateObject;
@@ -7634,7 +8051,7 @@ this['persian-datepicker-next-version'] = (function () {
     			selectedUnix,
     			oldotherPart,
     			visible,
-    			animateSpeed: animateSpeed$2,
+    			animateSpeed: animateSpeed$4,
     			cachedSelectedUnix,
     			transitionDirectionForward,
     			yearPrt,
@@ -7648,7 +8065,7 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     		if ("oldotherPart" in $$props) oldotherPart = $$props.oldotherPart;
     		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
-    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$2 = $$props.animateSpeed);
+    		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$4 = $$props.animateSpeed);
     		if ("cachedSelectedUnix" in $$props) $$invalidate("cachedSelectedUnix", cachedSelectedUnix = $$props.cachedSelectedUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("yearPrt" in $$props) $$invalidate("yearPrt", yearPrt = $$props.yearPrt);
@@ -7847,7 +8264,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (28:1) {#if $config.calendarType === 'gregorian'}
-    function create_if_block$3(ctx) {
+    function create_if_block$5(ctx) {
     	let button;
     	let dispose;
 
@@ -7871,7 +8288,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$5.name,
     		type: "if",
     		source: "(28:1) {#if $config.calendarType === 'gregorian'}",
     		ctx
@@ -7891,7 +8308,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let if_block0 = ctx.viewMode !== "time" && create_if_block_3$2(ctx);
     	let if_block1 = ctx.viewMode === "time" && create_if_block_2$2(ctx);
     	let if_block2 = ctx.$config.calendarType === "persian" && create_if_block_1$2(ctx);
-    	let if_block3 = ctx.$config.calendarType === "gregorian" && create_if_block$3(ctx);
+    	let if_block3 = ctx.$config.calendarType === "gregorian" && create_if_block$5(ctx);
 
     	const block = {
     		c: function create() {
@@ -7971,7 +8388,7 @@ this['persian-datepicker-next-version'] = (function () {
     				if (if_block3) {
     					if_block3.p(changed, ctx);
     				} else {
-    					if_block3 = create_if_block$3(ctx);
+    					if_block3 = create_if_block$5(ctx);
     					if_block3.c();
     					if_block3.m(div, null);
     				}
@@ -8376,7 +8793,7 @@ this['persian-datepicker-next-version'] = (function () {
     const file$7 = "src/App.svelte";
 
     // (1:0) {#if isVisbile}
-    function create_if_block$4(ctx) {
+    function create_if_block$6(ctx) {
     	let div;
     	let t0;
     	let t1;
@@ -8407,7 +8824,7 @@ this['persian-datepicker-next-version'] = (function () {
     	navigator.$on("today", ctx.today);
     	navigator.$on("next", ctx.navNext);
     	navigator.$on("prev", ctx.navPrev);
-    	let if_block0 = ctx.$viewMode === "year" && create_if_block_4(ctx);
+    	let if_block0 = ctx.$viewMode === "year" && create_if_block_4$1(ctx);
     	let if_block1 = ctx.$viewMode === "month" && create_if_block_3$3(ctx);
     	let if_block2 = ctx.$viewMode === "date" && create_if_block_2$3(ctx);
     	let if_block3 = ctx.$viewMode === "time" && create_if_block_1$3(ctx);
@@ -8480,7 +8897,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block0.p(changed, ctx);
     					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_4(ctx);
+    					if_block0 = create_if_block_4$1(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(div, t2);
@@ -8597,7 +9014,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$6.name,
     		type: "if",
     		source: "(1:0) {#if isVisbile}",
     		ctx
@@ -8607,7 +9024,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (16:2) {#if $viewMode === 'year'}
-    function create_if_block_4(ctx) {
+    function create_if_block_4$1(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -8665,7 +9082,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4.name,
+    		id: create_if_block_4$1.name,
     		type: "if",
     		source: "(16:2) {#if $viewMode === 'year'}",
     		ctx
@@ -8862,7 +9279,7 @@ this['persian-datepicker-next-version'] = (function () {
     function create_fragment$8(ctx) {
     	let t;
     	let current;
-    	let if_block = ctx.isVisbile && create_if_block$4(ctx);
+    	let if_block = ctx.isVisbile && create_if_block$6(ctx);
 
     	const input = new Input({
     			props: {
@@ -8896,7 +9313,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block.p(changed, ctx);
     					transition_in(if_block, 1);
     				} else {
-    					if_block = create_if_block$4(ctx);
+    					if_block = create_if_block$6(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(t.parentNode, t);

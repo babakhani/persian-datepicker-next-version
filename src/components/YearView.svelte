@@ -1,4 +1,8 @@
-<div class="pwt-date-year-view">
+{#if visible}
+<div 
+  out:fadeOut="{{duration: animateSpeed}}" 
+	in:fadeIn="{{duration: animateSpeed}}" 
+  class="pwt-date-year-view">
   {#each yearRange as year}
     <div
       on:click="{event => select(year)}"
@@ -9,6 +13,7 @@
     </div>
   {/each}
 </div>
+{/if}
 
 <script>
   import { time, elapsed, countable } from '../stores.js'
@@ -17,6 +22,32 @@
 
   export let selectedUnix
   export let viewUnix
+
+	function fadeOut(node, { duration, delay }) {
+		return {
+			duration,
+			delay,
+			css: t => {
+				//console.log(t)
+				return `
+				transform: translate(${transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
+				opacity: ${t};
+				`
+				}
+		};
+	}
+	function fadeIn(node, { duration, delay }) {
+		return {
+			duration,
+			delay,
+			css: t => {
+				return `
+				transform: translate(${!transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
+				opacity: ${t};
+				`
+			}
+			};
+	}
 
   const dispatch = createEventDispatcher()
 
@@ -27,7 +58,10 @@
 
   let yearRange
   let startYear
-
+	let visible = true
+	let animateSpeed = 100
+	let cachedViewUnix = viewUnix
+	let transitionDirectionForward = true
   $: {
     yearRange = []
     startYear = currentViewYear - (currentViewYear % 12)
@@ -36,6 +70,16 @@
       yearRange.push(startYear + i)
       i++
     }
+		if (viewUnix >  cachedViewUnix) {
+			transitionDirectionForward = true
+		} else {
+			transitionDirectionForward = false
+		}
+		cachedViewUnix = viewUnix
+		visible = false
+		setTimeout(() => {
+			visible = true
+		}, 200)
   }
 </script>
 
