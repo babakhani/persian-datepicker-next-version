@@ -51,6 +51,14 @@ export const actions = {
     viewMode.set(payload.viewMode)
     this.onSetCalendar(get(config).calendarType)
   },
+  onSelectTime (pDate) {
+    const pd = get(dateObject)
+    const date = pDate.detail
+    const { hour, minute, second } = getHourMinuteSecond(date)
+    const calced = new pd(get(selectedUnix)).hour(hour).minute(minute).second(second)
+    this.updateIsDirty(true)
+    selectedUnix.set(calced.valueOf())
+  },
   onSelectDate(pDate) {
     const date = pDate.detail
     const { hour, minute, second } = getHourMinuteSecond(get(selectedUnix))
@@ -63,7 +71,6 @@ export const actions = {
   },
   setSelectedDate(pDate) {
     const pd = get(dateObject)
-    //viewUnix.set(new pd(pDate).valueOf())
     selectedUnix.set(new pd(pDate).valueOf())
   },
   onSelectMonth(month) {

@@ -205,9 +205,6 @@ this['persian-datepicker-next-version'] = (function () {
             throw new Error(`Function called outside component initialization`);
         return current_component;
     }
-    function afterUpdate(fn) {
-        get_current_component().$$.after_update.push(fn);
-    }
     function createEventDispatcher() {
         const component = get_current_component();
         return (type, detail) => {
@@ -5177,6 +5174,14 @@ this['persian-datepicker-next-version'] = (function () {
         viewMode.set(payload.viewMode);
         this.onSetCalendar(get_store_value(config).calendarType);
       },
+      onSelectTime (pDate) {
+        const pd = get_store_value(dateObject);
+        const date = pDate.detail;
+        const { hour, minute, second } = getHourMinuteSecond(date);
+        const calced = new pd(get_store_value(selectedUnix)).hour(hour).minute(minute).second(second);
+        this.updateIsDirty(true);
+        selectedUnix.set(calced.valueOf());
+      },
       onSelectDate(pDate) {
         const date = pDate.detail;
         const { hour, minute, second } = getHourMinuteSecond(get_store_value(selectedUnix));
@@ -5189,7 +5194,6 @@ this['persian-datepicker-next-version'] = (function () {
       },
       setSelectedDate(pDate) {
         const pd = get_store_value(dateObject);
-        //viewUnix.set(new pd(pDate).valueOf())
         selectedUnix.set(new pd(pDate).valueOf());
       },
       onSelectMonth(month) {
@@ -6777,12 +6781,6 @@ this['persian-datepicker-next-version'] = (function () {
     		dispatch("selectDate", payload);
     	}
 
-    	let selectedDay = new $dateObject(selectedUnix).startOf("day");
-
-    	afterUpdate(async () => {
-    		$$invalidate("selectedDay", selectedDay = new $dateObject(selectedUnix).startOf("day"));
-    	});
-
     	let groupedDay = [];
     	let visible = true;
     	let cachedViewUnix = viewUnix;
@@ -6808,13 +6806,13 @@ this['persian-datepicker-next-version'] = (function () {
     			viewUnix,
     			selectedUnix,
     			todayUnix,
-    			selectedDay,
     			groupedDay,
     			visible,
     			animateSpeed: animateSpeed$2,
     			cachedViewUnix,
     			transitionDirectionForward,
     			$config,
+    			selectedDay,
     			$dateObject,
     			today,
     			currentViewMonth,
@@ -6826,24 +6824,29 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     		if ("todayUnix" in $$props) $$invalidate("todayUnix", todayUnix = $$props.todayUnix);
-    		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
     		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
     		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
     		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$2 = $$props.animateSpeed);
     		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("$config" in $$props) config.set($config = $$props.$config);
+    		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("today" in $$props) $$invalidate("today", today = $$props.today);
     		if ("currentViewMonth" in $$props) $$invalidate("currentViewMonth", currentViewMonth = $$props.currentViewMonth);
     		if ("viewUnixDate" in $$props) viewUnixDate = $$props.viewUnixDate;
     	};
 
+    	let selectedDay;
     	let today;
     	let currentViewMonth;
     	let viewUnixDate;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1, cachedViewUnix: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1, cachedViewUnix: 1 }) => {
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("selectedDay", selectedDay = new $dateObject(selectedUnix).startOf("day"));
+    		}
+
     		if (changed.$dateObject || changed.todayUnix) {
     			 $$invalidate("today", today = new $dateObject(todayUnix));
     		}
@@ -6939,9 +6942,9 @@ this['persian-datepicker-next-version'] = (function () {
     		selectedUnix,
     		todayUnix,
     		selectDate,
-    		selectedDay,
     		groupedDay,
     		visible,
+    		selectedDay,
     		today,
     		currentViewMonth,
     		click_handler
@@ -7010,30 +7013,147 @@ this['persian-datepicker-next-version'] = (function () {
     const file$3 = "src/components/TimeView.svelte";
 
     function create_fragment$3(ctx) {
-    	let div;
-    	let t;
+    	let div4;
+    	let div0;
+    	let button0;
+    	let t1;
+    	let t2;
+    	let t3;
+    	let button1;
+    	let t5;
+    	let div1;
+    	let button2;
+    	let t7;
+    	let t8;
+    	let t9;
+    	let button3;
+    	let t11;
+    	let div2;
+    	let button4;
+    	let t13;
+    	let t14;
+    	let t15;
+    	let button5;
+    	let t17;
+    	let div3;
+    	let button6;
+    	let t19;
+    	let button7;
+    	let dispose;
 
     	const block = {
     		c: function create() {
-    			div = element("div");
-    			t = text(ctx.currentUnixDate);
-    			attr_dev(div, "class", "pwt-date-time");
-    			add_location(div, file$3, 0, 0, 0);
+    			div4 = element("div");
+    			div0 = element("div");
+    			button0 = element("button");
+    			button0.textContent = "Up";
+    			t1 = space();
+    			t2 = text(ctx.currentHour);
+    			t3 = space();
+    			button1 = element("button");
+    			button1.textContent = "Down";
+    			t5 = space();
+    			div1 = element("div");
+    			button2 = element("button");
+    			button2.textContent = "Up";
+    			t7 = space();
+    			t8 = text(ctx.currentMinute);
+    			t9 = space();
+    			button3 = element("button");
+    			button3.textContent = "Down";
+    			t11 = space();
+    			div2 = element("div");
+    			button4 = element("button");
+    			button4.textContent = "Up";
+    			t13 = space();
+    			t14 = text(ctx.currentSecond);
+    			t15 = space();
+    			button5 = element("button");
+    			button5.textContent = "Down";
+    			t17 = space();
+    			div3 = element("div");
+    			button6 = element("button");
+    			button6.textContent = "Up";
+    			t19 = text("\n\t\t  Meridian\n\t\t");
+    			button7 = element("button");
+    			button7.textContent = "Down";
+    			attr_dev(button0, "class", "pwt-date-time-arrow");
+    			add_location(button0, file$3, 2, 2, 64);
+    			attr_dev(button1, "class", "pwt-date-time-arrow");
+    			add_location(button1, file$3, 8, 2, 195);
+    			attr_dev(div0, "class", "pwt-date-time-hour");
+    			add_location(div0, file$3, 1, 1, 29);
+    			attr_dev(button2, "class", "pwt-date-time-arrow");
+    			add_location(button2, file$3, 15, 2, 357);
+    			attr_dev(button3, "class", "pwt-date-time-arrow");
+    			add_location(button3, file$3, 21, 2, 489);
+    			attr_dev(div1, "class", "pwt-date-time-minute");
+    			add_location(div1, file$3, 14, 1, 320);
+    			attr_dev(button4, "class", "pwt-date-time-arrow");
+    			add_location(button4, file$3, 28, 2, 653);
+    			attr_dev(button5, "class", "pwt-date-time-arrow");
+    			add_location(button5, file$3, 34, 2, 788);
+    			attr_dev(div2, "class", "pwt-date-time-second");
+    			add_location(div2, file$3, 27, 1, 616);
+    			attr_dev(button6, "class", "pwt-date-time-arrow");
+    			add_location(button6, file$3, 41, 2, 954);
+    			attr_dev(button7, "class", "pwt-date-time-arrow");
+    			add_location(button7, file$3, 45, 2, 1028);
+    			attr_dev(div3, "class", "pwt-date-time-meridian");
+    			add_location(div3, file$3, 40, 1, 915);
+    			attr_dev(div4, "class", "pwt-date-time");
+    			add_location(div4, file$3, 0, 0, 0);
+
+    			dispose = [
+    				listen_dev(button0, "click", ctx.click_handler, false, false, false),
+    				listen_dev(button1, "click", ctx.click_handler_1, false, false, false),
+    				listen_dev(button2, "click", ctx.click_handler_2, false, false, false),
+    				listen_dev(button3, "click", ctx.click_handler_3, false, false, false),
+    				listen_dev(button4, "click", ctx.click_handler_4, false, false, false),
+    				listen_dev(button5, "click", ctx.click_handler_5, false, false, false)
+    			];
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, t);
+    			insert_dev(target, div4, anchor);
+    			append_dev(div4, div0);
+    			append_dev(div0, button0);
+    			append_dev(div0, t1);
+    			append_dev(div0, t2);
+    			append_dev(div0, t3);
+    			append_dev(div0, button1);
+    			append_dev(div4, t5);
+    			append_dev(div4, div1);
+    			append_dev(div1, button2);
+    			append_dev(div1, t7);
+    			append_dev(div1, t8);
+    			append_dev(div1, t9);
+    			append_dev(div1, button3);
+    			append_dev(div4, t11);
+    			append_dev(div4, div2);
+    			append_dev(div2, button4);
+    			append_dev(div2, t13);
+    			append_dev(div2, t14);
+    			append_dev(div2, t15);
+    			append_dev(div2, button5);
+    			append_dev(div4, t17);
+    			append_dev(div4, div3);
+    			append_dev(div3, button6);
+    			append_dev(div3, t19);
+    			append_dev(div3, button7);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.currentUnixDate) set_data_dev(t, ctx.currentUnixDate);
+    			if (changed.currentHour) set_data_dev(t2, ctx.currentHour);
+    			if (changed.currentMinute) set_data_dev(t8, ctx.currentMinute);
+    			if (changed.currentSecond) set_data_dev(t14, ctx.currentSecond);
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
+    			if (detaching) detach_dev(div4);
+    			run_all(dispose);
     		}
     	};
 
@@ -7049,12 +7169,27 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     function instance$3($$self, $$props, $$invalidate) {
+    	let $dateObject;
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
+    	const dispatch = createEventDispatcher();
     	let { selectedUnix } = $$props;
-    	let currentUnixDate = new persianDate$1(selectedUnix).format("HH:mm:ss");
 
-    	afterUpdate(async () => {
-    		$$invalidate("currentUnixDate", currentUnixDate = new persianDate$1(selectedUnix).format("HH:mm:ss"));
-    	});
+    	const updateTime = function (mode, direction) {
+    		let selectedObj = new $dateObject(selectedUnix);
+
+    		if (direction === "up") {
+    			selectedObj = selectedObj.add(mode, 1).clone();
+    		} else {
+    			selectedObj = selectedObj.subtract(mode, 1).clone();
+    		}
+
+    		selectDate(selectedObj);
+    	};
+
+    	function selectDate(payload) {
+    		dispatch("selectTime", payload);
+    	}
 
     	const writable_props = ["selectedUnix"];
 
@@ -7062,20 +7197,66 @@ this['persian-datepicker-next-version'] = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<TimeView> was created with unknown prop '${key}'`);
     	});
 
+    	const click_handler = () => updateTime("hour", "up");
+    	const click_handler_1 = () => updateTime("hour", "down");
+    	const click_handler_2 = () => updateTime("minute", "up");
+    	const click_handler_3 = () => updateTime("minute", "down");
+    	const click_handler_4 = () => updateTime("second", "up");
+    	const click_handler_5 = () => updateTime("second", "down");
+
     	$$self.$set = $$props => {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     	};
 
     	$$self.$capture_state = () => {
-    		return { selectedUnix, currentUnixDate };
+    		return {
+    			selectedUnix,
+    			currentHour,
+    			$dateObject,
+    			currentMinute,
+    			currentSecond
+    		};
     	};
 
     	$$self.$inject_state = $$props => {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
-    		if ("currentUnixDate" in $$props) $$invalidate("currentUnixDate", currentUnixDate = $$props.currentUnixDate);
+    		if ("currentHour" in $$props) $$invalidate("currentHour", currentHour = $$props.currentHour);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("currentMinute" in $$props) $$invalidate("currentMinute", currentMinute = $$props.currentMinute);
+    		if ("currentSecond" in $$props) $$invalidate("currentSecond", currentSecond = $$props.currentSecond);
     	};
 
-    	return { selectedUnix, currentUnixDate };
+    	let currentHour;
+    	let currentMinute;
+    	let currentSecond;
+
+    	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1 }) => {
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("currentHour", currentHour = new $dateObject(selectedUnix).hour());
+    		}
+
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("currentMinute", currentMinute = new $dateObject(selectedUnix).minute());
+    		}
+
+    		if (changed.$dateObject || changed.selectedUnix) {
+    			 $$invalidate("currentSecond", currentSecond = new $dateObject(selectedUnix).second());
+    		}
+    	};
+
+    	return {
+    		selectedUnix,
+    		updateTime,
+    		currentHour,
+    		currentMinute,
+    		currentSecond,
+    		click_handler,
+    		click_handler_1,
+    		click_handler_2,
+    		click_handler_3,
+    		click_handler_4,
+    		click_handler_5
+    	};
     }
 
     class TimeView extends SvelteComponentDev {
@@ -7111,10 +7292,10 @@ this['persian-datepicker-next-version'] = (function () {
     const file$4 = "src/components/Navigator.svelte";
 
     // (29:2) {#if viewMode === 'year'}
-    function create_if_block_4(ctx) {
+    function create_if_block_6(ctx) {
     	let if_block_anchor;
     	let current;
-    	let if_block = ctx.visible && create_if_block_5(ctx);
+    	let if_block = ctx.visible && create_if_block_7(ctx);
 
     	const block = {
     		c: function create() {
@@ -7132,7 +7313,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block.p(changed, ctx);
     					transition_in(if_block, 1);
     				} else {
-    					if_block = create_if_block_5(ctx);
+    					if_block = create_if_block_7(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
@@ -7164,7 +7345,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4.name,
+    		id: create_if_block_6.name,
     		type: "if",
     		source: "(29:2) {#if viewMode === 'year'}",
     		ctx
@@ -7174,7 +7355,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (30:3) {#if visible}
-    function create_if_block_5(ctx) {
+    function create_if_block_7(ctx) {
     	let button;
     	let t0;
     	let t1;
@@ -7231,7 +7412,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_5.name,
+    		id: create_if_block_7.name,
     		type: "if",
     		source: "(30:3) {#if visible}",
     		ctx
@@ -7241,6 +7422,128 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (40:2) {#if viewMode === 'month'}
+    function create_if_block_4(ctx) {
+    	let if_block_anchor;
+    	let current;
+    	let if_block = ctx.visible && create_if_block_5(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block_5(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4.name,
+    		type: "if",
+    		source: "(40:2) {#if viewMode === 'month'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (41:3) {#if visible}
+    function create_if_block_5(ctx) {
+    	let button;
+    	let t;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t = text(ctx.selectedYear);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 41, 4, 1425);
+    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.selectedYear) set_data_dev(t, ctx.selectedYear);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_5.name,
+    		type: "if",
+    		source: "(41:3) {#if visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (51:2) {#if viewMode === 'date'}
     function create_if_block_2$1(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7296,128 +7599,6 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(40:2) {#if viewMode === 'month'}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (41:3) {#if visible}
-    function create_if_block_3$1(ctx) {
-    	let button;
-    	let t;
-    	let button_intro;
-    	let button_outro;
-    	let current;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			t = text(ctx.selectedYear);
-    			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 41, 4, 1425);
-    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (!current || changed.selectedYear) set_data_dev(t, ctx.selectedYear);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			add_render_callback(() => {
-    				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
-    				button_intro.start();
-    			});
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching && button_outro) button_outro.end();
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_3$1.name,
-    		type: "if",
-    		source: "(41:3) {#if visible}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (51:2) {#if viewMode === 'date'}
-    function create_if_block$3(ctx) {
-    	let if_block_anchor;
-    	let current;
-    	let if_block = ctx.visible && create_if_block_1$1(ctx);
-
-    	const block = {
-    		c: function create() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m: function mount(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (ctx.visible) {
-    				if (if_block) {
-    					if_block.p(changed, ctx);
-    					transition_in(if_block, 1);
-    				} else {
-    					if_block = create_if_block_1$1(ctx);
-    					if_block.c();
-    					transition_in(if_block, 1);
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				group_outros();
-
-    				transition_out(if_block, 1, 1, () => {
-    					if_block = null;
-    				});
-
-    				check_outros();
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$3.name,
-    		type: "if",
     		source: "(51:2) {#if viewMode === 'date'}",
     		ctx
     	});
@@ -7426,7 +7607,7 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     // (52:3) {#if visible}
-    function create_if_block_1$1(ctx) {
+    function create_if_block_3$1(ctx) {
     	let button;
     	let t0;
     	let t1;
@@ -7482,9 +7663,138 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$1.name,
+    		id: create_if_block_3$1.name,
     		type: "if",
     		source: "(52:3) {#if visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (63:2) {#if viewMode === 'time'}
+    function create_if_block$3(ctx) {
+    	let if_block_anchor;
+    	let current;
+    	let if_block = ctx.visible && create_if_block_1$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block_1$1(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(63:2) {#if viewMode === 'time'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (64:3) {#if visible}
+    function create_if_block_1$1(ctx) {
+    	let button;
+    	let t0;
+    	let t1;
+    	let t2;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t0 = text(ctx.selectedMonth);
+    			t1 = space();
+    			t2 = text(ctx.selectedDate);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 64, 4, 2024);
+    			dispose = listen_dev(button, "click", ctx.click_handler_3, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.selectedMonth) set_data_dev(t0, ctx.selectedMonth);
+    			if (!current || changed.selectedDate) set_data_dev(t2, ctx.selectedDate);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$1.name,
+    		type: "if",
+    		source: "(64:3) {#if visible}",
     		ctx
     	});
 
@@ -7504,11 +7814,13 @@ this['persian-datepicker-next-version'] = (function () {
     	let div0;
     	let t2;
     	let t3;
+    	let t4;
     	let current;
     	let dispose;
-    	let if_block0 = ctx.viewMode === "year" && create_if_block_4(ctx);
-    	let if_block1 = ctx.viewMode === "month" && create_if_block_2$1(ctx);
-    	let if_block2 = ctx.viewMode === "date" && create_if_block$3(ctx);
+    	let if_block0 = ctx.viewMode === "year" && create_if_block_6(ctx);
+    	let if_block1 = ctx.viewMode === "month" && create_if_block_4(ctx);
+    	let if_block2 = ctx.viewMode === "date" && create_if_block_2$1(ctx);
+    	let if_block3 = ctx.viewMode === "time" && create_if_block$3(ctx);
 
     	const block = {
     		c: function create() {
@@ -7527,6 +7839,8 @@ this['persian-datepicker-next-version'] = (function () {
     			if (if_block1) if_block1.c();
     			t3 = space();
     			if (if_block2) if_block2.c();
+    			t4 = space();
+    			if (if_block3) if_block3.c();
     			attr_dev(path0, "d", "M5.649,24c-0.143,0-0.279-0.061-0.374-0.168c-0.183-0.207-0.163-0.524,0.043-0.706L17.893,12L5.318,0.875\n\t\t\t\tC5.111,0.692,5.092,0.375,5.274,0.169C5.37,0.062,5.506,0,5.649,0c0.122,0,0.24,0.045,0.331,0.125l12.576,11.126\n\t\t\t\tc0.029,0.026,0.056,0.052,0.081,0.08c0.369,0.416,0.332,1.051-0.08,1.416L5.98,23.875C5.888,23.956,5.771,24,5.649,24z");
     			add_location(path0, file$4, 8, 3, 160);
     			attr_dev(svg0, "width", "12");
@@ -7572,6 +7886,8 @@ this['persian-datepicker-next-version'] = (function () {
     			if (if_block1) if_block1.m(div0, null);
     			append_dev(div0, t3);
     			if (if_block2) if_block2.m(div0, null);
+    			append_dev(div0, t4);
+    			if (if_block3) if_block3.m(div0, null);
     			current = true;
     		},
     		p: function update(changed, ctx) {
@@ -7580,7 +7896,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block0.p(changed, ctx);
     					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_4(ctx);
+    					if_block0 = create_if_block_6(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(div0, t2);
@@ -7600,7 +7916,7 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
     				} else {
-    					if_block1 = create_if_block_2$1(ctx);
+    					if_block1 = create_if_block_4(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(div0, t3);
@@ -7620,10 +7936,10 @@ this['persian-datepicker-next-version'] = (function () {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block$3(ctx);
+    					if_block2 = create_if_block_2$1(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
-    					if_block2.m(div0, null);
+    					if_block2.m(div0, t4);
     				}
     			} else if (if_block2) {
     				group_outros();
@@ -7634,18 +7950,40 @@ this['persian-datepicker-next-version'] = (function () {
 
     				check_outros();
     			}
+
+    			if (ctx.viewMode === "time") {
+    				if (if_block3) {
+    					if_block3.p(changed, ctx);
+    					transition_in(if_block3, 1);
+    				} else {
+    					if_block3 = create_if_block$3(ctx);
+    					if_block3.c();
+    					transition_in(if_block3, 1);
+    					if_block3.m(div0, null);
+    				}
+    			} else if (if_block3) {
+    				group_outros();
+
+    				transition_out(if_block3, 1, 1, () => {
+    					if_block3 = null;
+    				});
+
+    				check_outros();
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(if_block0);
     			transition_in(if_block1);
     			transition_in(if_block2);
+    			transition_in(if_block3);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(if_block0);
     			transition_out(if_block1);
     			transition_out(if_block2);
+    			transition_out(if_block3);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -7653,6 +7991,7 @@ this['persian-datepicker-next-version'] = (function () {
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
+    			if (if_block3) if_block3.d();
     			run_all(dispose);
     		}
     	};
@@ -7730,6 +8069,7 @@ this['persian-datepicker-next-version'] = (function () {
     	const click_handler = () => setViewMode("year");
     	const click_handler_1 = () => setViewMode("year");
     	const click_handler_2 = () => setViewMode("month");
+    	const click_handler_3 = () => setViewMode("date");
 
     	$$self.$set = $$props => {
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
@@ -7747,7 +8087,8 @@ this['persian-datepicker-next-version'] = (function () {
     			transitionDirectionForward,
     			selectedYear,
     			$dateObject,
-    			selectedMonth
+    			selectedMonth,
+    			selectedDate
     		};
     	};
 
@@ -7762,10 +8103,12 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("selectedMonth" in $$props) $$invalidate("selectedMonth", selectedMonth = $$props.selectedMonth);
+    		if ("selectedDate" in $$props) $$invalidate("selectedDate", selectedDate = $$props.selectedDate);
     	};
 
     	let selectedYear;
     	let selectedMonth;
+    	let selectedDate;
 
     	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, selectedYear: 1, cachedViewUnix: 1 }) => {
     		if (changed.$dateObject || changed.viewUnix) {
@@ -7774,6 +8117,10 @@ this['persian-datepicker-next-version'] = (function () {
 
     		if (changed.$dateObject || changed.viewUnix) {
     			 $$invalidate("selectedMonth", selectedMonth = new $dateObject(viewUnix).format("MMMM"));
+    		}
+
+    		if (changed.$dateObject || changed.viewUnix) {
+    			 $$invalidate("selectedDate", selectedDate = new $dateObject(viewUnix).format("DD"));
     		}
 
     		if (changed.viewUnix || changed.selectedYear || changed.cachedViewUnix) {
@@ -7813,9 +8160,11 @@ this['persian-datepicker-next-version'] = (function () {
     		visible,
     		selectedYear,
     		selectedMonth,
+    		selectedDate,
     		click_handler,
     		click_handler_1,
-    		click_handler_2
+    		click_handler_2,
+    		click_handler_3
     	};
     }
 
@@ -8082,7 +8431,7 @@ this['persian-datepicker-next-version'] = (function () {
     		}
 
     		if (changed.$dateObject || changed.selectedUnix) {
-    			 $$invalidate("otherPart", otherPart = new $dateObject(selectedUnix).format("dddd DD MMMM"));
+    			 $$invalidate("otherPart", otherPart = new $dateObject(selectedUnix).format("LLLL"));
     		}
 
     		if (changed.otherPart || changed.selectedUnix || changed.cachedSelectedUnix) {
@@ -9238,6 +9587,8 @@ this['persian-datepicker-next-version'] = (function () {
     			$$inline: true
     		});
 
+    	timeview.$on("selectTime", ctx.onSelectTime);
+
     	const block = {
     		c: function create() {
     			create_component(timeview.$$.fragment);
@@ -9426,6 +9777,10 @@ this['persian-datepicker-next-version'] = (function () {
     		dispatcher("onSelectDate")(event);
     	};
 
+    	const onSelectTime = function (event) {
+    		dispatcher("onSelectTime")(event);
+    	};
+
     	const onSelectMonth = function (event) {
     		dispatcher("onSelectMonth")(event.detail);
     	};
@@ -9495,6 +9850,7 @@ this['persian-datepicker-next-version'] = (function () {
     		setViewMode,
     		setcalendar,
     		onSelectDate,
+    		onSelectTime,
     		onSelectMonth,
     		onSelectYear,
     		navNext,

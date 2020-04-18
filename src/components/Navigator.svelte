@@ -60,6 +60,18 @@
 				</button>
 			{/if}
 		{/if}
+		{#if viewMode === 'time'}
+			{#if visible}
+				<button 
+					out:fadeOut="{{duration: animateSpeed}}" 
+					in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
+					class="pwt-date-navigator-button"
+					on:click={() => setViewMode("date")}>
+					{selectedMonth}
+					{selectedDate}
+				</button>
+			{/if}
+		{/if}
 	</div>
 </div>
 
@@ -104,6 +116,7 @@
 
 	$: selectedYear = new $dateObject(viewUnix).year()
 	$: selectedMonth = new $dateObject(viewUnix).format('MMMM')
+	$: selectedDate = new $dateObject(viewUnix).format('DD')
 
 	let startYear
 	let visible = true

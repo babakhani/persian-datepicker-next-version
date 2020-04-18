@@ -104,11 +104,8 @@
 
 	function selectDate(payload) { dispatch('selectDate', payload) }
 
-	let selectedDay = new $dateObject(selectedUnix).startOf('day');
+	$: selectedDay = new $dateObject(selectedUnix).startOf('day');
 
-	afterUpdate(async () => {
-		selectedDay = new $dateObject(selectedUnix).startOf('day')
-	});
 
 	let groupedDay = []
 

@@ -44,7 +44,7 @@
 	let oldotherPart
 
 	$: yearPrt = new $dateObject(selectedUnix).format('YYYY')
-	$: otherPart = new $dateObject(selectedUnix).format('dddd DD MMMM')
+	$: otherPart = new $dateObject(selectedUnix).format('LLLL')
 
 	let visible
 	let animateSpeed = 100

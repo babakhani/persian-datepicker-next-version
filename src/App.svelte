@@ -44,6 +44,7 @@
 		{/if}
 		{#if $viewMode === 'time'}
 			<TimeView 
+				on:selectTime="{onSelectTime}"
 				selectedUnix="{$selectedUnix}" />
 		{/if}
 		<Toolbox 
@@ -132,6 +133,10 @@
 
 	const onSelectDate = function(event) {
 		dispatcher('onSelectDate')(event)
+	}
+
+	const onSelectTime = function(event) {
+		dispatcher('onSelectTime')(event)
 	}
 
 	const onSelectMonth = function(event) {
