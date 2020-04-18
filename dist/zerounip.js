@@ -5895,7 +5895,7 @@ this['persian-datepicker-next-version'] = (function () {
     	return child_ctx;
     }
 
-    // (6:5) {#if groupedDay[1]}
+    // (6:3) {#if groupedDay[1]}
     function create_if_block_3(ctx) {
     	let each_1_anchor;
     	let each_value_2 = ctx.groupedDay[1];
@@ -5954,14 +5954,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(6:5) {#if groupedDay[1]}",
+    		source: "(6:3) {#if groupedDay[1]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (7:6) {#each groupedDay[1] as day}
+    // (7:4) {#each groupedDay[1] as day}
     function create_each_block_2(ctx) {
     	let th;
     	let span;
@@ -5975,8 +5975,8 @@ this['persian-datepicker-next-version'] = (function () {
     			span = element("span");
     			t0 = text(t0_value);
     			t1 = space();
-    			add_location(span, file$2, 8, 8, 174);
-    			add_location(th, file$2, 7, 7, 161);
+    			add_location(span, file$2, 8, 6, 158);
+    			add_location(th, file$2, 7, 5, 147);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, th, anchor);
@@ -5996,14 +5996,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(7:6) {#each groupedDay[1] as day}",
+    		source: "(7:4) {#each groupedDay[1] as day}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (16:1) {#if visible}
+    // (16:2) {#if visible}
     function create_if_block(ctx) {
     	let each_1_anchor;
     	let current;
@@ -6090,14 +6090,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(16:1) {#if visible}",
+    		source: "(16:2) {#if visible}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (21:6) {#if week.length > 1}
+    // (21:5) {#if week.length > 1}
     function create_if_block_1(ctx) {
     	let each_1_anchor;
     	let each_value_1 = ctx.week;
@@ -6156,14 +6156,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(21:6) {#if week.length > 1}",
+    		source: "(21:5) {#if week.length > 1}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (29:9) {#if day && day.month && day.format && currentViewMonth === day.month()}
+    // (29:8) {#if day && day.month && day.format && currentViewMonth === day.month()}
     function create_if_block_2(ctx) {
     	let span;
     	let t_value = ctx.day.format("D") + "";
@@ -6173,7 +6173,7 @@ this['persian-datepicker-next-version'] = (function () {
     		c: function create() {
     			span = element("span");
     			t = text(t_value);
-    			add_location(span, file$2, 29, 10, 900);
+    			add_location(span, file$2, 29, 9, 857);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -6191,14 +6191,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(29:9) {#if day && day.month && day.format && currentViewMonth === day.month()}",
+    		source: "(29:8) {#if day && day.month && day.format && currentViewMonth === day.month()}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (22:7) {#each week as day}
+    // (22:6) {#each week as day}
     function create_each_block_1(ctx) {
     	let td;
     	let show_if = ctx.day && ctx.day.month && ctx.day.format && ctx.currentViewMonth === ctx.day.month();
@@ -6219,7 +6219,7 @@ this['persian-datepicker-next-version'] = (function () {
     			toggle_class(td, "disable", ctx.isDisable(ctx.day));
     			toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
     			toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
-    			add_location(td, file$2, 22, 8, 492);
+    			add_location(td, file$2, 22, 7, 456);
 
     			dispose = listen_dev(
     				td,
@@ -6281,14 +6281,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(22:7) {#each week as day}",
+    		source: "(22:6) {#each week as day}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (17:4) {#each groupedDay as week, i}
+    // (17:3) {#each groupedDay as week, i}
     function create_each_block$2(ctx) {
     	let tr;
     	let t;
@@ -6302,7 +6302,7 @@ this['persian-datepicker-next-version'] = (function () {
     			tr = element("tr");
     			if (if_block) if_block.c();
     			t = space();
-    			add_location(tr, file$2, 17, 5, 336);
+    			add_location(tr, file$2, 17, 4, 299);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -6329,7 +6329,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     			add_render_callback(() => {
     				if (tr_outro) tr_outro.end(1);
-    				if (!tr_intro) tr_intro = create_in_transition(tr, fadeIn, { duration: animateSpeed });
+    				if (!tr_intro) tr_intro = create_in_transition(tr, ctx.fadeIn, { duration: animateSpeed });
     				tr_intro.start();
     			});
 
@@ -6337,7 +6337,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		o: function outro(local) {
     			if (tr_intro) tr_intro.invalidate();
-    			tr_outro = create_out_transition(tr, fadeOut, { duration: animateSpeed });
+    			tr_outro = create_out_transition(tr, ctx.fadeOut, { duration: animateSpeed });
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -6351,7 +6351,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(17:4) {#each groupedDay as week, i}",
+    		source: "(17:3) {#each groupedDay as week, i}",
     		ctx
     	});
 
@@ -6375,10 +6375,10 @@ this['persian-datepicker-next-version'] = (function () {
     			if (if_block0) if_block0.c();
     			t = space();
     			if (if_block1) if_block1.c();
-    			add_location(tr, file$2, 4, 4, 89);
+    			add_location(tr, file$2, 4, 2, 81);
     			attr_dev(table, "class", "month-table next");
     			attr_dev(table, "border", "0");
-    			add_location(table, file$2, 1, 3, 31);
+    			add_location(table, file$2, 1, 1, 29);
     			attr_dev(div, "class", "pwt-date-view");
     			add_location(div, file$2, 0, 0, 0);
     		},
@@ -6457,34 +6457,6 @@ this['persian-datepicker-next-version'] = (function () {
 
     let animateSpeed = 100;
 
-    function fadeOut(node, { duration, delay }) {
-    	return {
-    		duration,
-    		delay,
-    		css: t => {
-    			return `
-				transform: translate(-${80 - t * 80}px, 0);
-				opacity: ${t};
-				`;
-    		}
-    	};
-    }
-
-    function fadeIn(node, { duration, delay }) {
-    	return {
-    		duration,
-    		delay,
-    		css: t => {
-    			console.log(t);
-
-    			return `
-				transform: translate(${80 - t * 80}px, 0);
-				opacity: ${t};
-				`;
-    		}
-    	};
-    }
-
     function instance$2($$self, $$props, $$invalidate) {
     	let $config;
     	let $dateObject;
@@ -6492,6 +6464,34 @@ this['persian-datepicker-next-version'] = (function () {
     	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
+
+    	function fadeOut(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				return `
+				transform: translate(${transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
+
+    	function fadeIn(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				console.log(t);
+
+    				return `
+				transform: translate(${!transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
 
     	const isSameDate = (a, b) => {
     		return a.isSameDay && a.isSameDay(b);
@@ -6534,6 +6534,8 @@ this['persian-datepicker-next-version'] = (function () {
 
     	let groupedDay = [];
     	let visible = true;
+    	let cachedViewUnix = viewUnix;
+    	let transitionDirectionForward = true;
     	const writable_props = ["viewUnix", "selectedUnix", "todayUnix"];
 
     	Object.keys($$props).forEach(key => {
@@ -6559,6 +6561,8 @@ this['persian-datepicker-next-version'] = (function () {
     			groupedDay,
     			visible,
     			animateSpeed,
+    			cachedViewUnix,
+    			transitionDirectionForward,
     			$config,
     			$dateObject,
     			today,
@@ -6575,6 +6579,8 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
     		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
     		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
+    		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
+    		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("today" in $$props) $$invalidate("today", today = $$props.today);
@@ -6586,7 +6592,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let currentViewMonth;
     	let viewUnixDate;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1, cachedViewUnix: 1 }) => {
     		if (changed.$dateObject || changed.todayUnix) {
     			 $$invalidate("today", today = new $dateObject(todayUnix));
     		}
@@ -6599,7 +6605,7 @@ this['persian-datepicker-next-version'] = (function () {
     			 viewUnixDate = new $dateObject(viewUnix).format("MMMM YYYY");
     		}
 
-    		if (changed.$dateObject || changed.viewUnix || changed.$config || changed.groupedDay) {
+    		if (changed.$dateObject || changed.viewUnix || changed.$config || changed.groupedDay || changed.cachedViewUnix) {
     			 {
     				$$invalidate("groupedDay", groupedDay = []);
     				let days = [];
@@ -6651,6 +6657,14 @@ this['persian-datepicker-next-version'] = (function () {
     					}
     				});
 
+    				if (viewUnix > cachedViewUnix) {
+    					transitionDirectionForward = true;
+    				} else {
+    					transitionDirectionForward = false;
+    				}
+
+    				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
+
     				if (viewUnix) {
     					$$invalidate("visible", visible = false);
 
@@ -6666,6 +6680,8 @@ this['persian-datepicker-next-version'] = (function () {
     	};
 
     	return {
+    		fadeOut,
+    		fadeIn,
     		isSameDate,
     		isDisable,
     		viewUnix,
@@ -6841,6 +6857,8 @@ this['persian-datepicker-next-version'] = (function () {
     }
 
     /* src/components/Navigator.svelte generated by Svelte v3.15.0 */
+
+    const { console: console_1$1 } = globals;
     const file$4 = "src/components/Navigator.svelte";
 
     // (14:1) {#if visible}
@@ -7004,7 +7022,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     			add_render_callback(() => {
     				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, fadeIn$1, { duration: animateSpeed$1 });
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$1 });
     				button_intro.start();
     			});
 
@@ -7012,7 +7030,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		o: function outro(local) {
     			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, fadeOut$1, { duration: animateSpeed$1 });
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$1 });
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -7063,7 +7081,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     			add_render_callback(() => {
     				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, fadeIn$1, { duration: animateSpeed$1 });
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$1 });
     				button_intro.start();
     			});
 
@@ -7071,7 +7089,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		o: function outro(local) {
     			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, fadeOut$1, { duration: animateSpeed$1 });
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$1 });
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -7129,7 +7147,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     			add_render_callback(() => {
     				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, fadeIn$1, { duration: animateSpeed$1, delay: 10 });
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$1, delay: 10 });
     				button_intro.start();
     			});
 
@@ -7137,7 +7155,7 @@ this['persian-datepicker-next-version'] = (function () {
     		},
     		o: function outro(local) {
     			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, fadeOut$1, { duration: animateSpeed$1 });
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$1 });
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -7274,36 +7292,39 @@ this['persian-datepicker-next-version'] = (function () {
 
     let animateSpeed$1 = 200;
 
-    function fadeOut$1(node, { duration }) {
-    	return {
-    		duration,
-    		css: t => {
-    			return `
-				right: auto;
-				left: ${t * 30}px;
-		    opacity: ${t};
-				`;
-    		}
-    	};
-    }
-
-    function fadeIn$1(node, { duration }) {
-    	return {
-    		duration,
-    		css: t => {
-    			return `
-				left: auto;
-				right: ${t * 20}px;
-		    opacity: ${t};
-				`;
-    		}
-    	};
-    }
-
     function instance$4($$self, $$props, $$invalidate) {
     	let $dateObject;
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
+
+    	function fadeOut(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				return `
+				transform: translate(${transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
+
+    	function fadeIn(node, { duration, delay }) {
+    		return {
+    			duration,
+    			delay,
+    			css: t => {
+    				console.log(t);
+
+    				return `
+				transform: translate(${!transitionDirectionForward ? "-" : ""}${20 - t * 20}px, 0);
+				opacity: ${t};
+				`;
+    			}
+    		};
+    	}
+
     	let { viewUnix } = $$props;
     	let { viewMode } = $$props;
     	const dispatch = createEventDispatcher();
@@ -7322,10 +7343,12 @@ this['persian-datepicker-next-version'] = (function () {
 
     	let startYear;
     	let visible = true;
+    	let cachedViewUnix = viewUnix;
+    	let transitionDirectionForward = true;
     	const writable_props = ["viewUnix", "viewMode"];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Navigator> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<Navigator> was created with unknown prop '${key}'`);
     	});
 
     	const click_handler = () => setViewMode("year");
@@ -7344,6 +7367,8 @@ this['persian-datepicker-next-version'] = (function () {
     			startYear,
     			visible,
     			animateSpeed: animateSpeed$1,
+    			cachedViewUnix,
+    			transitionDirectionForward,
     			selectedYear,
     			$dateObject,
     			selectedMonth
@@ -7356,6 +7381,8 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
     		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
     		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$1 = $$props.animateSpeed);
+    		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
+    		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
     		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("selectedMonth" in $$props) $$invalidate("selectedMonth", selectedMonth = $$props.selectedMonth);
@@ -7364,7 +7391,7 @@ this['persian-datepicker-next-version'] = (function () {
     	let selectedYear;
     	let selectedMonth;
 
-    	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, selectedYear: 1 }) => {
+    	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, selectedYear: 1, cachedViewUnix: 1 }) => {
     		if (changed.$dateObject || changed.viewUnix) {
     			 $$invalidate("selectedYear", selectedYear = new $dateObject(viewUnix).year());
     		}
@@ -7373,10 +7400,18 @@ this['persian-datepicker-next-version'] = (function () {
     			 $$invalidate("selectedMonth", selectedMonth = new $dateObject(viewUnix).format("MMMM"));
     		}
 
-    		if (changed.viewUnix || changed.selectedYear) {
+    		if (changed.viewUnix || changed.selectedYear || changed.cachedViewUnix) {
     			 {
     				if (viewUnix) {
     					$$invalidate("startYear", startYear = selectedYear - selectedYear % 12);
+
+    					if (viewUnix > cachedViewUnix) {
+    						transitionDirectionForward = true;
+    					} else {
+    						transitionDirectionForward = false;
+    					}
+
+    					$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
     					$$invalidate("visible", visible = false);
 
     					setTimeout(
@@ -7391,6 +7426,8 @@ this['persian-datepicker-next-version'] = (function () {
     	};
 
     	return {
+    		fadeOut,
+    		fadeIn,
     		viewUnix,
     		viewMode,
     		setViewMode,
@@ -7422,11 +7459,11 @@ this['persian-datepicker-next-version'] = (function () {
     		const props = options.props || ({});
 
     		if (ctx.viewUnix === undefined && !("viewUnix" in props)) {
-    			console.warn("<Navigator> was created without expected prop 'viewUnix'");
+    			console_1$1.warn("<Navigator> was created without expected prop 'viewUnix'");
     		}
 
     		if (ctx.viewMode === undefined && !("viewMode" in props)) {
-    			console.warn("<Navigator> was created without expected prop 'viewMode'");
+    			console_1$1.warn("<Navigator> was created without expected prop 'viewMode'");
     		}
     	}
 

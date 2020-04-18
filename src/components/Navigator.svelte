@@ -65,31 +65,32 @@
   import { fade } from 'svelte/transition'
 	import { elasticOut } from 'svelte/easing'
 
-	function fadeOut(node, { duration }) {
+	function fadeOut(node, { duration, delay }) {
 		return {
 			duration,
+			delay,
 			css: t => {
+				//console.log(t)
 				return `
-				right: auto;
-				left: ${t * 30}px;
-		    opacity: ${t};
+				transform: translate(${transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
+				opacity: ${t};
 				`
 			}
 		};
 	}
-	function fadeIn(node, { duration }) {
+	function fadeIn(node, { duration, delay }) {
 		return {
 			duration,
+			delay,
 			css: t => {
+				console.log(t)
 				return `
-				left: auto;
-				right: ${t * 20}px;
-		    opacity: ${t};
+				transform: translate(${!transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
+				opacity: ${t};
 				`
 			}
 		};
 	}
-
 
 	export let viewUnix
 	export let viewMode
@@ -107,9 +108,17 @@
 	let startYear
 	let visible = true
 	let animateSpeed = 200
+	let cachedViewUnix = viewUnix
+	let transitionDirectionForward = true
 	$: {
 		if (viewUnix) {
 			startYear = selectedYear - (selectedYear % 12)
+      if (viewUnix >  cachedViewUnix) {
+        transitionDirectionForward = true
+			} else {
+        transitionDirectionForward = false
+			}
+			cachedViewUnix = viewUnix
 			visible = false
 			setTimeout(() => {
 				visible = true 
