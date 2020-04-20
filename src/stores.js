@@ -72,6 +72,7 @@ export const actions = {
   setSelectedDate(pDate) {
     const pd = get(dateObject)
     selectedUnix.set(new pd(pDate).valueOf())
+    this.setViewModeToLowerAvailableLevel()
   },
   onSelectMonth(month) {
     const pd = get(dateObject)
@@ -85,7 +86,7 @@ export const actions = {
       .month(month)
       .valueOf()
     )
-    this.setViewMode('date')
+    this.setViewModeToLowerAvailableLevel()
     this.updateIsDirty(true)
   },
   onSelectYear(year) {
@@ -100,7 +101,7 @@ export const actions = {
       .year(year)
       .valueOf()
     )
-    this.setViewMode('month')
+    this.setViewModeToLowerAvailableLevel()
     this.updateIsDirty(true)
   },
   onSetHour(hour) {
@@ -129,12 +130,54 @@ export const actions = {
       .valueOf()
     )
   },
-  onChangeViewMode(viewMode) {
-    // click on center of toolbar
-    this.setViewMode(viewMode)
-  },
   setViewMode(mode) {
     viewMode.set(mode)
+  },
+  setViewModeToUpperAvailableLevel() {
+    let currentViewMode = get(viewMode)
+    let $config = get(config)
+    if (currentViewMode === 'time') {
+       if ($config.dayPicker.enabled) {
+         viewMode.set('date')
+       } else if ($config.monthPicker.enabled) {
+         viewMode.set('month')
+       } else if ($config.yearPicker.enabled) {
+         viewMode.set('year')
+       }
+    } else if (currentViewMode === 'date') {
+       if ($config.monthPicker.enabled) {
+         viewMode.set('month')
+       } else if ($config.yearPicker.enabled) {
+         viewMode.set('year')
+       }
+    } else if (currentViewMode === 'month') {
+       if ($config.yearPicker.enabled) {
+         viewMode.set('year')
+       }
+    }
+  },
+  setViewModeToLowerAvailableLevel() {
+    let currentViewMode = get(viewMode)
+    let $config = get(config)
+    if (currentViewMode === 'year') {
+       if ($config.monthPicker.enabled) {
+         viewMode.set('month')
+       } else if ($config.dayPicker.enabled) {
+         viewMode.set('date')
+       } else if ($config.timePicker.enabled) {
+         viewMode.set('time')
+       }
+    } else if (currentViewMode === 'month') {
+       if ($config.dayPicker.enabled) {
+         viewMode.set('date')
+       } else if ($config.timePicker.enabled) {
+         viewMode.set('time')
+       }
+    } else if (currentViewMode === 'date') {
+       if ($config.timePicker.enabled) {
+         viewMode.set('time')
+       }
+    }
   },
   updateIsDirty(value) {
     isDirty.set(value)

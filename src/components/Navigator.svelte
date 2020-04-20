@@ -33,8 +33,7 @@
 				<button 
 					out:fadeOut="{{duration: animateSpeed}}" 
 					in:fadeIn="{{duration: animateSpeed}}" 
-					class="pwt-date-navigator-button"
-					on:click={() => setViewMode("year")}>
+					class="pwt-date-navigator-button">
 					{startYear} - {startYear + 11}
 				</button>
 			{/if}

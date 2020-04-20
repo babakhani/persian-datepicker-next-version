@@ -159,10 +159,6 @@
 <style global lang="scss">
 	@import './theme.scss';
 	.pwt-date-time {
-		position: relative;
-		width: calc(100% - 20px) !important;
-		height: calc(100% - 220px) !important;
-		margin: 10px;
 		.pwt-date-time-section {
 			display: block;
 			height: 100%;

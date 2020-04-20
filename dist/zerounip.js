@@ -9357,23 +9357,11 @@ this['persian-datepicker-next-version'] = (function () {
     			$$inline: true
     		});
 
-    	const navigator = new Navigator({
-    			props: {
-    				viewMode: ctx.$viewMode,
-    				viewUnix: ctx.$viewUnix,
-    				selectedUnix: ctx.$selectedUnix
-    			},
-    			$$inline: true
-    		});
-
-    	navigator.$on("selectmode", ctx.setViewMode);
-    	navigator.$on("today", ctx.today);
-    	navigator.$on("next", ctx.navNext);
-    	navigator.$on("prev", ctx.navPrev);
-    	let if_block0 = ctx.$viewMode === "year" && create_if_block_4$1(ctx);
-    	let if_block1 = ctx.$viewMode === "month" && create_if_block_3$3(ctx);
-    	let if_block2 = ctx.$viewMode === "date" && create_if_block_2$3(ctx);
-    	let if_block3 = ctx.$viewMode === "time" && create_if_block_1$3(ctx);
+    	let if_block0 = ctx.$config.naviagtor.enabled && create_if_block_5$1(ctx);
+    	let if_block1 = ctx.$viewMode === "year" && create_if_block_4$1(ctx);
+    	let if_block2 = ctx.$viewMode === "month" && create_if_block_3$3(ctx);
+    	let if_block3 = ctx.$viewMode === "date" && create_if_block_2$3(ctx);
+    	let if_block4 = ctx.$viewMode === "time" && create_if_block_1$3(ctx);
 
     	const toolbox = new Toolbox({
     			props: {
@@ -9395,15 +9383,15 @@ this['persian-datepicker-next-version'] = (function () {
     			div = element("div");
     			create_component(infobox.$$.fragment);
     			t0 = space();
-    			create_component(navigator.$$.fragment);
-    			t1 = space();
     			if (if_block0) if_block0.c();
-    			t2 = space();
+    			t1 = space();
     			if (if_block1) if_block1.c();
-    			t3 = space();
+    			t2 = space();
     			if (if_block2) if_block2.c();
-    			t4 = space();
+    			t3 = space();
     			if (if_block3) if_block3.c();
+    			t4 = space();
+    			if (if_block4) if_block4.c();
     			t5 = space();
     			create_component(toolbox.$$.fragment);
     			attr_dev(div, "class", "pwt-datepicker");
@@ -9413,15 +9401,15 @@ this['persian-datepicker-next-version'] = (function () {
     			insert_dev(target, div, anchor);
     			mount_component(infobox, div, null);
     			append_dev(div, t0);
-    			mount_component(navigator, div, null);
-    			append_dev(div, t1);
     			if (if_block0) if_block0.m(div, null);
-    			append_dev(div, t2);
+    			append_dev(div, t1);
     			if (if_block1) if_block1.m(div, null);
-    			append_dev(div, t3);
+    			append_dev(div, t2);
     			if (if_block2) if_block2.m(div, null);
-    			append_dev(div, t4);
+    			append_dev(div, t3);
     			if (if_block3) if_block3.m(div, null);
+    			append_dev(div, t4);
+    			if (if_block4) if_block4.m(div, null);
     			append_dev(div, t5);
     			mount_component(toolbox, div, null);
     			ctx.div_binding(div);
@@ -9432,21 +9420,16 @@ this['persian-datepicker-next-version'] = (function () {
     			if (changed.$viewUnix) infobox_changes.viewUnix = ctx.$viewUnix;
     			if (changed.$selectedUnix) infobox_changes.selectedUnix = ctx.$selectedUnix;
     			infobox.$set(infobox_changes);
-    			const navigator_changes = {};
-    			if (changed.$viewMode) navigator_changes.viewMode = ctx.$viewMode;
-    			if (changed.$viewUnix) navigator_changes.viewUnix = ctx.$viewUnix;
-    			if (changed.$selectedUnix) navigator_changes.selectedUnix = ctx.$selectedUnix;
-    			navigator.$set(navigator_changes);
 
-    			if (ctx.$viewMode === "year") {
+    			if (ctx.$config.naviagtor.enabled) {
     				if (if_block0) {
     					if_block0.p(changed, ctx);
     					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_4$1(ctx);
+    					if_block0 = create_if_block_5$1(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
-    					if_block0.m(div, t2);
+    					if_block0.m(div, t1);
     				}
     			} else if (if_block0) {
     				group_outros();
@@ -9458,15 +9441,15 @@ this['persian-datepicker-next-version'] = (function () {
     				check_outros();
     			}
 
-    			if (ctx.$viewMode === "month") {
+    			if (ctx.$viewMode === "year") {
     				if (if_block1) {
     					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
     				} else {
-    					if_block1 = create_if_block_3$3(ctx);
+    					if_block1 = create_if_block_4$1(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
-    					if_block1.m(div, t3);
+    					if_block1.m(div, t2);
     				}
     			} else if (if_block1) {
     				group_outros();
@@ -9478,15 +9461,15 @@ this['persian-datepicker-next-version'] = (function () {
     				check_outros();
     			}
 
-    			if (ctx.$viewMode === "date") {
+    			if (ctx.$viewMode === "month") {
     				if (if_block2) {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_2$3(ctx);
+    					if_block2 = create_if_block_3$3(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
-    					if_block2.m(div, t4);
+    					if_block2.m(div, t3);
     				}
     			} else if (if_block2) {
     				group_outros();
@@ -9498,21 +9481,41 @@ this['persian-datepicker-next-version'] = (function () {
     				check_outros();
     			}
 
-    			if (ctx.$viewMode === "time") {
+    			if (ctx.$viewMode === "date") {
     				if (if_block3) {
     					if_block3.p(changed, ctx);
     					transition_in(if_block3, 1);
     				} else {
-    					if_block3 = create_if_block_1$3(ctx);
+    					if_block3 = create_if_block_2$3(ctx);
     					if_block3.c();
     					transition_in(if_block3, 1);
-    					if_block3.m(div, t5);
+    					if_block3.m(div, t4);
     				}
     			} else if (if_block3) {
     				group_outros();
 
     				transition_out(if_block3, 1, 1, () => {
     					if_block3 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.$viewMode === "time") {
+    				if (if_block4) {
+    					if_block4.p(changed, ctx);
+    					transition_in(if_block4, 1);
+    				} else {
+    					if_block4 = create_if_block_1$3(ctx);
+    					if_block4.c();
+    					transition_in(if_block4, 1);
+    					if_block4.m(div, t5);
+    				}
+    			} else if (if_block4) {
+    				group_outros();
+
+    				transition_out(if_block4, 1, 1, () => {
+    					if_block4 = null;
     				});
 
     				check_outros();
@@ -9527,32 +9530,32 @@ this['persian-datepicker-next-version'] = (function () {
     		i: function intro(local) {
     			if (current) return;
     			transition_in(infobox.$$.fragment, local);
-    			transition_in(navigator.$$.fragment, local);
     			transition_in(if_block0);
     			transition_in(if_block1);
     			transition_in(if_block2);
     			transition_in(if_block3);
+    			transition_in(if_block4);
     			transition_in(toolbox.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(infobox.$$.fragment, local);
-    			transition_out(navigator.$$.fragment, local);
     			transition_out(if_block0);
     			transition_out(if_block1);
     			transition_out(if_block2);
     			transition_out(if_block3);
+    			transition_out(if_block4);
     			transition_out(toolbox.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     			destroy_component(infobox);
-    			destroy_component(navigator);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
     			if (if_block3) if_block3.d();
+    			if (if_block4) if_block4.d();
     			destroy_component(toolbox);
     			ctx.div_binding(null);
     		}
@@ -9569,7 +9572,65 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
-    // (16:2) {#if $viewMode === 'year'}
+    // (8:2) {#if $config.naviagtor.enabled}
+    function create_if_block_5$1(ctx) {
+    	let current;
+
+    	const navigator = new Navigator({
+    			props: {
+    				viewMode: ctx.$viewMode,
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	navigator.$on("selectmode", ctx.setViewMode);
+    	navigator.$on("today", ctx.today);
+    	navigator.$on("next", ctx.navNext);
+    	navigator.$on("prev", ctx.navPrev);
+
+    	const block = {
+    		c: function create() {
+    			create_component(navigator.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(navigator, target, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const navigator_changes = {};
+    			if (changed.$viewMode) navigator_changes.viewMode = ctx.$viewMode;
+    			if (changed.$viewUnix) navigator_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) navigator_changes.selectedUnix = ctx.$selectedUnix;
+    			navigator.$set(navigator_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(navigator.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(navigator.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(navigator, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_5$1.name,
+    		type: "if",
+    		source: "(8:2) {#if $config.naviagtor.enabled}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (18:2) {#if $viewMode === 'year'}
     function create_if_block_4$1(ctx) {
     	let div;
     	let div_transition;
@@ -9589,7 +9650,7 @@ this['persian-datepicker-next-version'] = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(yearview.$$.fragment);
-    			add_location(div, file$7, 16, 3, 382);
+    			add_location(div, file$7, 18, 3, 432);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -9630,14 +9691,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_4$1.name,
     		type: "if",
-    		source: "(16:2) {#if $viewMode === 'year'}",
+    		source: "(18:2) {#if $viewMode === 'year'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (25:2) {#if $viewMode === 'month'}
+    // (27:2) {#if $viewMode === 'month'}
     function create_if_block_3$3(ctx) {
     	let div;
     	let div_transition;
@@ -9657,7 +9718,7 @@ this['persian-datepicker-next-version'] = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(monthview.$$.fragment);
-    			add_location(div, file$7, 25, 3, 588);
+    			add_location(div, file$7, 27, 3, 638);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -9698,14 +9759,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_3$3.name,
     		type: "if",
-    		source: "(25:2) {#if $viewMode === 'month'}",
+    		source: "(27:2) {#if $viewMode === 'month'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:2) {#if $viewMode === 'date'}
+    // (36:2) {#if $viewMode === 'date'}
     function create_if_block_2$3(ctx) {
     	let div;
     	let div_transition;
@@ -9727,7 +9788,7 @@ this['persian-datepicker-next-version'] = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(dateview.$$.fragment);
-    			add_location(div, file$7, 34, 3, 795);
+    			add_location(div, file$7, 36, 3, 845);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -9768,14 +9829,14 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_2$3.name,
     		type: "if",
-    		source: "(34:2) {#if $viewMode === 'date'}",
+    		source: "(36:2) {#if $viewMode === 'date'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (45:2) {#if $viewMode === 'time'}
+    // (47:2) {#if $viewMode === 'time'}
     function create_if_block_1$3(ctx) {
     	let current;
 
@@ -9817,7 +9878,7 @@ this['persian-datepicker-next-version'] = (function () {
     		block,
     		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(45:2) {#if $viewMode === 'time'}",
+    		source: "(47:2) {#if $viewMode === 'time'}",
     		ctx
     	});
 
@@ -9913,11 +9974,14 @@ this['persian-datepicker-next-version'] = (function () {
     function instance$8($$self, $$props, $$invalidate) {
     	let $viewUnix;
     	let $selectedUnix;
+    	let $config;
     	let $viewMode;
     	validate_store(viewUnix, "viewUnix");
     	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
     	validate_store(selectedUnix, "selectedUnix");
     	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	validate_store(viewMode, "viewMode");
     	component_subscribe($$self, viewMode, $$value => $$invalidate("$viewMode", $viewMode = $$value));
     	let { options = {} } = $$props;
@@ -10023,6 +10087,7 @@ this['persian-datepicker-next-version'] = (function () {
     			isVisbile,
     			$viewUnix,
     			$selectedUnix,
+    			$config,
     			$viewMode
     		};
     	};
@@ -10034,6 +10099,7 @@ this['persian-datepicker-next-version'] = (function () {
     		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
     		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
     		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
+    		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$viewMode" in $$props) viewMode.set($viewMode = $$props.$viewMode);
     	};
 
@@ -10055,6 +10121,7 @@ this['persian-datepicker-next-version'] = (function () {
     		navPrev,
     		$viewUnix,
     		$selectedUnix,
+    		$config,
     		$viewMode,
     		div_binding
     	};

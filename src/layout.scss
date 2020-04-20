@@ -2,17 +2,16 @@
   display: none;
   font-family: "IRANSansWeb", tahoma;
   direction: ltr;
-  padding: 10px;
   color: #333333;
   border: 1px solid #ededed;
   box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .5);
   position: relative;
   width: 300px;
-  height: 460px;
+  max-height: 470px;
   border-radius: 6px;
   overflow: hidden;
   margin: 0 auto;
-
+  padding: 0;
 	*:active,
 	*:focus,
   *:hover {
@@ -26,7 +25,9 @@
   .pwt-date-toolbox,
   .pwt-date-time,
   .pwt-date-view {
-    position: absolute;
+    position: relative;
+    width: 100%;
+    float: left;
   }
 
   .pwt-date-year-view,
@@ -34,14 +35,9 @@
   .pwt-date-time,
   .pwt-date-view {
     background: white;
-    right: 0;
-    left: 0; 
     width: calc(100% - 20px);
     padding-right: 10px;
     padding-left: 10px;
-    bottom: 40px;
-    top: 140px;
-    height: calc(100% - 160px);
   }
 
   .pwt-date-toolbox
@@ -63,11 +59,19 @@
     height: 100px;
   }
 
+  > .pwt-date-time,
+  > .pwt-datepicker-picker-section {
+    width: calc(100% - 20px);
+    padding-right: 10px;
+    padding-left: 10px;
+    float: left;
+    height: 280px;
+  }
+
   .pwt-date-navigator {
     width: calc(100% - 20px);
     padding-right: 10px;
     padding-left: 10px;
-    top: 100px;
     height: 48px;
     right: 0;
     left: 0;
@@ -85,8 +89,6 @@
     }
   }
   .pwt-date-view {
-    height: calc(100% - 200px);
-    bottom: 40px;
     table {
       width: 100%;
       border-spacing: 0;

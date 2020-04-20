@@ -4966,136 +4966,8 @@ this.zerounip = (function () {
         /**
          * @description by default datepicker have a template string, and you can overwrite it simply by replace string in config.
          * @type string
-         * @example
-         * <div id="plotId" class="datepicker-plot-area datepicker-plot-area-inline-view">
-         {{#navigator.enabled}}
-         <div class="navigator">
-         <div class="datepicker-header">
-         <div class="btn btn-next">{{navigator.text.btnNextText}}</div>
-         <div class="btn btn-switch">{{ navigator.switch.text }}</div>
-         <div class="btn btn-prev">{{navigator.text.btnPrevText}}</div>
-         </div>
-         </div>
-         {{/navigator.enabled}}
-         <div class="datepicker-grid-view" >
-         {{#days.enabled}}
-         {{#days.viewMode}}
-         <div class="datepicker-day-view" >
-         <div class="month-grid-box">
-         <div class="header">
-         <div class="title"></div>
-         <div class="header-row">
-         <div class="header-row-cell">ش</div>
-         <div class="header-row-cell">ی</div>
-         <div class="header-row-cell">د</div>
-         <div class="header-row-cell">س</div>
-         <div class="header-row-cell">چ</div>
-         <div class="header-row-cell">پ</div>
-         <div class="header-row-cell">ج</div>
-         </div>
-         </div>
-         <table cellspacing="0" class="table-days">
-         <tbody>
-         {{#days.list}}
-
-         <tr>
-         {{#.}}
-
-         {{#enabled}}
-         <td data-unix="{{dataUnix}}" ><span  class="{{#otherMonth}}other-month{{/otherMonth}} {{#selected}}selected{{/selected}}">{{title}}</span></td>
-         {{/enabled}}
-         {{^enabled}}
-         <td data-unix="{{dataUnix}}" class="disabled"><span class="{{#otherMonth}}other-month{{/otherMonth}}">{{title}}</span></td>
-         {{/enabled}}
-
-         {{/.}}
-         </tr>
-         {{/days.list}}
-         </tbody>
-         </table>
-         </div>
-         </div>
-         {{/days.viewMode}}
-         {{/days.enabled}}
-
-         {{#month.enabled}}
-         {{#month.viewMode}}
-         <div class="datepicker-month-view">
-         {{#month.list}}
-         {{#enabled}}
-         <div data-month="{{dataMonth}}" class="month-item {{#selected}}selected{{/selected}}">{{title}}</small></div>
-         {{/enabled}}
-         {{^enabled}}
-         <div data-month="{{dataMonth}}" class="month-item month-item-disable {{#selected}}selected{{/selected}}">{{title}}</small></div>
-         {{/enabled}}
-         {{/month.list}}
-         </div>
-         {{/month.viewMode}}
-         {{/month.enabled}}
-
-         {{#year.enabled }}
-         {{#year.viewMode }}
-         <div class="datepicker-year-view" >
-         {{#year.list}}
-         {{#enabled}}
-         <div data-year="{{dataYear}}" class="year-item {{#selected}}selected{{/selected}}">{{title}}</div>
-         {{/enabled}}
-         {{^enabled}}
-         <div data-year="{{dataYear}}" class="year-item year-item-disable {{#selected}}selected{{/selected}}">{{title}}</div>
-         {{/enabled}}
-         {{/year.list}}
-         </div>
-         {{/year.viewMode }}
-         {{/year.enabled }}
-
-         </div>
-         {{#time}}
-         {{#enabled}}
-         <div class="datepicker-time-view">
-         {{#hour.enabled}}
-         <div class="hour time-segment" data-time-key="hour">
-         <div class="up-btn" data-time-key="hour">▲</div>
-         <input value="{{hour.title}}" type="text" placeholder="hour" class="hour-input">
-         <div class="down-btn" data-time-key="hour">▼</div>
-         </div>
-         <div class="divider">:</div>
-         {{/hour.enabled}}
-         {{#minute.enabled}}
-         <div class="minute time-segment" data-time-key="minute" >
-         <div class="up-btn" data-time-key="minute">▲</div>
-         <input value="{{minute.title}}" type="text" placeholder="minute" class="minute-input">
-         <div class="down-btn" data-time-key="minute">▼</div>
-         </div>
-         <div class="divider second-divider">:</div>
-         {{/minute.enabled}}
-         {{#second.enabled}}
-         <div class="second time-segment" data-time-key="second"  >
-         <div class="up-btn" data-time-key="second" >▲</div>
-         <input value="{{second.title}}"  type="text" placeholder="second" class="second-input">
-         <div class="down-btn" data-time-key="second" >▼</div>
-         </div>
-         <div class="divider meridian-divider"></div>
-         <div class="divider meridian-divider"></div>
-         {{/second.enabled}}
-         {{#meridian.enabled}}
-         <div class="meridian time-segment" data-time-key="meridian" >
-         <div class="up-btn" data-time-key="meridian">▲</div>
-         <input value="{{meridian.title}}" type="text" class="meridian-input">
-         <div class="down-btn" data-time-key="meridian">▼</div>
-         </div>
-         {{/meridian.enabled}}
-         </div>
-         {{/enabled}}
-         {{/time}}
-
-         {{#toolbox}}
-         {{#enabled}}
-         <div class="toolbox ">
-         <div class="btn-today">{{text.btnToday}}</div>
-         </div>
-         {{/enabled}}
-         {{/toolbox}}
-         </div>
+         * @deprected 2.0.0
+         * @removed 2.0.0
          */
         'template': null,
 
@@ -5193,6 +5065,7 @@ this.zerounip = (function () {
       setSelectedDate(pDate) {
         const pd = get_store_value(dateObject);
         selectedUnix.set(new pd(pDate).valueOf());
+        this.setViewModeToLowerAvailableLevel();
       },
       onSelectMonth(month) {
         const pd = get_store_value(dateObject);
@@ -5206,7 +5079,7 @@ this.zerounip = (function () {
           .month(month)
           .valueOf()
         );
-        this.setViewMode('date');
+        this.setViewModeToLowerAvailableLevel();
         this.updateIsDirty(true);
       },
       onSelectYear(year) {
@@ -5221,7 +5094,7 @@ this.zerounip = (function () {
           .year(year)
           .valueOf()
         );
-        this.setViewMode('month');
+        this.setViewModeToLowerAvailableLevel();
         this.updateIsDirty(true);
       },
       onSetHour(hour) {
@@ -5250,12 +5123,54 @@ this.zerounip = (function () {
           .valueOf()
         );
       },
-      onChangeViewMode(viewMode) {
-        // click on center of toolbar
-        this.setViewMode(viewMode);
-      },
       setViewMode(mode) {
         viewMode.set(mode);
+      },
+      setViewModeToUpperAvailableLevel() {
+        let currentViewMode = get_store_value(viewMode);
+        let $config = get_store_value(config);
+        if (currentViewMode === 'time') {
+           if ($config.dayPicker.enabled) {
+             viewMode.set('date');
+           } else if ($config.monthPicker.enabled) {
+             viewMode.set('month');
+           } else if ($config.yearPicker.enabled) {
+             viewMode.set('year');
+           }
+        } else if (currentViewMode === 'date') {
+           if ($config.monthPicker.enabled) {
+             viewMode.set('month');
+           } else if ($config.yearPicker.enabled) {
+             viewMode.set('year');
+           }
+        } else if (currentViewMode === 'month') {
+           if ($config.yearPicker.enabled) {
+             viewMode.set('year');
+           }
+        }
+      },
+      setViewModeToLowerAvailableLevel() {
+        let currentViewMode = get_store_value(viewMode);
+        let $config = get_store_value(config);
+        if (currentViewMode === 'year') {
+           if ($config.monthPicker.enabled) {
+             viewMode.set('month');
+           } else if ($config.dayPicker.enabled) {
+             viewMode.set('date');
+           } else if ($config.timePicker.enabled) {
+             viewMode.set('time');
+           }
+        } else if (currentViewMode === 'month') {
+           if ($config.dayPicker.enabled) {
+             viewMode.set('date');
+           } else if ($config.timePicker.enabled) {
+             viewMode.set('time');
+           }
+        } else if (currentViewMode === 'date') {
+           if ($config.timePicker.enabled) {
+             viewMode.set('time');
+           }
+        }
       },
       updateIsDirty(value) {
         isDirty.set(value);
@@ -7578,7 +7493,6 @@ this.zerounip = (function () {
     	let button_intro;
     	let button_outro;
     	let current;
-    	let dispose;
 
     	const block = {
     		c: function create() {
@@ -7588,7 +7502,6 @@ this.zerounip = (function () {
     			t2 = text(t2_value);
     			attr_dev(button, "class", "pwt-date-navigator-button");
     			add_location(button, file$4, 32, 4, 1159);
-    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -7620,7 +7533,6 @@ this.zerounip = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button);
     			if (detaching && button_outro) button_outro.end();
-    			dispose();
     		}
     	};
 
@@ -7635,7 +7547,7 @@ this.zerounip = (function () {
     	return block;
     }
 
-    // (42:2) {#if viewMode === 'month'}
+    // (41:2) {#if viewMode === 'month'}
     function create_if_block_4(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7691,14 +7603,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(42:2) {#if viewMode === 'month'}",
+    		source: "(41:2) {#if viewMode === 'month'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (43:3) {#if visible}
+    // (42:3) {#if visible}
     function create_if_block_5(ctx) {
     	let button;
     	let t;
@@ -7712,8 +7624,8 @@ this.zerounip = (function () {
     			button = element("button");
     			t = text(ctx.selectedYear);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 43, 4, 1459);
-    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    			add_location(button, file$4, 42, 4, 1417);
+    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -7750,14 +7662,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(43:3) {#if visible}",
+    		source: "(42:3) {#if visible}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (53:2) {#if viewMode === 'date'}
+    // (52:2) {#if viewMode === 'date'}
     function create_if_block_2$1(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7813,14 +7725,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(53:2) {#if viewMode === 'date'}",
+    		source: "(52:2) {#if viewMode === 'date'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (54:3) {#if visible}
+    // (53:3) {#if visible}
     function create_if_block_3$1(ctx) {
     	let button;
     	let t0;
@@ -7838,8 +7750,8 @@ this.zerounip = (function () {
     			t1 = space();
     			t2 = text(ctx.visualYear);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 54, 4, 1742);
-    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
+    			add_location(button, file$4, 53, 4, 1700);
+    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -7879,14 +7791,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_3$1.name,
     		type: "if",
-    		source: "(54:3) {#if visible}",
+    		source: "(53:3) {#if visible}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (65:2) {#if viewMode === 'time'}
+    // (64:2) {#if viewMode === 'time'}
     function create_if_block$3(ctx) {
     	let if_block_anchor;
     	let current;
@@ -7942,14 +7854,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(65:2) {#if viewMode === 'time'}",
+    		source: "(64:2) {#if viewMode === 'time'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (66:3) {#if visible}
+    // (65:3) {#if visible}
     function create_if_block_1$1(ctx) {
     	let button;
     	let t0;
@@ -7967,8 +7879,8 @@ this.zerounip = (function () {
     			t1 = space();
     			t2 = text(ctx.selectedDate);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 66, 4, 2056);
-    			dispose = listen_dev(button, "click", ctx.click_handler_3, false, false, false);
+    			add_location(button, file$4, 65, 4, 2014);
+    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -8008,7 +7920,7 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(66:3) {#if visible}",
+    		source: "(65:3) {#if visible}",
     		ctx
     	});
 
@@ -8254,9 +8166,8 @@ this.zerounip = (function () {
     	});
 
     	const click_handler = () => setViewMode("year");
-    	const click_handler_1 = () => setViewMode("year");
-    	const click_handler_2 = () => setViewMode("month");
-    	const click_handler_3 = () => setViewMode("date");
+    	const click_handler_1 = () => setViewMode("month");
+    	const click_handler_2 = () => setViewMode("date");
 
     	$$self.$set = $$props => {
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
@@ -8358,8 +8269,7 @@ this.zerounip = (function () {
     		selectedDate,
     		click_handler,
     		click_handler_1,
-    		click_handler_2,
-    		click_handler_3
+    		click_handler_2
     	};
     }
 
@@ -9338,113 +9248,62 @@ this.zerounip = (function () {
 
     // (1:0) {#if isVisbile}
     function create_if_block$6(ctx) {
-    	let div;
+    	let div1;
     	let t0;
     	let t1;
+    	let div0;
     	let t2;
     	let t3;
-    	let t4;
-    	let t5;
     	let current;
-
-    	const infobox = new Infobox({
-    			props: {
-    				viewUnix: ctx.$viewUnix,
-    				selectedUnix: ctx.$selectedUnix
-    			},
-    			$$inline: true
-    		});
-
-    	const navigator = new Navigator({
-    			props: {
-    				viewMode: ctx.$viewMode,
-    				viewUnix: ctx.$viewUnix,
-    				selectedUnix: ctx.$selectedUnix
-    			},
-    			$$inline: true
-    		});
-
-    	navigator.$on("selectmode", ctx.setViewMode);
-    	navigator.$on("today", ctx.today);
-    	navigator.$on("next", ctx.navNext);
-    	navigator.$on("prev", ctx.navPrev);
-    	let if_block0 = ctx.$viewMode === "year" && create_if_block_4$1(ctx);
-    	let if_block1 = ctx.$viewMode === "month" && create_if_block_3$3(ctx);
-    	let if_block2 = ctx.$viewMode === "date" && create_if_block_2$3(ctx);
-    	let if_block3 = ctx.$viewMode === "time" && create_if_block_1$3(ctx);
-
-    	const toolbox = new Toolbox({
-    			props: {
-    				viewMode: ctx.$viewMode,
-    				viewUnix: ctx.$viewUnix,
-    				selectedUnix: ctx.$selectedUnix
-    			},
-    			$$inline: true
-    		});
-
-    	toolbox.$on("setcalendar", ctx.setcalendar);
-    	toolbox.$on("selectmode", ctx.setViewMode);
-    	toolbox.$on("today", ctx.today);
-    	toolbox.$on("next", ctx.navNext);
-    	toolbox.$on("prev", ctx.navPrev);
+    	let if_block0 = ctx.$config.infobox.enabled && create_if_block_8$1(ctx);
+    	let if_block1 = ctx.$config.navigator.enabled && create_if_block_7$1(ctx);
+    	let if_block2 = !ctx.$config.onlyTimePicker && create_if_block_3$3(ctx);
+    	let if_block3 = (ctx.$viewMode === "time" && ctx.$config.timePicker.enabled || ctx.$config.onlyTimePicker) && create_if_block_2$3(ctx);
+    	let if_block4 = ctx.$config.toolbox.enabled && create_if_block_1$3(ctx);
 
     	const block = {
     		c: function create() {
-    			div = element("div");
-    			create_component(infobox.$$.fragment);
-    			t0 = space();
-    			create_component(navigator.$$.fragment);
-    			t1 = space();
+    			div1 = element("div");
     			if (if_block0) if_block0.c();
-    			t2 = space();
+    			t0 = space();
     			if (if_block1) if_block1.c();
-    			t3 = space();
+    			t1 = space();
+    			div0 = element("div");
     			if (if_block2) if_block2.c();
-    			t4 = space();
+    			t2 = space();
     			if (if_block3) if_block3.c();
-    			t5 = space();
-    			create_component(toolbox.$$.fragment);
-    			attr_dev(div, "class", "pwt-datepicker");
-    			add_location(div, file$7, 1, 1, 17);
+    			t3 = space();
+    			if (if_block4) if_block4.c();
+    			attr_dev(div0, "class", "pwt-datepicker-picker-section");
+    			add_location(div0, file$7, 19, 3, 477);
+    			attr_dev(div1, "class", "pwt-datepicker");
+    			add_location(div1, file$7, 1, 1, 17);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			mount_component(infobox, div, null);
-    			append_dev(div, t0);
-    			mount_component(navigator, div, null);
-    			append_dev(div, t1);
-    			if (if_block0) if_block0.m(div, null);
-    			append_dev(div, t2);
-    			if (if_block1) if_block1.m(div, null);
-    			append_dev(div, t3);
-    			if (if_block2) if_block2.m(div, null);
-    			append_dev(div, t4);
-    			if (if_block3) if_block3.m(div, null);
-    			append_dev(div, t5);
-    			mount_component(toolbox, div, null);
-    			ctx.div_binding(div);
+    			insert_dev(target, div1, anchor);
+    			if (if_block0) if_block0.m(div1, null);
+    			append_dev(div1, t0);
+    			if (if_block1) if_block1.m(div1, null);
+    			append_dev(div1, t1);
+    			append_dev(div1, div0);
+    			if (if_block2) if_block2.m(div0, null);
+    			append_dev(div0, t2);
+    			if (if_block3) if_block3.m(div0, null);
+    			append_dev(div1, t3);
+    			if (if_block4) if_block4.m(div1, null);
+    			ctx.div1_binding(div1);
     			current = true;
     		},
     		p: function update(changed, ctx) {
-    			const infobox_changes = {};
-    			if (changed.$viewUnix) infobox_changes.viewUnix = ctx.$viewUnix;
-    			if (changed.$selectedUnix) infobox_changes.selectedUnix = ctx.$selectedUnix;
-    			infobox.$set(infobox_changes);
-    			const navigator_changes = {};
-    			if (changed.$viewMode) navigator_changes.viewMode = ctx.$viewMode;
-    			if (changed.$viewUnix) navigator_changes.viewUnix = ctx.$viewUnix;
-    			if (changed.$selectedUnix) navigator_changes.selectedUnix = ctx.$selectedUnix;
-    			navigator.$set(navigator_changes);
-
-    			if (ctx.$viewMode === "year") {
+    			if (ctx.$config.infobox.enabled) {
     				if (if_block0) {
     					if_block0.p(changed, ctx);
     					transition_in(if_block0, 1);
     				} else {
-    					if_block0 = create_if_block_4$1(ctx);
+    					if_block0 = create_if_block_8$1(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
-    					if_block0.m(div, t2);
+    					if_block0.m(div1, t0);
     				}
     			} else if (if_block0) {
     				group_outros();
@@ -9456,15 +9315,15 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			if (ctx.$viewMode === "month") {
+    			if (ctx.$config.navigator.enabled) {
     				if (if_block1) {
     					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
     				} else {
-    					if_block1 = create_if_block_3$3(ctx);
+    					if_block1 = create_if_block_7$1(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
-    					if_block1.m(div, t3);
+    					if_block1.m(div1, t1);
     				}
     			} else if (if_block1) {
     				group_outros();
@@ -9476,15 +9335,15 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			if (ctx.$viewMode === "date") {
+    			if (!ctx.$config.onlyTimePicker) {
     				if (if_block2) {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_2$3(ctx);
+    					if_block2 = create_if_block_3$3(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
-    					if_block2.m(div, t4);
+    					if_block2.m(div0, t2);
     				}
     			} else if (if_block2) {
     				group_outros();
@@ -9496,15 +9355,15 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			if (ctx.$viewMode === "time") {
+    			if (ctx.$viewMode === "time" && ctx.$config.timePicker.enabled || ctx.$config.onlyTimePicker) {
     				if (if_block3) {
     					if_block3.p(changed, ctx);
     					transition_in(if_block3, 1);
     				} else {
-    					if_block3 = create_if_block_1$3(ctx);
+    					if_block3 = create_if_block_2$3(ctx);
     					if_block3.c();
     					transition_in(if_block3, 1);
-    					if_block3.m(div, t5);
+    					if_block3.m(div0, null);
     				}
     			} else if (if_block3) {
     				group_outros();
@@ -9516,43 +9375,51 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			const toolbox_changes = {};
-    			if (changed.$viewMode) toolbox_changes.viewMode = ctx.$viewMode;
-    			if (changed.$viewUnix) toolbox_changes.viewUnix = ctx.$viewUnix;
-    			if (changed.$selectedUnix) toolbox_changes.selectedUnix = ctx.$selectedUnix;
-    			toolbox.$set(toolbox_changes);
+    			if (ctx.$config.toolbox.enabled) {
+    				if (if_block4) {
+    					if_block4.p(changed, ctx);
+    					transition_in(if_block4, 1);
+    				} else {
+    					if_block4 = create_if_block_1$3(ctx);
+    					if_block4.c();
+    					transition_in(if_block4, 1);
+    					if_block4.m(div1, null);
+    				}
+    			} else if (if_block4) {
+    				group_outros();
+
+    				transition_out(if_block4, 1, 1, () => {
+    					if_block4 = null;
+    				});
+
+    				check_outros();
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(infobox.$$.fragment, local);
-    			transition_in(navigator.$$.fragment, local);
     			transition_in(if_block0);
     			transition_in(if_block1);
     			transition_in(if_block2);
     			transition_in(if_block3);
-    			transition_in(toolbox.$$.fragment, local);
+    			transition_in(if_block4);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(infobox.$$.fragment, local);
-    			transition_out(navigator.$$.fragment, local);
     			transition_out(if_block0);
     			transition_out(if_block1);
     			transition_out(if_block2);
     			transition_out(if_block3);
-    			transition_out(toolbox.$$.fragment, local);
+    			transition_out(if_block4);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			destroy_component(infobox);
-    			destroy_component(navigator);
+    			if (detaching) detach_dev(div1);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
     			if (if_block3) if_block3.d();
-    			destroy_component(toolbox);
-    			ctx.div_binding(null);
+    			if (if_block4) if_block4.d();
+    			ctx.div1_binding(null);
     		}
     	};
 
@@ -9567,8 +9434,240 @@ this.zerounip = (function () {
     	return block;
     }
 
-    // (16:2) {#if $viewMode === 'year'}
-    function create_if_block_4$1(ctx) {
+    // (5:2) {#if $config.infobox.enabled}
+    function create_if_block_8$1(ctx) {
+    	let current;
+
+    	const infobox = new Infobox({
+    			props: {
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(infobox.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(infobox, target, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const infobox_changes = {};
+    			if (changed.$viewUnix) infobox_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) infobox_changes.selectedUnix = ctx.$selectedUnix;
+    			infobox.$set(infobox_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(infobox.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(infobox.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(infobox, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_8$1.name,
+    		type: "if",
+    		source: "(5:2) {#if $config.infobox.enabled}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (10:3) {#if $config.navigator.enabled}
+    function create_if_block_7$1(ctx) {
+    	let current;
+
+    	const navigator = new Navigator({
+    			props: {
+    				viewMode: ctx.$viewMode,
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	navigator.$on("selectmode", ctx.setViewModeToUpperAvailableLevel);
+    	navigator.$on("today", ctx.today);
+    	navigator.$on("next", ctx.navNext);
+    	navigator.$on("prev", ctx.navPrev);
+
+    	const block = {
+    		c: function create() {
+    			create_component(navigator.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(navigator, target, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const navigator_changes = {};
+    			if (changed.$viewMode) navigator_changes.viewMode = ctx.$viewMode;
+    			if (changed.$viewUnix) navigator_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) navigator_changes.selectedUnix = ctx.$selectedUnix;
+    			navigator.$set(navigator_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(navigator.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(navigator.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(navigator, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_7$1.name,
+    		type: "if",
+    		source: "(10:3) {#if $config.navigator.enabled}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (22:4) {#if !$config.onlyTimePicker}
+    function create_if_block_3$3(ctx) {
+    	let t0;
+    	let t1;
+    	let if_block2_anchor;
+    	let current;
+    	let if_block0 = ctx.$viewMode === "year" && ctx.$config.yearPicker.enabled && create_if_block_6$1(ctx);
+    	let if_block1 = ctx.$viewMode === "month" && ctx.$config.monthPicker.enabled && create_if_block_5$1(ctx);
+    	let if_block2 = ctx.$viewMode === "date" && ctx.$config.dayPicker.enabled && create_if_block_4$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block0) if_block0.c();
+    			t0 = space();
+    			if (if_block1) if_block1.c();
+    			t1 = space();
+    			if (if_block2) if_block2.c();
+    			if_block2_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block0) if_block0.m(target, anchor);
+    			insert_dev(target, t0, anchor);
+    			if (if_block1) if_block1.m(target, anchor);
+    			insert_dev(target, t1, anchor);
+    			if (if_block2) if_block2.m(target, anchor);
+    			insert_dev(target, if_block2_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (ctx.$viewMode === "year" && ctx.$config.yearPicker.enabled) {
+    				if (if_block0) {
+    					if_block0.p(changed, ctx);
+    					transition_in(if_block0, 1);
+    				} else {
+    					if_block0 = create_if_block_6$1(ctx);
+    					if_block0.c();
+    					transition_in(if_block0, 1);
+    					if_block0.m(t0.parentNode, t0);
+    				}
+    			} else if (if_block0) {
+    				group_outros();
+
+    				transition_out(if_block0, 1, 1, () => {
+    					if_block0 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.$viewMode === "month" && ctx.$config.monthPicker.enabled) {
+    				if (if_block1) {
+    					if_block1.p(changed, ctx);
+    					transition_in(if_block1, 1);
+    				} else {
+    					if_block1 = create_if_block_5$1(ctx);
+    					if_block1.c();
+    					transition_in(if_block1, 1);
+    					if_block1.m(t1.parentNode, t1);
+    				}
+    			} else if (if_block1) {
+    				group_outros();
+
+    				transition_out(if_block1, 1, 1, () => {
+    					if_block1 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.$viewMode === "date" && ctx.$config.dayPicker.enabled) {
+    				if (if_block2) {
+    					if_block2.p(changed, ctx);
+    					transition_in(if_block2, 1);
+    				} else {
+    					if_block2 = create_if_block_4$1(ctx);
+    					if_block2.c();
+    					transition_in(if_block2, 1);
+    					if_block2.m(if_block2_anchor.parentNode, if_block2_anchor);
+    				}
+    			} else if (if_block2) {
+    				group_outros();
+
+    				transition_out(if_block2, 1, 1, () => {
+    					if_block2 = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block0);
+    			transition_in(if_block1);
+    			transition_in(if_block2);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block0);
+    			transition_out(if_block1);
+    			transition_out(if_block2);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block0) if_block0.d(detaching);
+    			if (detaching) detach_dev(t0);
+    			if (if_block1) if_block1.d(detaching);
+    			if (detaching) detach_dev(t1);
+    			if (if_block2) if_block2.d(detaching);
+    			if (detaching) detach_dev(if_block2_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3$3.name,
+    		type: "if",
+    		source: "(22:4) {#if !$config.onlyTimePicker}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (23:5) {#if $viewMode === 'year' && $config.yearPicker.enabled}
+    function create_if_block_6$1(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -9587,7 +9686,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(yearview.$$.fragment);
-    			add_location(div, file$7, 16, 3, 382);
+    			add_location(div, file$7, 23, 6, 627);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -9626,17 +9725,17 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4$1.name,
+    		id: create_if_block_6$1.name,
     		type: "if",
-    		source: "(16:2) {#if $viewMode === 'year'}",
+    		source: "(23:5) {#if $viewMode === 'year' && $config.yearPicker.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (25:2) {#if $viewMode === 'month'}
-    function create_if_block_3$3(ctx) {
+    // (32:5) {#if $viewMode === 'month' && $config.monthPicker.enabled}
+    function create_if_block_5$1(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -9655,7 +9754,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(monthview.$$.fragment);
-    			add_location(div, file$7, 25, 3, 588);
+    			add_location(div, file$7, 32, 6, 891);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -9694,17 +9793,17 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3$3.name,
+    		id: create_if_block_5$1.name,
     		type: "if",
-    		source: "(25:2) {#if $viewMode === 'month'}",
+    		source: "(32:5) {#if $viewMode === 'month' && $config.monthPicker.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:2) {#if $viewMode === 'date'}
-    function create_if_block_2$3(ctx) {
+    // (41:5) {#if $viewMode === 'date' && $config.dayPicker.enabled}
+    function create_if_block_4$1(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -9725,7 +9824,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(dateview.$$.fragment);
-    			add_location(div, file$7, 34, 3, 795);
+    			add_location(div, file$7, 41, 6, 1154);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -9764,17 +9863,19 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$3.name,
+    		id: create_if_block_4$1.name,
     		type: "if",
-    		source: "(34:2) {#if $viewMode === 'date'}",
+    		source: "(41:5) {#if $viewMode === 'date' && $config.dayPicker.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (45:2) {#if $viewMode === 'time'}
-    function create_if_block_1$3(ctx) {
+    // (53:4) {#if ($viewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
+    function create_if_block_2$3(ctx) {
+    	let div;
+    	let div_intro;
     	let current;
 
     	const timeview = new TimeView({
@@ -9786,10 +9887,13 @@ this.zerounip = (function () {
 
     	const block = {
     		c: function create() {
+    			div = element("div");
     			create_component(timeview.$$.fragment);
+    			add_location(div, file$7, 53, 5, 1511);
     		},
     		m: function mount(target, anchor) {
-    			mount_component(timeview, target, anchor);
+    			insert_dev(target, div, anchor);
+    			mount_component(timeview, div, null);
     			current = true;
     		},
     		p: function update(changed, ctx) {
@@ -9800,6 +9904,14 @@ this.zerounip = (function () {
     		i: function intro(local) {
     			if (current) return;
     			transition_in(timeview.$$.fragment, local);
+
+    			if (!div_intro) {
+    				add_render_callback(() => {
+    					div_intro = create_in_transition(div, fade, { duration: 500 });
+    					div_intro.start();
+    				});
+    			}
+
     			current = true;
     		},
     		o: function outro(local) {
@@ -9807,7 +9919,67 @@ this.zerounip = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(timeview, detaching);
+    			if (detaching) detach_dev(div);
+    			destroy_component(timeview);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$3.name,
+    		type: "if",
+    		source: "(53:4) {#if ($viewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (62:3) {#if $config.toolbox.enabled}
+    function create_if_block_1$3(ctx) {
+    	let current;
+
+    	const toolbox = new Toolbox({
+    			props: {
+    				viewMode: ctx.$viewMode,
+    				viewUnix: ctx.$viewUnix,
+    				selectedUnix: ctx.$selectedUnix
+    			},
+    			$$inline: true
+    		});
+
+    	toolbox.$on("setcalendar", ctx.setcalendar);
+    	toolbox.$on("selectmode", ctx.setViewMode);
+    	toolbox.$on("today", ctx.today);
+    	toolbox.$on("next", ctx.navNext);
+    	toolbox.$on("prev", ctx.navPrev);
+
+    	const block = {
+    		c: function create() {
+    			create_component(toolbox.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(toolbox, target, anchor);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			const toolbox_changes = {};
+    			if (changed.$viewMode) toolbox_changes.viewMode = ctx.$viewMode;
+    			if (changed.$viewUnix) toolbox_changes.viewUnix = ctx.$viewUnix;
+    			if (changed.$selectedUnix) toolbox_changes.selectedUnix = ctx.$selectedUnix;
+    			toolbox.$set(toolbox_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toolbox.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toolbox.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(toolbox, detaching);
     		}
     	};
 
@@ -9815,7 +9987,7 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(45:2) {#if $viewMode === 'time'}",
+    		source: "(62:3) {#if $config.toolbox.enabled}",
     		ctx
     	});
 
@@ -9909,9 +10081,12 @@ this.zerounip = (function () {
     }
 
     function instance$8($$self, $$props, $$invalidate) {
+    	let $config;
     	let $viewUnix;
     	let $selectedUnix;
     	let $viewMode;
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	validate_store(viewUnix, "viewUnix");
     	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
     	validate_store(selectedUnix, "selectedUnix");
@@ -9964,6 +10139,10 @@ this.zerounip = (function () {
     		dispatcher("setViewMode")(event.detail);
     	};
 
+    	const setViewModeToUpperAvailableLevel = function () {
+    		dispatcher("setViewModeToUpperAvailableLevel")();
+    	};
+
     	const setcalendar = function (event) {
     		dispatcher("onSetCalendar")(event.detail);
     	};
@@ -10002,7 +10181,7 @@ this.zerounip = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	function div_binding($$value) {
+    	function div1_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
     			$$invalidate("plotarea", plotarea = $$value);
     		});
@@ -10019,6 +10198,7 @@ this.zerounip = (function () {
     			originalContainer,
     			plotarea,
     			isVisbile,
+    			$config,
     			$viewUnix,
     			$selectedUnix,
     			$viewMode
@@ -10030,6 +10210,7 @@ this.zerounip = (function () {
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
     		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
     		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
+    		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
     		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
     		if ("$viewMode" in $$props) viewMode.set($viewMode = $$props.$viewMode);
@@ -10043,6 +10224,7 @@ this.zerounip = (function () {
     		setvisibility,
     		setInitialValue,
     		setViewMode,
+    		setViewModeToUpperAvailableLevel,
     		setcalendar,
     		onSelectDate,
     		onSelectTime,
@@ -10051,10 +10233,11 @@ this.zerounip = (function () {
     		navNext,
     		today,
     		navPrev,
+    		$config,
     		$viewUnix,
     		$selectedUnix,
     		$viewMode,
-    		div_binding
+    		div1_binding
     	};
     }
 

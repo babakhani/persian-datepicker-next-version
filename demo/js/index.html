@@ -71,6 +71,9 @@
       }, // DONE
       // minDate: new persianDate().subtract('day', 4).valueOf(), // DONE
       // maxDate: new persianDate().add('day', 4).valueOf(), // DONE,
+      infobox : {
+         enabled: true
+      },
       navigator: {
         'enabled': true,
         'scroll': {
@@ -89,7 +92,131 @@
         'onSwitch': function (datepickerObject) {
           Helper.debug(datepickerObject, 'dayPicker Event: onSwitch');
         }
-      }
+      },
+      toolbox: {
+        'enabled': true,
+        'text': {
+          btnToday: 'امروز'
+        },
+        submitButton: {
+          enabled: true,
+            text: {
+              fa: 'تایید',
+                en: 'submit'
+            },
+            onSubmit: function (datepickerObject) {
+              //Helper.debug(datepickerObject, 'dayPicker Event: onSubmit');
+            }
+        },
+        todayButton: {
+          enabled: true,
+            text: {
+              fa: 'امروز',
+                en: 'today'
+            },
+            onToday: function (datepickerObject) {
+              //Helper.debug(datepickerObject, 'dayPicker Event: onToday');
+            }
+        },
+        calendarSwitch: {
+          enabled: true,
+            format: 'MMMM',
+            onSwitch: function (datepickerObject) {
+              //Helper.debug(datepickerObject, 'dayPicker Event: onSwitch');
+            }
+        },
+        onToday: function (datepickerObject) {
+          //Helper.debug(datepickerObject, 'dayPicker Event: onToday');
+        }
+      },
+      onlyTimePicker: false,
+      onlySelectOnDate: true,
+      checkDate: function () {
+        return true;
+      },
+      checkMonth: function () {
+        return true;
+      },
+      checkYear: function () {
+        return true;
+      },
+      'timePicker': {
+        'enabled': true,
+        'step': 1,
+        'hour': {
+          'enabled': true,
+          'step': null
+        },
+        'minute': {
+          'enabled': true,
+          'step': null
+        },
+        'second': {
+          'enabled': true,
+          'step': null
+        },
+        'meridian': {
+          'enabled': false
+        }
+      },
+      dayPicker: {
+        'enabled': true,
+        'titleFormat': 'YYYY MMMM',
+        'titleFormatter': function (year, month) {
+        let titleDate = this.model.PersianDate.date([year, month]);
+        return titleDate.format(this.model.options.dayPicker.titleFormat);
+        },
+          'onSelect': function (selectedDayUnix) {
+        Helper.debug(this, 'dayPicker Event: onSelect : ' + selectedDayUnix);
+          }
+      },
+      monthPicker: {
+        'enabled': true,
+        'titleFormat': 'YYYY',
+        'titleFormatter': function (unix) {
+        let titleDate = this.model.PersianDate.date(unix);
+        return titleDate.format(this.model.options.monthPicker.titleFormat);
+        },
+          'onSelect': function (monthIndex) {
+        Helper.debug(this, 'monthPicker Event: onSelect : ' + monthIndex);
+        }
+      },
+      yearPicker: {
+        'enabled': true,
+        'titleFormat': 'YYYY',
+        'titleFormatter': function (year) {
+          let remaining = parseInt(year / 12, 10) * 12;
+          let startYear = this.model.PersianDate.date([remaining]);
+          let endYear = this.model.PersianDate.date([remaining + 11]);
+          return startYear.format(this.model.options.yearPicker.titleFormat) + '-' + endYear.format(this.model.options.yearPicker.titleFormat);
+        },
+        onSelect: function (year) {
+          Helper.debug(this, 'yearPicker Event: onSelect : ' + year);
+        }
+      },
+      onSelect: function (unixDate) {
+        Helper.debug(this, 'datepicker Event: onSelect : ' + unixDate);
+      },
+      'onSet': function (unixDate) {
+      Helper.debug(this, 'datepicker Event: onSet : ' + unixDate);
+        },
+      'position': 'auto',
+      'onShow': function (datepickerObject) {
+      Helper.debug(datepickerObject, 'Event: onShow ');
+      },
+      'onHide': function (datepickerObject) {
+      Helper.debug(datepickerObject, 'Event: onHide ');
+      },
+      'onToggle': function (datepickerObject) {
+      Helper.debug(datepickerObject, 'Event: onToggle ');
+      },
+      'onDestroy': function (datepickerObject) {
+      Helper.debug(datepickerObject, 'Event: onDestroy ');
+      },
+      'autoClose': false,
+      'template': null,
+      'observer': false,
+      'inputDelay': 800
     }
     zerounip(container, options)
   </script>
