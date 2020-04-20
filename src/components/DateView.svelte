@@ -222,7 +222,7 @@
 
 			&.today {
 				span {
-					border: 1px solid gray;
+					border: 1px solid darken($primarycolor, 20);
 				}
 			}
 

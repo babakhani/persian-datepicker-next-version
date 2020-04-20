@@ -170,7 +170,8 @@
 				left: 10px;
 				top: 5px;
 				bottom: 5px;
-			  text-align: left;
+				height: 32px;
+				text-align: left;
         border-radius: 6px;
 				&:hover {
 					background: #f1f1f1;
@@ -188,6 +189,7 @@
 			position: absolute;
 			top: 5px;
 			bottom: 5px;
+			height: 32px;
 			right: 10px;
 			width: calc(20% - 10px);
 			border: 0;
