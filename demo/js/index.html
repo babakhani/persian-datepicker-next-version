@@ -31,17 +31,17 @@
   <script>
     var container = document.getElementById('container')
     var options = {
-      calendarType: 'persian', // DONE
+      calendarType: 'gregorian', // DONE
       calendar: {
-        'persian': {
-          'locale': 'fa', // DONE
-          'showHint': false,
-          'leapYearMode': 'algorithmic' // "astronomical"
+        persian: {
+          locale: 'fa', // DONE
+          showHint: true,
+          leapYearMode: 'algorithmic' // "astronomical" // DONE
         },
 
-        'gregorian': {
-          'locale': 'en', // DONE
-          'showHint': false
+        gregorian: {
+          locale: 'en', // DONE
+          showHint: true 
         }
       },
       responsive: true, // Deprecated
@@ -139,7 +139,7 @@
         return true;
       },
       'timePicker': {
-        'enabled': true,
+        'enabled': false,
         'step': 1,
         'hour': {
           'enabled': true,

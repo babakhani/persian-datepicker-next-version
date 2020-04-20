@@ -42,9 +42,12 @@ export const actions = {
     })
     let currentLocale = get(config).calendar[payload].locale
     let obj = persianDate
+    currentCalendar.set(payload)
     obj.toCalendar(payload)
     obj.toLocale(currentLocale)
+    obj.toLeapYearMode(get(config).calendar.persian.leapYearMode)
     dateObject.set( obj )
+    viewUnix.set(get(selectedUnix))
   },
   setConfig (payload) {
     config.set(payload)
@@ -60,12 +63,20 @@ export const actions = {
     selectedUnix.set(calced.valueOf())
   },
   onSelectDate(pDate) {
-    const date = pDate.detail
+    const pd = get(dateObject)
     const { hour, minute, second } = getHourMinuteSecond(get(selectedUnix))
+    const date = new pd(pDate)
+    const cashedDate = date.date()
+    const cashedMonth = date.month()
+    const cashedYear = date.year()
     date
       .hour(hour)
       .minute(minute)
       .second(second)
+      .date(cashedDate)
+      .month(cashedMonth)
+      .year(cashedYear)
+    this.setSelectedDate(date)
     this.setSelectedDate(date)
     this.updateIsDirty(true)
   },
@@ -174,7 +185,7 @@ export const actions = {
          viewMode.set('time')
        }
     } else if (currentViewMode === 'date') {
-       if ($config.timePicker.enabled) {
+       if ($config.timePicker.enabled && $config.timePicker.showAsLastStep) {
          viewMode.set('time')
        }
     }

@@ -5010,6 +5010,7 @@ this.zerounip = (function () {
     const minUnix = writable(null);
     const maxUnix = writable(null);
     const dateObject = writable(persianDate$1);
+    const currentCalendar = writable('persian'); // [persian, gregorian]
 
 
     const actions = {
@@ -5035,9 +5036,12 @@ this.zerounip = (function () {
         });
         let currentLocale = get_store_value(config).calendar[payload].locale;
         let obj = persianDate$1;
+        currentCalendar.set(payload);
         obj.toCalendar(payload);
         obj.toLocale(currentLocale);
+        obj.toLeapYearMode(get_store_value(config).calendar.persian.leapYearMode);
         dateObject.set( obj );
+        viewUnix.set(get_store_value(selectedUnix));
       },
       setConfig (payload) {
         config.set(payload);
@@ -5053,12 +5057,20 @@ this.zerounip = (function () {
         selectedUnix.set(calced.valueOf());
       },
       onSelectDate(pDate) {
-        const date = pDate.detail;
+        const pd = get_store_value(dateObject);
         const { hour, minute, second } = getHourMinuteSecond(get_store_value(selectedUnix));
+        const date = new pd(pDate);
+        const cashedDate = date.date();
+        const cashedMonth = date.month();
+        const cashedYear = date.year();
         date
           .hour(hour)
           .minute(minute)
-          .second(second);
+          .second(second)
+          .date(cashedDate)
+          .month(cashedMonth)
+          .year(cashedYear);
+        this.setSelectedDate(date);
         this.setSelectedDate(date);
         this.updateIsDirty(true);
       },
@@ -5167,7 +5179,7 @@ this.zerounip = (function () {
              viewMode.set('time');
            }
         } else if (currentViewMode === 'date') {
-           if ($config.timePicker.enabled) {
+           if ($config.timePicker.enabled && $config.timePicker.showAsLastStep) {
              viewMode.set('time');
            }
         }
@@ -6066,7 +6078,7 @@ this.zerounip = (function () {
     }
 
     // (6:3) {#if groupedDay[1]}
-    function create_if_block_3(ctx) {
+    function create_if_block_4(ctx) {
     	let each_1_anchor;
     	let each_value_2 = ctx.groupedDay[1];
     	let each_blocks = [];
@@ -6122,7 +6134,7 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3.name,
+    		id: create_if_block_4.name,
     		type: "if",
     		source: "(6:3) {#if groupedDay[1]}",
     		ctx
@@ -6205,7 +6217,7 @@ this.zerounip = (function () {
     			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate) {
+    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate || changed.$config || changed.getHintText) {
     				each_value = ctx.groupedDay;
     				let i;
 
@@ -6293,7 +6305,7 @@ this.zerounip = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate) {
+    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate || changed.$config || changed.getHintText) {
     				each_value_1 = ctx.week;
     				let i;
 
@@ -6333,24 +6345,86 @@ this.zerounip = (function () {
     	return block;
     }
 
-    // (29:8) {#if day && day.month && day.format && currentViewMonth === day.month()}
+    // (30:8) {#if day && day.month && day.format && currentViewMonth === day.month()}
     function create_if_block_2(ctx) {
     	let span;
-    	let t_value = ctx.day.format("D") + "";
+    	let t0_value = ctx.day.format("D") + "";
+    	let t0;
+    	let t1;
+    	let if_block_anchor;
+    	let if_block = ctx.$config.calendar[ctx.$config.calendarType].showHint && create_if_block_3(ctx);
+
+    	const block = {
+    		c: function create() {
+    			span = element("span");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    			attr_dev(span, "class", "pwt-date-view-text");
+    			add_location(span, file$2, 30, 9, 951);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span, anchor);
+    			append_dev(span, t0);
+    			insert_dev(target, t1, anchor);
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(changed, ctx) {
+    			if (changed.groupedDay && t0_value !== (t0_value = ctx.day.format("D") + "")) set_data_dev(t0, t0_value);
+
+    			if (ctx.$config.calendar[ctx.$config.calendarType].showHint) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    				} else {
+    					if_block = create_if_block_3(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(span);
+    			if (detaching) detach_dev(t1);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(30:8) {#if day && day.month && day.format && currentViewMonth === day.month()}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (34:9) {#if $config.calendar[$config.calendarType].showHint}
+    function create_if_block_3(ctx) {
+    	let span;
+    	let t_value = ctx.getHintText(ctx.day) + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			span = element("span");
     			t = text(t_value);
-    			add_location(span, file$2, 29, 9, 857);
+    			attr_dev(span, "class", "pwt-date-view-hint");
+    			add_location(span, file$2, 34, 10, 1103);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
     			append_dev(span, t);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.groupedDay && t_value !== (t_value = ctx.day.format("D") + "")) set_data_dev(t, t_value);
+    			if (changed.groupedDay && t_value !== (t_value = ctx.getHintText(ctx.day) + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(span);
@@ -6359,9 +6433,9 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2.name,
+    		id: create_if_block_3.name,
     		type: "if",
-    		source: "(29:8) {#if day && day.month && day.format && currentViewMonth === day.month()}",
+    		source: "(34:9) {#if $config.calendar[$config.calendarType].showHint}",
     		ctx
     	});
 
@@ -6387,8 +6461,8 @@ this.zerounip = (function () {
     			t = space();
     			toggle_class(td, "othermonth", !ctx.day.month);
     			toggle_class(td, "disable", ctx.isDisable(ctx.day));
-    			toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
-    			toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
+    			toggle_class(td, "selected", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.selectedDay));
+    			toggle_class(td, "today", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.today));
     			add_location(td, file$2, 22, 7, 456);
 
     			dispose = listen_dev(
@@ -6432,12 +6506,12 @@ this.zerounip = (function () {
     				toggle_class(td, "disable", ctx.isDisable(ctx.day));
     			}
 
-    			if (changed.isSameDate || changed.groupedDay || changed.selectedDay) {
-    				toggle_class(td, "selected", ctx.isSameDate(ctx.day, ctx.selectedDay));
+    			if (changed.groupedDay || changed.isSameDate || changed.selectedDay) {
+    				toggle_class(td, "selected", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.selectedDay));
     			}
 
-    			if (changed.isSameDate || changed.groupedDay || changed.today) {
-    				toggle_class(td, "today", ctx.isSameDate(ctx.day, ctx.today));
+    			if (changed.groupedDay || changed.isSameDate || changed.today) {
+    				toggle_class(td, "today", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.today));
     			}
     		},
     		d: function destroy(detaching) {
@@ -6534,7 +6608,7 @@ this.zerounip = (function () {
     	let tr;
     	let t;
     	let current;
-    	let if_block0 = ctx.groupedDay[1] && create_if_block_3(ctx);
+    	let if_block0 = ctx.groupedDay[1] && create_if_block_4(ctx);
     	let if_block1 = ctx.visible && create_if_block$2(ctx);
 
     	const block = {
@@ -6569,7 +6643,7 @@ this.zerounip = (function () {
     				if (if_block0) {
     					if_block0.p(changed, ctx);
     				} else {
-    					if_block0 = create_if_block_3(ctx);
+    					if_block0 = create_if_block_4(ctx);
     					if_block0.c();
     					if_block0.m(tr, null);
     				}
@@ -6628,12 +6702,15 @@ this.zerounip = (function () {
     let animateSpeed$2 = 100;
 
     function instance$2($$self, $$props, $$invalidate) {
-    	let $config;
     	let $dateObject;
-    	validate_store(config, "config");
-    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
+    	let $config;
+    	let $currentCalendar;
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
+    	validate_store(currentCalendar, "currentCalendar");
+    	component_subscribe($$self, currentCalendar, $$value => $$invalidate("$currentCalendar", $currentCalendar = $$value));
 
     	function fadeOut(node, { duration, delay }) {
     		return {
@@ -6662,7 +6739,7 @@ this.zerounip = (function () {
     	}
 
     	const isSameDate = (a, b) => {
-    		return a.isSameDay && a.isSameDay(b);
+    		return new $dateObject(a).isSameDay(b);
     	};
 
     	const isDisable = day => {
@@ -6694,6 +6771,24 @@ this.zerounip = (function () {
     		dispatch("selectDate", payload);
     	}
 
+    	const getHintText = function (day) {
+    		let out;
+
+    		if ($currentCalendar === "persian") {
+    			$dateObject.toCalendar("gregorian");
+    			out = new $dateObject(day.valueOf()).format("D");
+    			$dateObject.toCalendar("persian");
+    		}
+
+    		if ($currentCalendar === "gregorian") {
+    			$dateObject.toCalendar("persian");
+    			out = new $dateObject(day.valueOf()).format("D");
+    			$dateObject.toCalendar("gregorian");
+    		}
+
+    		return out;
+    	};
+
     	let groupedDay = [];
     	let visible = true;
     	let cachedViewUnix = viewUnix;
@@ -6705,7 +6800,7 @@ this.zerounip = (function () {
     	});
 
     	const click_handler = ({ day }, event) => {
-    		if (!isDisable(day) && day.month && currentViewMonth === day.month()) selectDate(day);
+    		if (!isDisable(day) && day.month && currentViewMonth === day.month()) selectDate(day.valueOf());
     	};
 
     	$$self.$set = $$props => {
@@ -6724,12 +6819,12 @@ this.zerounip = (function () {
     			animateSpeed: animateSpeed$2,
     			cachedViewUnix,
     			transitionDirectionForward,
+    			$dateObject,
     			$config,
     			selectedDay,
-    			$dateObject,
+    			$currentCalendar,
     			today,
-    			currentViewMonth,
-    			viewUnixDate
+    			currentViewMonth
     		};
     	};
 
@@ -6742,18 +6837,17 @@ this.zerounip = (function () {
     		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$2 = $$props.animateSpeed);
     		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
     		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
-    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("$currentCalendar" in $$props) currentCalendar.set($currentCalendar = $$props.$currentCalendar);
     		if ("today" in $$props) $$invalidate("today", today = $$props.today);
     		if ("currentViewMonth" in $$props) $$invalidate("currentViewMonth", currentViewMonth = $$props.currentViewMonth);
-    		if ("viewUnixDate" in $$props) viewUnixDate = $$props.viewUnixDate;
     	};
 
     	let selectedDay;
     	let today;
     	let currentViewMonth;
-    	let viewUnixDate;
 
     	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1, cachedViewUnix: 1 }) => {
     		if (changed.$dateObject || changed.selectedUnix) {
@@ -6766,10 +6860,6 @@ this.zerounip = (function () {
 
     		if (changed.$dateObject || changed.viewUnix) {
     			 $$invalidate("currentViewMonth", currentViewMonth = new $dateObject(viewUnix).month());
-    		}
-
-    		if (changed.$dateObject || changed.viewUnix) {
-    			 viewUnixDate = new $dateObject(viewUnix).format("MMMM YYYY");
     		}
 
     		if (changed.$dateObject || changed.viewUnix || changed.$config || changed.groupedDay || changed.cachedViewUnix) {
@@ -6857,8 +6947,10 @@ this.zerounip = (function () {
     		selectedUnix,
     		todayUnix,
     		selectDate,
+    		getHintText,
     		groupedDay,
     		visible,
+    		$config,
     		selectedDay,
     		today,
     		currentViewMonth,
@@ -7548,7 +7640,7 @@ this.zerounip = (function () {
     }
 
     // (41:2) {#if viewMode === 'month'}
-    function create_if_block_4(ctx) {
+    function create_if_block_4$1(ctx) {
     	let if_block_anchor;
     	let current;
     	let if_block = ctx.visible && create_if_block_5(ctx);
@@ -7601,7 +7693,7 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4.name,
+    		id: create_if_block_4$1.name,
     		type: "if",
     		source: "(41:2) {#if viewMode === 'month'}",
     		ctx
@@ -7937,7 +8029,7 @@ this.zerounip = (function () {
     	let current;
     	let if_block0 = ctx.viewMode !== "time" && create_if_block_8(ctx);
     	let if_block1 = ctx.viewMode === "year" && create_if_block_6(ctx);
-    	let if_block2 = ctx.viewMode === "month" && create_if_block_4(ctx);
+    	let if_block2 = ctx.viewMode === "month" && create_if_block_4$1(ctx);
     	let if_block3 = ctx.viewMode === "date" && create_if_block_2$1(ctx);
     	let if_block4 = ctx.viewMode === "time" && create_if_block$3(ctx);
 
@@ -8015,7 +8107,7 @@ this.zerounip = (function () {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_4(ctx);
+    					if_block2 = create_if_block_4$1(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(div0, t2);
@@ -9551,7 +9643,7 @@ this.zerounip = (function () {
     	let current;
     	let if_block0 = ctx.$viewMode === "year" && ctx.$config.yearPicker.enabled && create_if_block_6$1(ctx);
     	let if_block1 = ctx.$viewMode === "month" && ctx.$config.monthPicker.enabled && create_if_block_5$1(ctx);
-    	let if_block2 = ctx.$viewMode === "date" && ctx.$config.dayPicker.enabled && create_if_block_4$1(ctx);
+    	let if_block2 = ctx.$viewMode === "date" && ctx.$config.dayPicker.enabled && create_if_block_4$2(ctx);
 
     	const block = {
     		c: function create() {
@@ -9617,7 +9709,7 @@ this.zerounip = (function () {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
     				} else {
-    					if_block2 = create_if_block_4$1(ctx);
+    					if_block2 = create_if_block_4$2(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(if_block2_anchor.parentNode, if_block2_anchor);
@@ -9803,7 +9895,7 @@ this.zerounip = (function () {
     }
 
     // (41:5) {#if $viewMode === 'date' && $config.dayPicker.enabled}
-    function create_if_block_4$1(ctx) {
+    function create_if_block_4$2(ctx) {
     	let div;
     	let div_transition;
     	let current;
@@ -9863,7 +9955,7 @@ this.zerounip = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4$1.name,
+    		id: create_if_block_4$2.name,
     		type: "if",
     		source: "(41:5) {#if $viewMode === 'date' && $config.dayPicker.enabled}",
     		ctx
@@ -10148,7 +10240,7 @@ this.zerounip = (function () {
     	};
 
     	const onSelectDate = function (event) {
-    		dispatcher("onSelectDate")(event);
+    		dispatcher("onSelectDate")(event.detail);
     	};
 
     	const onSelectTime = function (event) {

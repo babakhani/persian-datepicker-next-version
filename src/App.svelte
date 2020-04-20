@@ -150,7 +150,7 @@ originalContainer={originalContainer} />
 	}
 
 	const onSelectDate = function(event) {
-		dispatcher('onSelectDate')(event)
+		dispatcher('onSelectDate')(event.detail)
 	}
 
 	const onSelectTime = function(event) {

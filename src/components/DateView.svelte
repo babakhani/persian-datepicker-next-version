@@ -21,15 +21,21 @@
 					{#if week.length > 1}
 						{#each week as day}
 							<td
-								on:click="{(event) => { if (!isDisable(day) && day.month && currentViewMonth === day.month()) selectDate(day) }}"
+								on:click="{(event) => { if (!isDisable(day) && day.month &&
+								currentViewMonth === day.month()) selectDate(day.valueOf()) }}"
 								class:othermonth="{!day.month}"
 								class:disable="{isDisable(day)}"
-								class:selected="{isSameDate(day, selectedDay)}"
-								class:today="{isSameDate(day, today)}">
+								class:selected="{day && day.isPersianDate && isSameDate(day.valueOf(), selectedDay)}"
+								class:today="{day && day.isPersianDate && isSameDate(day.valueOf(), today)}">
 								{#if day && day.month && day.format && currentViewMonth === day.month()}
-									<span>
+									<span class="pwt-date-view-text">
 										{day.format('D')}
 									</span>
+									{#if $config.calendar[$config.calendarType].showHint}
+										<span class="pwt-date-view-hint">
+												{getHintText(day)}
+										</span>
+									{/if}
 								{/if}
 							</td>
 						{/each}
@@ -44,7 +50,7 @@
 	import { afterUpdate } from 'svelte'
 	import { flip } from 'svelte/animate'
 	import { time, elapsed, countable } from '../stores.js'
-	import { config, dateObject } from '../stores.js'
+	import { config, dateObject, currentCalendar } from '../stores.js'
 
 	function fadeOut(node, { duration, delay }) {
 		return {
@@ -73,7 +79,7 @@
 	}
 
 	const isSameDate = (a, b) => {
-		return a.isSameDay && a.isSameDay(b)
+		return new $dateObject(a).isSameDay(b)
 	}
 
 	const isDisable = (day) => {
@@ -105,13 +111,27 @@
 	function selectDate(payload) { dispatch('selectDate', payload) }
 
 	$: selectedDay = new $dateObject(selectedUnix).startOf('day');
+  
 
+	const getHintText = function (day) {
+		let out
+		if ($currentCalendar === 'persian') {
+		  $dateObject.toCalendar('gregorian')
+		  out = new $dateObject(day.valueOf()).format('D')
+			$dateObject.toCalendar('persian')
+		}
+		if ($currentCalendar === 'gregorian') {
+			$dateObject.toCalendar('persian')
+		  out = new $dateObject(day.valueOf()).format('D')
+			$dateObject.toCalendar('gregorian')
+		}
+		return out
+	}
 
 	let groupedDay = []
 
 	$: today = new $dateObject(todayUnix)
 	$: currentViewMonth = new $dateObject(viewUnix).month()
-	$: viewUnixDate = new $dateObject(viewUnix).format('MMMM YYYY')
 	let visible = true
 	let animateSpeed = 100
 	let cachedViewUnix = viewUnix
@@ -213,38 +233,52 @@
 			height: calc(100/8%);
 			width: 14.2%;
 			cursor: pointer;
+			position: relative;
 
 			&:hover {
-				span {
+				span.pwt-date-view-text {
 					background: #ededed;
 				}
 			}
 
 			&.today {
-				span {
-					border: 1px solid darken($primarycolor, 20);
+				span.pwt-date-view-text {
+					border: 1px solid darken($primarycolor, 20) !important;
 				}
 			}
 
 			&.othermonth {
 				cursor: default !important;
-				span {
+				span.pwt-date-view-text {
 					color: #ccc !important;
 				}
 			}
 
 			&.disable {
 				cursor: default !important;
-				span {
+				span.pwt-date-view-text {
 					background: #ededed;
 				}
 			}
 
 			&.selected {
-				span {
+				span.pwt-date-view-text {
 					color: white;
 					background: $primarycolor;
 				}
+			}
+
+			.pwt-date-view-hint {
+				display: block;
+				width: auto;
+				height: auto;
+				position: absolute;
+				font-size: 9px;
+				bottom: 0;
+				right: 5px;
+				height: 12px;
+				line-height: 12px;
+				color: #cccccc;
 			}
 		}
 	}

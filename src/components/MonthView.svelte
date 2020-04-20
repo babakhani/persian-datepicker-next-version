@@ -93,24 +93,25 @@
 			cursor: pointer;
 			&:hover {
 				span {
-				background-color: lighten($primarycolor, 30);
-			}
+					background-color: lighten($primarycolor, 30);
+				}
 			}
 			&.selected {
-			span {
-				background-color: $primarycolor;
-				color: white;
-			}
+				span {
+					background-color: $primarycolor;
+					color: white;
+				}
 			}
 			span.pwt-text {
-			display: block;
-			width: 80%;
-			padding: 6px;
-			border-radius: 20px;
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
+				display: block;
+				font-size: .8em;
+				width: 80%;
+				padding: 6px;
+				border-radius: 20px;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
 			}
 		}
 	}
