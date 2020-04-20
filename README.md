@@ -1,13 +1,13 @@
 Persian Date Picker
 ==============
 
-# Version 2.0.0-alpha (Under Development, Don't use in production)
+## Version 2.0.0-alpha (Under Development, Don't use in production)
 
 
 ### Whats changed in v2.0.0
 
-## jQuery Removed (No Decencies)
-## Officially Support Vue, React, Svelte and Pure Javascript 
+#### jQuery Removed (No Decencies)
+#### Officially Support Vue, React, Svelte and Pure Javascript 
 
 
 This Date picker work with Iranian calendar.
