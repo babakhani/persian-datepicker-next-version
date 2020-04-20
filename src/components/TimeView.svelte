@@ -127,8 +127,8 @@
 	export let selectedUnix
 
 	$: currentHour = new $dateObject(selectedUnix).format('hh')
-	$: currentMinute = new $dateObject(selectedUnix).minute()
-	$: currentSecond = new $dateObject(selectedUnix).second()
+	$: currentMinute = new $dateObject(selectedUnix).format('mm')
+	$: currentSecond = new $dateObject(selectedUnix).format('ss')
 	$: currentMeridian = new $dateObject(selectedUnix).format('a')
 
 	let tempDate = $dateObject
@@ -159,6 +159,8 @@
 <style global lang="scss">
 	@import './theme.scss';
 	.pwt-date-time {
+		width: 100%;
+		height: 100%;
 		.pwt-date-time-section {
 			display: block;
 			height: 100%;
@@ -178,6 +180,7 @@
 				display: block;
 				width: 100%;
 				height: 30%;
+				min-height: 48px;
 				position: static;
 				top: 0;
 				right: 0;

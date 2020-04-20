@@ -7283,11 +7283,11 @@ this.zerounip = (function () {
     		}
 
     		if (changed.$dateObject || changed.selectedUnix) {
-    			 $$invalidate("currentMinute", currentMinute = new $dateObject(selectedUnix).minute());
+    			 $$invalidate("currentMinute", currentMinute = new $dateObject(selectedUnix).format("mm"));
     		}
 
     		if (changed.$dateObject || changed.selectedUnix) {
-    			 $$invalidate("currentSecond", currentSecond = new $dateObject(selectedUnix).second());
+    			 $$invalidate("currentSecond", currentSecond = new $dateObject(selectedUnix).format("ss"));
     		}
 
     		if (changed.$dateObject || changed.selectedUnix) {
