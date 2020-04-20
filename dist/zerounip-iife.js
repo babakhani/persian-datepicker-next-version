@@ -5274,7 +5274,7 @@ this.zerounip = (function () {
     			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (changed.currentYear || changed.yearRange || changed.select) {
+    			if (changed.isDisable || changed.yearRange || changed.currentYear || changed.select) {
     				each_value = ctx.yearRange;
     				let i;
 
@@ -5344,6 +5344,10 @@ this.zerounip = (function () {
     		return ctx.click_handler(ctx, ...args);
     	}
 
+    	function click_handler_1(...args) {
+    		return ctx.click_handler_1(ctx, ...args);
+    	}
+
     	const block = {
     		c: function create() {
     			div = element("div");
@@ -5351,20 +5355,33 @@ this.zerounip = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(span, "class", "pwt-text");
-    			add_location(span, file, 9, 3, 263);
+    			add_location(span, file, 11, 3, 366);
+    			toggle_class(div, "disable", ctx.isDisable(ctx.year));
     			toggle_class(div, "selected", ctx.currentYear === ctx.year);
     			add_location(div, file, 6, 4, 167);
 
-    			dispose = listen_dev(
-    				div,
-    				"click",
-    				function () {
-    					click_handler.apply(this, arguments);
-    				},
-    				false,
-    				false,
-    				false
-    			);
+    			dispose = [
+    				listen_dev(
+    					div,
+    					"click",
+    					function () {
+    						click_handler.apply(this, arguments);
+    					},
+    					false,
+    					false,
+    					false
+    				),
+    				listen_dev(
+    					div,
+    					"click",
+    					function () {
+    						click_handler_1.apply(this, arguments);
+    					},
+    					false,
+    					false,
+    					false
+    				)
+    			];
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -5376,13 +5393,17 @@ this.zerounip = (function () {
     			ctx = new_ctx;
     			if (changed.yearRange && t0_value !== (t0_value = ctx.year + "")) set_data_dev(t0, t0_value);
 
+    			if (changed.isDisable || changed.yearRange) {
+    				toggle_class(div, "disable", ctx.isDisable(ctx.year));
+    			}
+
     			if (changed.currentYear || changed.yearRange) {
     				toggle_class(div, "selected", ctx.currentYear === ctx.year);
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -5465,7 +5486,10 @@ this.zerounip = (function () {
     let animateSpeed = 100;
 
     function instance($$self, $$props, $$invalidate) {
+    	let $config;
     	let $dateObject;
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { selectedUnix } = $$props;
@@ -5497,6 +5521,32 @@ this.zerounip = (function () {
     		};
     	}
 
+    	const isDisable = y => {
+    		let startYear;
+    		let endYear;
+
+    		if ($config.minDate && $config.maxDate) {
+    			startYear = new $dateObject($config.minDate).year();
+    			endYear = new $dateObject($config.maxDate).year();
+
+    			if (y > endYear || y < startYear) {
+    				return true;
+    			}
+    		} else if ($config.maxDate) {
+    			endYear = new $dateObject($config.maxDate).year();
+
+    			if (y > endYear) {
+    				return true;
+    			}
+    		} else if ($config.minDate) {
+    			startYear = new $dateObject($config.minDate).year();
+
+    			if (y < startYear) {
+    				return true;
+    			}
+    		}
+    	};
+
     	const dispatch = createEventDispatcher();
 
     	function select(payload) {
@@ -5516,6 +5566,10 @@ this.zerounip = (function () {
 
     	const click_handler = ({ year }, event) => select(year);
 
+    	const click_handler_1 = ({ year }, event) => {
+    		if (!isDisable(year)) select(year);
+    	};
+
     	$$self.$set = $$props => {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
     		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
@@ -5531,8 +5585,9 @@ this.zerounip = (function () {
     			animateSpeed,
     			cachedViewUnix,
     			transitionDirectionForward,
-    			currentYear,
+    			$config,
     			$dateObject,
+    			currentYear,
     			currentViewYear
     		};
     	};
@@ -5546,8 +5601,9 @@ this.zerounip = (function () {
     		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
     		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
-    		if ("currentYear" in $$props) $$invalidate("currentYear", currentYear = $$props.currentYear);
+    		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("currentYear" in $$props) $$invalidate("currentYear", currentYear = $$props.currentYear);
     		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
     	};
 
@@ -5598,11 +5654,13 @@ this.zerounip = (function () {
     		viewUnix,
     		fadeOut,
     		fadeIn,
+    		isDisable,
     		select,
     		yearRange,
     		visible,
     		currentYear,
-    		click_handler
+    		click_handler,
+    		click_handler_1
     	};
     }
 
@@ -5691,7 +5749,7 @@ this.zerounip = (function () {
     			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (changed.currentMonth || changed.currentViewYear || changed.currentSelectedYear || changed.select || changed.monthRange) {
+    			if (changed.isDisable || changed.currentViewYear || changed.currentMonth || changed.currentSelectedYear || changed.select || changed.monthRange) {
     				each_value = ctx.monthRange;
     				let i;
 
@@ -5768,10 +5826,21 @@ this.zerounip = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(span, "class", "pwt-text");
-    			add_location(span, file$1, 9, 4, 325);
+    			add_location(span, file$1, 10, 4, 436);
+    			toggle_class(div, "disable", ctx.isDisable(ctx.currentViewYear, ctx.index + 1));
     			toggle_class(div, "selected", ctx.currentMonth - 1 === ctx.index && ctx.currentViewYear === ctx.currentSelectedYear);
     			add_location(div, file$1, 6, 3, 178);
-    			dispose = listen_dev(div, "click", click_handler, false, false, false);
+
+    			dispose = listen_dev(
+    				div,
+    				"click",
+    				function () {
+    					click_handler.apply(this, arguments);
+    				},
+    				false,
+    				false,
+    				false
+    			);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -5782,6 +5851,10 @@ this.zerounip = (function () {
     		p: function update(changed, new_ctx) {
     			ctx = new_ctx;
     			if (changed.monthRange && t0_value !== (t0_value = ctx.month + "")) set_data_dev(t0, t0_value);
+
+    			if (changed.isDisable || changed.currentViewYear) {
+    				toggle_class(div, "disable", ctx.isDisable(ctx.currentViewYear, ctx.index + 1));
+    			}
 
     			if (changed.currentMonth || changed.currentViewYear || changed.currentSelectedYear) {
     				toggle_class(div, "selected", ctx.currentMonth - 1 === ctx.index && ctx.currentViewYear === ctx.currentSelectedYear);
@@ -5872,7 +5945,10 @@ this.zerounip = (function () {
     let animateSpeed$1 = 100;
 
     function instance$1($$self, $$props, $$invalidate) {
+    	let $config;
     	let $dateObject;
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
     	validate_store(dateObject, "dateObject");
     	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
     	let { selectedUnix } = $$props;
@@ -5904,6 +5980,38 @@ this.zerounip = (function () {
     		};
     	}
 
+    	const isDisable = (y, month) => {
+    		let startYear;
+    		let startMonth;
+    		let endYear;
+    		let endMonth;
+
+    		if ($config.minDate && $config.maxDate) {
+    			startYear = new $dateObject($config.minDate).year();
+    			startMonth = new $dateObject($config.minDate).month();
+    			endYear = new $dateObject($config.maxDate).year();
+    			endMonth = new $dateObject($config.maxDate).month();
+
+    			if (y == endYear && month > endMonth || y > endYear || (y == startYear && month < startMonth || y < startYear)) {
+    				return true;
+    			}
+    		} else if ($config.maxDate) {
+    			endYear = new $dateObject($config.maxDate).year();
+    			endMonth = new $dateObject($config.maxDate).month();
+
+    			if (y == endYear && month > endMonth || y > endYear) {
+    				return true;
+    			}
+    		} else if ($config.minDate) {
+    			startYear = new $dateObject($config.minDate).year();
+    			startMonth = new $dateObject($config.minDate).month();
+
+    			if (y == startYear && month < startMonth || y < startYear) {
+    				return true;
+    			}
+    		}
+    	};
+
     	const dispatch = createEventDispatcher();
 
     	function select(payload) {
@@ -5919,7 +6027,9 @@ this.zerounip = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<MonthView> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = ({ index }, event) => select(index + 1);
+    	const click_handler = ({ index }, event) => {
+    		if (!isDisable(currentViewYear, index + 1)) select(index + 1);
+    	};
 
     	$$self.$set = $$props => {
     		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
@@ -5934,8 +6044,9 @@ this.zerounip = (function () {
     			animateSpeed: animateSpeed$1,
     			cachedViewUnix,
     			transitionDirectionForward,
-    			monthRange,
+    			$config,
     			$dateObject,
+    			monthRange,
     			currentMonth,
     			currentSelectedYear,
     			currentViewYear
@@ -5949,8 +6060,9 @@ this.zerounip = (function () {
     		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$1 = $$props.animateSpeed);
     		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
-    		if ("monthRange" in $$props) $$invalidate("monthRange", monthRange = $$props.monthRange);
+    		if ("$config" in $$props) config.set($config = $$props.$config);
     		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("monthRange" in $$props) $$invalidate("monthRange", monthRange = $$props.monthRange);
     		if ("currentMonth" in $$props) $$invalidate("currentMonth", currentMonth = $$props.currentMonth);
     		if ("currentSelectedYear" in $$props) $$invalidate("currentSelectedYear", currentSelectedYear = $$props.currentSelectedYear);
     		if ("currentViewYear" in $$props) $$invalidate("currentViewYear", currentViewYear = $$props.currentViewYear);
@@ -6004,6 +6116,7 @@ this.zerounip = (function () {
     		viewUnix,
     		fadeOut,
     		fadeIn,
+    		isDisable,
     		select,
     		visible,
     		monthRange,

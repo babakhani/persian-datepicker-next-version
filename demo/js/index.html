@@ -35,13 +35,13 @@
       calendar: {
         persian: {
           locale: 'fa', // DONE
-          showHint: true,
+          showHint: true, // DONE
           leapYearMode: 'algorithmic' // "astronomical" // DONE
         },
 
         gregorian: {
           locale: 'en', // DONE
-          showHint: true 
+          showHint: true  // DONE
         }
       },
       responsive: true, // Deprecated
@@ -49,7 +49,7 @@
       initialValue: false,  // DONE
       initialValueType: 'persian', // Works but deprecated in next version
       persianDigit: true, // Deprected
-      viewMode: 'date', // DONE
+      viewMode: 'year', // DONE
       format: 'LLLL', // DONE
       formatter (unixDate, dateObject) {
         return new dateObject(unixDate).format(this.format);
@@ -67,8 +67,8 @@
           return new dateObject(unixDate).format(this.altFormat);
         }
       }, // DONE
-      // minDate: new persianDate().subtract('day', 4).valueOf(), // DONE
-      // maxDate: new persianDate().add('day', 4).valueOf(), // DONE,
+      minDate: new persianDate().subtract('year', 16).valueOf(), // DONE
+      maxDate: new persianDate().add('year', 6).valueOf(), // DONE,
       infobox : {
          enabled: true
       },

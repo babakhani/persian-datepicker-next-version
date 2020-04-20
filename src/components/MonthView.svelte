@@ -5,7 +5,8 @@
 		class="pwt-date-month-view">
 		{#each monthRange as month, index}
 			<div
-				on:click="{event => select(index + 1)}"
+				on:click="{(event) => { if (!isDisable(currentViewYear, index + 1)) select(index + 1) }}"
+			  class:disable="{isDisable(currentViewYear, index + 1)}"
 				class:selected="{currentMonth - 1 === index && currentViewYear === currentSelectedYear}">
 				<span class="pwt-text">
 					{month}
@@ -47,6 +48,34 @@
 				`
 			}
 			};
+	}
+
+	const isDisable = (y, month) => {
+		let startYear 
+		let startMonth
+		let endYear
+		let endMonth
+		if ($config.minDate && $config.maxDate) {
+			startYear = new $dateObject($config.minDate).year()
+			startMonth = new $dateObject($config.minDate).month()
+			endYear = new $dateObject($config.maxDate).year()
+			endMonth = new $dateObject($config.maxDate).month()
+			if (((y == endYear && month > endMonth) || y > endYear) || ((y == startYear && month < startMonth) || y < startYear)) {
+				return true;
+			}
+		} else if ($config.maxDate) {
+			endYear = new $dateObject($config.maxDate).year()
+			endMonth = new $dateObject($config.maxDate).month()
+			if ((y == endYear && month > endMonth) || y > endYear) {
+				return true;
+			}
+		} else if ($config.minDate) {
+			startYear = new $dateObject($config.minDate).year()
+			startMonth = new $dateObject($config.minDate).month()
+			if ((y == startYear && month < startMonth) || y < startYear) {
+				return true;
+			}
+		}
 	}
 
 	const dispatch = createEventDispatcher()
@@ -91,6 +120,13 @@
 			display: block;
 			position: relative;
 			cursor: pointer;
+
+			&.disable {
+				span {
+				  background: #ededed;
+				}
+			}
+
 			&:hover {
 				span {
 					background-color: lighten($primarycolor, 30);
