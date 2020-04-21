@@ -1,6 +1,7 @@
 {#if isVisbile}
 	<div 
 		bind:this={plotarea}
+		on:wheel={handleWheel}
 		class="pwt-datepicker">
 		{#if $config.infobox.enabled}
 			<Infobox
@@ -141,12 +142,9 @@ originalContainer={originalContainer} />
 		dispatcher('setViewMode')(event.detail)
 	}
 
-	const setViewModeToUpperAvailableLevel = function() {
-		dispatcher('setViewModeToUpperAvailableLevel')()
-	}
-
 	const setcalendar = function(event) {
 		dispatcher('onSetCalendar')(event.detail)
+		$config.toolbox.calendarSwitch.onSwitch(event)
 	}
 
 	const onSelectDate = function(event) {
@@ -165,16 +163,38 @@ originalContainer={originalContainer} />
 		dispatcher('onSelectYear')(event.detail)
 	}
 
-	const navNext = event => {
-		dispatcher('onSelectNextView')(event)
-	}
-
 	const today = event => {
 		dispatcher('onSelectToday')(event)
+		$config.toolbox.todayButton.onToday(event)
+	}
+
+	const navNext = event => {
+		dispatcher('onSelectNextView')(event)
+		$config.navigator.onNext(event)
 	}
 
 	const navPrev = event => {
 		dispatcher('onSelectPrevView')(event)
+		$config.navigator.onPrev(event)
+	}
+
+	const setViewModeToUpperAvailableLevel = event => {
+		dispatcher('setViewModeToUpperAvailableLevel')()
+		$config.navigator.onSwitch(event)
+	}
+
+ 
+	const handleWheel = (e) => {
+		if ($config.navigator.scroll.enabled) {
+			setTimeout(() => {
+				if (e.deltaY > 0 || e.deltaX > 0) {
+					navNext()
+				}
+				if (e.deltaY < 0 || e.deltaX < 0) {
+					navPrev()
+				}
+			}, 1)
+		}
 	}
 </script>
 
