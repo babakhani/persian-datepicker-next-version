@@ -24,10 +24,10 @@ export const actions = {
     let parse = new PersianDateParser()
     if (parse.parse(inputString) !== undefined) {
         pd.toCalendar(get(config).initialValueType)
-        let unix = new pd(parse.parse(inputString)).valueOf()
+        let unix = new pd(parse.parse(inputString))
         this.updateIsDirty(true)
-        viewUnix.set(unix)
-        selectedUnix.set(unix)
+        viewUnix.set(unix.valueOf())
+        this.setSelectedDate(unix)
         pd.toCalendar(get(config).calendarType)
     }
   },
@@ -59,7 +59,7 @@ export const actions = {
     const { hour, minute, second } = getHourMinuteSecond(date)
     const calced = new pd(get(selectedUnix)).hour(hour).minute(minute).second(second)
     this.updateIsDirty(true)
-    selectedUnix.set(calced.valueOf())
+    this.setSelectedDate(calced)
   },
   onSelectDate(pDate) {
     const pd = get(dateObject)
@@ -76,13 +76,14 @@ export const actions = {
       .month(cashedMonth)
       .year(cashedYear)
     this.setSelectedDate(date)
-    this.setSelectedDate(date)
     this.updateIsDirty(true)
   },
   setSelectedDate(pDate) {
     const pd = get(dateObject)
-    selectedUnix.set(new pd(pDate).valueOf())
+    const unix = new pd(pDate).valueOf()
+    selectedUnix.set(unix)
     this.setViewModeToLowerAvailableLevel()
+    get(config).onSelect(unix)
   },
   onSelectMonth(month) {
     const pd = get(dateObject)
@@ -92,10 +93,9 @@ export const actions = {
       .valueOf()
     )
     if (!get(config).onlySelectOnDate) {
-      selectedUnix.set(
+      this.setSelectedDate(
         new pd(get(viewUnix))
         .month(month)
-        .valueOf()
       )
     }
     this.setViewModeToLowerAvailableLevel()
@@ -109,10 +109,9 @@ export const actions = {
       .valueOf()
     )
     if (!get(config).onlySelectOnDate) {
-      selectedUnix.set(
+      this.setSelectedDate(
         new pd(get(selectedUnix))
         .year(year)
-        .valueOf()
       )
     }
     this.setViewModeToLowerAvailableLevel()
@@ -120,28 +119,25 @@ export const actions = {
   },
   onSetHour(hour) {
     const pd = get(dateObject)
-    selectedUnix.set(
+    this.setSelectedDate(
       new pd(get(selectedUnix))
       .hour(hour)
-      .valueOf()
     )
     this.updateIsDirty(true)
   },
   onSetMinute(minute) {
     const pd = get(dateObject)
-    selectedUnix.set(
+    this.setSelectedDate(
       new pd(get(selectedUnix))
       .minute(minute)
-      .valueOf()
     )
     this.updateIsDirty(true)
   },
   setSecond(second) {
     const pd = get(dateObject)
-    selectedUnix.set(
+    this.setSelectedDate(
       new pd(get(selectedUnix))
       .second(second)
-      .valueOf()
     )
   },
   setViewMode(mode) {

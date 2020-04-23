@@ -129,6 +129,11 @@ originalContainer={originalContainer} />
 				plotarea.style.display = isVisbile ? 'block' : 'none'
 			}
 		}, 0)
+		if (isVisbile) {
+		  $config.onShow()
+		} else {
+		  $config.onHide()
+		}
 	}
 
 	// TODO: develop time

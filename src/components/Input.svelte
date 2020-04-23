@@ -65,6 +65,21 @@
 		}
 	}
 
+	let initInputObserver = function () {
+		if (originalContainer && originalContainer.tagName === 'INPUT') {
+			originalContainer.addEventListener('paste', (e) => {
+				setTimeout(() => {
+				  getInputInitialValue()
+				}, 0)
+			})
+			originalContainer.addEventListener('keyup', (e) => {
+				setTimeout(() => {
+				  getInputInitialValue()
+				}, 0)
+			})
+		}
+	}
+
 	let updateInputs = function () {
 		if ($config.initialValue || $isDirty) {
 		  let selected = $config.formatter($selectedUnix, $dateObject)
@@ -92,4 +107,7 @@
   getInputInitialValue()
 	setPlotPostion()
 	initInputEvents()
+	if ($config.observer) {
+	  initInputObserver()
+	}
 </script>

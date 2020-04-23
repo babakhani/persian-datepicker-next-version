@@ -5018,10 +5018,10 @@ this.zerounip = (function () {
         let parse = new PersianDateParser();
         if (parse.parse(inputString) !== undefined) {
             pd.toCalendar(get_store_value(config).initialValueType);
-            let unix = new pd(parse.parse(inputString)).valueOf();
+            let unix = new pd(parse.parse(inputString));
             this.updateIsDirty(true);
-            viewUnix.set(unix);
-            selectedUnix.set(unix);
+            viewUnix.set(unix.valueOf());
+            this.setSelectedDate(unix);
             pd.toCalendar(get_store_value(config).calendarType);
         }
       },
@@ -5053,7 +5053,7 @@ this.zerounip = (function () {
         const { hour, minute, second } = getHourMinuteSecond(date);
         const calced = new pd(get_store_value(selectedUnix)).hour(hour).minute(minute).second(second);
         this.updateIsDirty(true);
-        selectedUnix.set(calced.valueOf());
+        this.setSelectedDate(calced);
       },
       onSelectDate(pDate) {
         const pd = get_store_value(dateObject);
@@ -5070,13 +5070,14 @@ this.zerounip = (function () {
           .month(cashedMonth)
           .year(cashedYear);
         this.setSelectedDate(date);
-        this.setSelectedDate(date);
         this.updateIsDirty(true);
       },
       setSelectedDate(pDate) {
         const pd = get_store_value(dateObject);
-        selectedUnix.set(new pd(pDate).valueOf());
+        const unix = new pd(pDate).valueOf();
+        selectedUnix.set(unix);
         this.setViewModeToLowerAvailableLevel();
+        get_store_value(config).onSelect(unix);
       },
       onSelectMonth(month) {
         const pd = get_store_value(dateObject);
@@ -5086,10 +5087,9 @@ this.zerounip = (function () {
           .valueOf()
         );
         if (!get_store_value(config).onlySelectOnDate) {
-          selectedUnix.set(
+          this.setSelectedDate(
             new pd(get_store_value(viewUnix))
             .month(month)
-            .valueOf()
           );
         }
         this.setViewModeToLowerAvailableLevel();
@@ -5103,10 +5103,9 @@ this.zerounip = (function () {
           .valueOf()
         );
         if (!get_store_value(config).onlySelectOnDate) {
-          selectedUnix.set(
+          this.setSelectedDate(
             new pd(get_store_value(selectedUnix))
             .year(year)
-            .valueOf()
           );
         }
         this.setViewModeToLowerAvailableLevel();
@@ -5114,28 +5113,25 @@ this.zerounip = (function () {
       },
       onSetHour(hour) {
         const pd = get_store_value(dateObject);
-        selectedUnix.set(
+        this.setSelectedDate(
           new pd(get_store_value(selectedUnix))
           .hour(hour)
-          .valueOf()
         );
         this.updateIsDirty(true);
       },
       onSetMinute(minute) {
         const pd = get_store_value(dateObject);
-        selectedUnix.set(
+        this.setSelectedDate(
           new pd(get_store_value(selectedUnix))
           .minute(minute)
-          .valueOf()
         );
         this.updateIsDirty(true);
       },
       setSecond(second) {
         const pd = get_store_value(dateObject);
-        selectedUnix.set(
+        this.setSelectedDate(
           new pd(get_store_value(selectedUnix))
           .second(second)
-          .valueOf()
         );
       },
       setViewMode(mode) {
@@ -9688,6 +9684,28 @@ this.zerounip = (function () {
     		}
     	};
 
+    	let initInputObserver = function () {
+    		if (originalContainer && originalContainer.tagName === "INPUT") {
+    			originalContainer.addEventListener("paste", e => {
+    				setTimeout(
+    					() => {
+    						getInputInitialValue();
+    					},
+    					0
+    				);
+    			});
+
+    			originalContainer.addEventListener("keyup", e => {
+    				setTimeout(
+    					() => {
+    						getInputInitialValue();
+    					},
+    					0
+    				);
+    			});
+    		}
+    	};
+
     	let updateInputs = function () {
     		if ($config.initialValue || $isDirty) {
     			let selected = $config.formatter($selectedUnix, $dateObject);
@@ -9714,6 +9732,11 @@ this.zerounip = (function () {
     	getInputInitialValue();
     	setPlotPostion();
     	initInputEvents();
+
+    	if ($config.observer) {
+    		initInputObserver();
+    	}
+
     	const writable_props = ["originalContainer", "plotarea"];
 
     	Object.keys($$props).forEach(key => {
@@ -9731,6 +9754,7 @@ this.zerounip = (function () {
     			plotarea,
     			setPlotPostion,
     			initInputEvents,
+    			initInputObserver,
     			updateInputs,
     			getInputInitialValue,
     			$config,
@@ -9745,6 +9769,7 @@ this.zerounip = (function () {
     		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
     		if ("setPlotPostion" in $$props) setPlotPostion = $$props.setPlotPostion;
     		if ("initInputEvents" in $$props) initInputEvents = $$props.initInputEvents;
+    		if ("initInputObserver" in $$props) initInputObserver = $$props.initInputObserver;
     		if ("updateInputs" in $$props) $$invalidate("updateInputs", updateInputs = $$props.updateInputs);
     		if ("getInputInitialValue" in $$props) getInputInitialValue = $$props.getInputInitialValue;
     		if ("$config" in $$props) config.set($config = $$props.$config);
@@ -10697,6 +10722,12 @@ this.zerounip = (function () {
     			},
     			0
     		);
+
+    		if (isVisbile) {
+    			$config.onShow();
+    		} else {
+    			$config.onHide();
+    		}
     	};
 
     	setvisibility({ detail: true });
