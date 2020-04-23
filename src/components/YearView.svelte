@@ -5,7 +5,6 @@
   class="pwt-date-year-view">
   {#each yearRange as year}
     <div
-      on:click="{event => select(year)}"
 			on:click="{(event) => { if (!isDisable(year)) select(year) }}"
 			class:disable="{isDisable(year)}"
       class:selected="{currentYear === year}">
@@ -54,22 +53,27 @@
 	const isDisable = (y) => {
 		let startYear 
 		let endYear
-		if ($config.minDate && $config.maxDate) {
-			startYear = new $dateObject($config.minDate).year()
-			endYear = new $dateObject($config.maxDate).year()
-			if (y > endYear || y < startYear) {
-				return true;
+		if ($config.checkYear(y)) {
+			if ($config.minDate && $config.maxDate) {
+				startYear = new $dateObject($config.minDate).year()
+				endYear = new $dateObject($config.maxDate).year()
+				if (y > endYear || y < startYear) {
+					return true;
+				}
+			} else if ($config.maxDate) {
+				endYear = new $dateObject($config.maxDate).year()
+				if (y > endYear) {
+					return true;
+				}
+			} else if ($config.minDate) {
+				startYear = new $dateObject($config.minDate).year()
+				if (y < startYear) {
+					return true;
+				}
 			}
-		} else if ($config.maxDate) {
-			endYear = new $dateObject($config.maxDate).year()
-			if (y > endYear) {
-				return true;
-			}
-		} else if ($config.minDate) {
-			startYear = new $dateObject($config.minDate).year()
-			if (y < startYear) {
-				return true;
-			}
+		}
+		else {
+			return true
 		}
 	}
 

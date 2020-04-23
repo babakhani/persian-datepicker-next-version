@@ -5086,11 +5086,13 @@ this.zerounip = (function () {
           .month(month)
           .valueOf()
         );
-        selectedUnix.set(
-          new pd(get_store_value(viewUnix))
-          .month(month)
-          .valueOf()
-        );
+        if (!get_store_value(config).onlySelectOnDate) {
+          selectedUnix.set(
+            new pd(get_store_value(viewUnix))
+            .month(month)
+            .valueOf()
+          );
+        }
         this.setViewModeToLowerAvailableLevel();
         this.updateIsDirty(true);
       },
@@ -5101,11 +5103,13 @@ this.zerounip = (function () {
           .year(year)
           .valueOf()
         );
-        selectedUnix.set(
-          new pd(get_store_value(selectedUnix))
-          .year(year)
-          .valueOf()
-        );
+        if (!get_store_value(config).onlySelectOnDate) {
+          selectedUnix.set(
+            new pd(get_store_value(selectedUnix))
+            .year(year)
+            .valueOf()
+          );
+        }
         this.setViewModeToLowerAvailableLevel();
         this.updateIsDirty(true);
       },
@@ -5344,10 +5348,6 @@ this.zerounip = (function () {
     		return ctx.click_handler(ctx, ...args);
     	}
 
-    	function click_handler_1(...args) {
-    		return ctx.click_handler_1(ctx, ...args);
-    	}
-
     	const block = {
     		c: function create() {
     			div = element("div");
@@ -5355,33 +5355,21 @@ this.zerounip = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(span, "class", "pwt-text");
-    			add_location(span, file, 11, 3, 366);
+    			add_location(span, file, 10, 3, 325);
     			toggle_class(div, "disable", ctx.isDisable(ctx.year));
     			toggle_class(div, "selected", ctx.currentYear === ctx.year);
     			add_location(div, file, 6, 4, 167);
 
-    			dispose = [
-    				listen_dev(
-    					div,
-    					"click",
-    					function () {
-    						click_handler.apply(this, arguments);
-    					},
-    					false,
-    					false,
-    					false
-    				),
-    				listen_dev(
-    					div,
-    					"click",
-    					function () {
-    						click_handler_1.apply(this, arguments);
-    					},
-    					false,
-    					false,
-    					false
-    				)
-    			];
+    			dispose = listen_dev(
+    				div,
+    				"click",
+    				function () {
+    					click_handler.apply(this, arguments);
+    				},
+    				false,
+    				false,
+    				false
+    			);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -5403,7 +5391,7 @@ this.zerounip = (function () {
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
-    			run_all(dispose);
+    			dispose();
     		}
     	};
 
@@ -5525,25 +5513,29 @@ this.zerounip = (function () {
     		let startYear;
     		let endYear;
 
-    		if ($config.minDate && $config.maxDate) {
-    			startYear = new $dateObject($config.minDate).year();
-    			endYear = new $dateObject($config.maxDate).year();
+    		if ($config.checkYear(y)) {
+    			if ($config.minDate && $config.maxDate) {
+    				startYear = new $dateObject($config.minDate).year();
+    				endYear = new $dateObject($config.maxDate).year();
 
-    			if (y > endYear || y < startYear) {
-    				return true;
-    			}
-    		} else if ($config.maxDate) {
-    			endYear = new $dateObject($config.maxDate).year();
+    				if (y > endYear || y < startYear) {
+    					return true;
+    				}
+    			} else if ($config.maxDate) {
+    				endYear = new $dateObject($config.maxDate).year();
 
-    			if (y > endYear) {
-    				return true;
-    			}
-    		} else if ($config.minDate) {
-    			startYear = new $dateObject($config.minDate).year();
+    				if (y > endYear) {
+    					return true;
+    				}
+    			} else if ($config.minDate) {
+    				startYear = new $dateObject($config.minDate).year();
 
-    			if (y < startYear) {
-    				return true;
+    				if (y < startYear) {
+    					return true;
+    				}
     			}
+    		} else {
+    			return true;
     		}
     	};
 
@@ -5564,9 +5556,7 @@ this.zerounip = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<YearView> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = ({ year }, event) => select(year);
-
-    	const click_handler_1 = ({ year }, event) => {
+    	const click_handler = ({ year }, event) => {
     		if (!isDisable(year)) select(year);
     	};
 
@@ -5659,8 +5649,7 @@ this.zerounip = (function () {
     		yearRange,
     		visible,
     		currentYear,
-    		click_handler,
-    		click_handler_1
+    		click_handler
     	};
     }
 
@@ -5986,29 +5975,33 @@ this.zerounip = (function () {
     		let endYear;
     		let endMonth;
 
-    		if ($config.minDate && $config.maxDate) {
-    			startYear = new $dateObject($config.minDate).year();
-    			startMonth = new $dateObject($config.minDate).month();
-    			endYear = new $dateObject($config.maxDate).year();
-    			endMonth = new $dateObject($config.maxDate).month();
+    		if ($config.checkMonth(y, month)) {
+    			if ($config.minDate && $config.maxDate) {
+    				startYear = new $dateObject($config.minDate).year();
+    				startMonth = new $dateObject($config.minDate).month();
+    				endYear = new $dateObject($config.maxDate).year();
+    				endMonth = new $dateObject($config.maxDate).month();
 
-    			if (y == endYear && month > endMonth || y > endYear || (y == startYear && month < startMonth || y < startYear)) {
-    				return true;
-    			}
-    		} else if ($config.maxDate) {
-    			endYear = new $dateObject($config.maxDate).year();
-    			endMonth = new $dateObject($config.maxDate).month();
+    				if (y == endYear && month > endMonth || y > endYear || (y == startYear && month < startMonth || y < startYear)) {
+    					return true;
+    				}
+    			} else if ($config.maxDate) {
+    				endYear = new $dateObject($config.maxDate).year();
+    				endMonth = new $dateObject($config.maxDate).month();
 
-    			if (y == endYear && month > endMonth || y > endYear) {
-    				return true;
-    			}
-    		} else if ($config.minDate) {
-    			startYear = new $dateObject($config.minDate).year();
-    			startMonth = new $dateObject($config.minDate).month();
+    				if (y == endYear && month > endMonth || y > endYear) {
+    					return true;
+    				}
+    			} else if ($config.minDate) {
+    				startYear = new $dateObject($config.minDate).year();
+    				startMonth = new $dateObject($config.minDate).month();
 
-    			if (y == startYear && month < startMonth || y < startYear) {
-    				return true;
+    				if (y == startYear && month < startMonth || y < startYear) {
+    					return true;
+    				}
     			}
+    		} else {
+    			return true;
     		}
     	};
 
@@ -6330,7 +6323,7 @@ this.zerounip = (function () {
     			current = true;
     		},
     		p: function update(changed, ctx) {
-    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate || changed.$config || changed.getHintText) {
+    			if (changed.groupedDay || changed.isDisable || changed.checkDate || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate || changed.$config || changed.getHintText) {
     				each_value = ctx.groupedDay;
     				let i;
 
@@ -6418,7 +6411,7 @@ this.zerounip = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.groupedDay || changed.isDisable || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate || changed.$config || changed.getHintText) {
+    			if (changed.groupedDay || changed.isDisable || changed.checkDate || changed.isSameDate || changed.selectedDay || changed.today || changed.currentViewMonth || changed.selectDate || changed.$config || changed.getHintText) {
     				each_value_1 = ctx.week;
     				let i;
 
@@ -6475,7 +6468,7 @@ this.zerounip = (function () {
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
     			attr_dev(span, "class", "pwt-date-view-text");
-    			add_location(span, file$2, 30, 9, 951);
+    			add_location(span, file$2, 30, 9, 970);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -6530,7 +6523,7 @@ this.zerounip = (function () {
     			span = element("span");
     			t = text(t_value);
     			attr_dev(span, "class", "pwt-date-view-hint");
-    			add_location(span, file$2, 34, 10, 1103);
+    			add_location(span, file$2, 34, 10, 1122);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -6573,7 +6566,7 @@ this.zerounip = (function () {
     			if (if_block) if_block.c();
     			t = space();
     			toggle_class(td, "othermonth", !ctx.day.month);
-    			toggle_class(td, "disable", ctx.isDisable(ctx.day));
+    			toggle_class(td, "disable", ctx.isDisable(ctx.day) || !ctx.checkDate(ctx.day));
     			toggle_class(td, "selected", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.selectedDay));
     			toggle_class(td, "today", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.today));
     			add_location(td, file$2, 22, 7, 456);
@@ -6615,8 +6608,8 @@ this.zerounip = (function () {
     				toggle_class(td, "othermonth", !ctx.day.month);
     			}
 
-    			if (changed.isDisable || changed.groupedDay) {
-    				toggle_class(td, "disable", ctx.isDisable(ctx.day));
+    			if (changed.isDisable || changed.groupedDay || changed.checkDate) {
+    				toggle_class(td, "disable", ctx.isDisable(ctx.day) || !ctx.checkDate(ctx.day));
     			}
 
     			if (changed.groupedDay || changed.isSameDate || changed.selectedDay) {
@@ -6855,6 +6848,10 @@ this.zerounip = (function () {
     		return new $dateObject(a).isSameDay(b);
     	};
 
+    	const checkDate = day => {
+    		return day.valueOf && $config.checkDate(day.valueOf());
+    	};
+
     	const isDisable = day => {
     		if (day.valueOf) {
     			let unixtimespan = day.valueOf();
@@ -7055,6 +7052,7 @@ this.zerounip = (function () {
     		fadeOut,
     		fadeIn,
     		isSameDate,
+    		checkDate,
     		isDisable,
     		viewUnix,
     		selectedUnix,

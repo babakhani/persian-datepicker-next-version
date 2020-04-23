@@ -24,7 +24,7 @@
 								on:click="{(event) => { if (!isDisable(day) && day.month &&
 								currentViewMonth === day.month()) selectDate(day.valueOf()) }}"
 								class:othermonth="{!day.month}"
-								class:disable="{isDisable(day)}"
+								class:disable="{isDisable(day) || !checkDate(day)}"
 								class:selected="{day && day.isPersianDate && isSameDate(day.valueOf(), selectedDay)}"
 								class:today="{day && day.isPersianDate && isSameDate(day.valueOf(), today)}">
 								{#if day && day.month && day.format && currentViewMonth === day.month()}
@@ -80,6 +80,10 @@
 
 	const isSameDate = (a, b) => {
 		return new $dateObject(a).isSameDay(b)
+	}
+
+	const checkDate = (day) => {
+		return day.valueOf && $config.checkDate(day.valueOf())
 	}
 
 	const isDisable = (day) => {

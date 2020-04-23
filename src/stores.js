@@ -92,11 +92,13 @@ export const actions = {
       .month(month)
       .valueOf()
     )
-    selectedUnix.set(
-      new pd(get(viewUnix))
-      .month(month)
-      .valueOf()
-    )
+    if (!get(config).onlySelectOnDate) {
+      selectedUnix.set(
+        new pd(get(viewUnix))
+        .month(month)
+        .valueOf()
+      )
+    }
     this.setViewModeToLowerAvailableLevel()
     this.updateIsDirty(true)
   },
@@ -107,11 +109,13 @@ export const actions = {
       .year(year)
       .valueOf()
     )
-    selectedUnix.set(
-      new pd(get(selectedUnix))
-      .year(year)
-      .valueOf()
-    )
+    if (!get(config).onlySelectOnDate) {
+      selectedUnix.set(
+        new pd(get(selectedUnix))
+        .year(year)
+        .valueOf()
+      )
+    }
     this.setViewModeToLowerAvailableLevel()
     this.updateIsDirty(true)
   },

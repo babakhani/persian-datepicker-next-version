@@ -87,7 +87,7 @@
         },
         'onSwitch': function (datepickerObject) { // DONE
           console.log('navigator.onSwitch')
-          console.log(datepickerObject)
+          //console.log(datepickerObject)
         }
       },
       toolbox: {
@@ -109,7 +109,7 @@
             enabled: true, // DONE
             text: { // DEPRECTED
               fa: 'امروز',
-                en: 'today'
+              en: 'today'
             },
             onToday: function (datepickerObject) { // DONE
               console.log('toolbox.onToday')
@@ -125,13 +125,13 @@
       },
       onlyTimePicker: false, // DONE
       onlySelectOnDate: true,
-      checkDate: function () {
+      checkDate: function (unix) { // DONE
+        return true 
+      },
+      checkMonth: function (y, m) { // DONE
         return true;
       },
-      checkMonth: function () {
-        return true;
-      },
-      checkYear: function () {
+      checkYear: function (y) { // DONE
         return true;
       },
       'timePicker': {

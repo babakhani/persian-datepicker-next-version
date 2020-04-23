@@ -55,26 +55,31 @@
 		let startMonth
 		let endYear
 		let endMonth
-		if ($config.minDate && $config.maxDate) {
-			startYear = new $dateObject($config.minDate).year()
-			startMonth = new $dateObject($config.minDate).month()
-			endYear = new $dateObject($config.maxDate).year()
-			endMonth = new $dateObject($config.maxDate).month()
-			if (((y == endYear && month > endMonth) || y > endYear) || ((y == startYear && month < startMonth) || y < startYear)) {
-				return true;
+		if ($config.checkMonth(y, month)) {
+			if ($config.minDate && $config.maxDate) {
+				startYear = new $dateObject($config.minDate).year()
+				startMonth = new $dateObject($config.minDate).month()
+				endYear = new $dateObject($config.maxDate).year()
+				endMonth = new $dateObject($config.maxDate).month()
+				if (((y == endYear && month > endMonth) || y > endYear) || ((y == startYear && month < startMonth) || y < startYear)) {
+					return true;
+				}
+			} else if ($config.maxDate) {
+				endYear = new $dateObject($config.maxDate).year()
+				endMonth = new $dateObject($config.maxDate).month()
+				if ((y == endYear && month > endMonth) || y > endYear) {
+					return true;
+				}
+			} else if ($config.minDate) {
+				startYear = new $dateObject($config.minDate).year()
+				startMonth = new $dateObject($config.minDate).month()
+				if ((y == startYear && month < startMonth) || y < startYear) {
+					return true;
+				}
 			}
-		} else if ($config.maxDate) {
-			endYear = new $dateObject($config.maxDate).year()
-			endMonth = new $dateObject($config.maxDate).month()
-			if ((y == endYear && month > endMonth) || y > endYear) {
-				return true;
-			}
-		} else if ($config.minDate) {
-			startYear = new $dateObject($config.minDate).year()
-			startMonth = new $dateObject($config.minDate).month()
-			if ((y == startYear && month < startMonth) || y < startYear) {
-				return true;
-			}
+		}
+		else {
+      return true
 		}
 	}
 
