@@ -90,7 +90,7 @@ originalContainer={originalContainer} />
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
-	import { config, isOpen, actions, selectedUnix, viewUnix, viewMode } from './stores.js'
+	import { config, actions, selectedUnix, viewUnix, viewMode } from './stores.js'
 
 
 	// Public props used in adapters
@@ -130,9 +130,9 @@ originalContainer={originalContainer} />
 			}
 		}, 0)
 		if (isVisbile) {
-		  $config.onShow()
+      $config.onShow()
 		} else {
-		  $config.onHide()
+      $config.onHide()
 		}
 	}
 
@@ -210,5 +210,5 @@ originalContainer={originalContainer} />
 </script>
 
 <style>
-  @import './theme.scss';
+@import './theme.scss';
 </style>
