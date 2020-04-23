@@ -95,6 +95,7 @@ originalContainer={originalContainer} />
 	const dispatch = createEventDispatcher()
 	// Handle global event and store events
 	const dispatcher = function(input) {
+		dispatch(input)
 		if (options[input]) {
 			return event => options[input](event)
 		} else {
