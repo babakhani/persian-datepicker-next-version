@@ -1,3 +1,4 @@
+<h1> { number }</h1>
 {#if isVisbile}
 	<div 
 		bind:this={plotarea}
@@ -107,7 +108,7 @@ originalContainer={originalContainer} />
 
 	// Public props used in adapters
 	export let options = {}
-	export let viewMode2 = 'day'
+	export let number = 'day'
 	export let originalContainer = null
 
 	// merge user defined config with predefined config and commit to store
@@ -117,7 +118,7 @@ originalContainer={originalContainer} />
 		options = Object.assign(defaultconfig, options)
 	}
 
- options.viewMode = viewMode2
+	//options.viewMode = viewMode2
 
 	dispatcher('setConfig')(options)
 

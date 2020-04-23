@@ -9848,7 +9848,7 @@ this.zerounip = (function () {
     const { Object: Object_1 } = globals;
     const file$7 = "src/app.svelte";
 
-    // (1:0) {#if isVisbile}
+    // (2:0) {#if isVisbile}
     function create_if_block$7(ctx) {
     	let div1;
     	let t0;
@@ -9878,9 +9878,9 @@ this.zerounip = (function () {
     			t3 = space();
     			if (if_block4) if_block4.c();
     			attr_dev(div0, "class", "pwt-datepicker-picker-section");
-    			add_location(div0, file$7, 20, 3, 502);
+    			add_location(div0, file$7, 21, 3, 523);
     			attr_dev(div1, "class", "pwt-datepicker");
-    			add_location(div1, file$7, 1, 1, 17);
+    			add_location(div1, file$7, 2, 1, 38);
     			dispose = listen_dev(div1, "wheel", ctx.handleWheel, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -10032,14 +10032,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block$7.name,
     		type: "if",
-    		source: "(1:0) {#if isVisbile}",
+    		source: "(2:0) {#if isVisbile}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (6:2) {#if $config.infobox.enabled}
+    // (7:2) {#if $config.infobox.enabled}
     function create_if_block_8$1(ctx) {
     	let current;
 
@@ -10083,14 +10083,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_8$1.name,
     		type: "if",
-    		source: "(6:2) {#if $config.infobox.enabled}",
+    		source: "(7:2) {#if $config.infobox.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (11:3) {#if $config.navigator.enabled}
+    // (12:3) {#if $config.navigator.enabled}
     function create_if_block_7$1(ctx) {
     	let current;
 
@@ -10141,14 +10141,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_7$1.name,
     		type: "if",
-    		source: "(11:3) {#if $config.navigator.enabled}",
+    		source: "(12:3) {#if $config.navigator.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (23:4) {#if !$config.onlyTimePicker}
+    // (24:4) {#if !$config.onlyTimePicker}
     function create_if_block_3$4(ctx) {
     	let t0;
     	let t1;
@@ -10264,14 +10264,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_3$4.name,
     		type: "if",
-    		source: "(23:4) {#if !$config.onlyTimePicker}",
+    		source: "(24:4) {#if !$config.onlyTimePicker}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (24:5) {#if $viewMode === 'year' && $config.yearPicker.enabled}
+    // (25:5) {#if $viewMode === 'year' && $config.yearPicker.enabled}
     function create_if_block_6$2(ctx) {
     	let div;
     	let div_transition;
@@ -10291,7 +10291,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(yearview.$$.fragment);
-    			add_location(div, file$7, 24, 6, 652);
+    			add_location(div, file$7, 25, 6, 673);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -10332,14 +10332,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_6$2.name,
     		type: "if",
-    		source: "(24:5) {#if $viewMode === 'year' && $config.yearPicker.enabled}",
+    		source: "(25:5) {#if $viewMode === 'year' && $config.yearPicker.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (33:5) {#if $viewMode === 'month' && $config.monthPicker.enabled}
+    // (34:5) {#if $viewMode === 'month' && $config.monthPicker.enabled}
     function create_if_block_5$2(ctx) {
     	let div;
     	let div_transition;
@@ -10359,7 +10359,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(monthview.$$.fragment);
-    			add_location(div, file$7, 33, 6, 916);
+    			add_location(div, file$7, 34, 6, 937);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -10400,14 +10400,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_5$2.name,
     		type: "if",
-    		source: "(33:5) {#if $viewMode === 'month' && $config.monthPicker.enabled}",
+    		source: "(34:5) {#if $viewMode === 'month' && $config.monthPicker.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (42:5) {#if $viewMode === 'day' && $config.dayPicker.enabled}
+    // (43:5) {#if $viewMode === 'day' && $config.dayPicker.enabled}
     function create_if_block_4$3(ctx) {
     	let div;
     	let div_transition;
@@ -10429,7 +10429,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(dateview.$$.fragment);
-    			add_location(div, file$7, 42, 6, 1178);
+    			add_location(div, file$7, 43, 6, 1199);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -10470,14 +10470,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_4$3.name,
     		type: "if",
-    		source: "(42:5) {#if $viewMode === 'day' && $config.dayPicker.enabled}",
+    		source: "(43:5) {#if $viewMode === 'day' && $config.dayPicker.enabled}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (54:4) {#if ($viewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
+    // (55:4) {#if ($viewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
     function create_if_block_2$4(ctx) {
     	let div;
     	let div_intro;
@@ -10494,7 +10494,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(timeview.$$.fragment);
-    			add_location(div, file$7, 54, 5, 1535);
+    			add_location(div, file$7, 55, 5, 1556);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -10533,14 +10533,14 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_2$4.name,
     		type: "if",
-    		source: "(54:4) {#if ($viewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}",
+    		source: "(55:4) {#if ($viewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (63:3) {#if $config.toolbox.enabled}
+    // (64:3) {#if $config.toolbox.enabled}
     function create_if_block_1$4(ctx) {
     	let current;
 
@@ -10592,7 +10592,7 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_1$4.name,
     		type: "if",
-    		source: "(63:3) {#if $config.toolbox.enabled}",
+    		source: "(64:3) {#if $config.toolbox.enabled}",
     		ctx
     	});
 
@@ -10600,7 +10600,10 @@ this.zerounip = (function () {
     }
 
     function create_fragment$8(ctx) {
-    	let t;
+    	let h1;
+    	let t0;
+    	let t1;
+    	let t2;
     	let current;
     	let if_block = ctx.isVisbile && create_if_block$7(ctx);
 
@@ -10617,20 +10620,29 @@ this.zerounip = (function () {
 
     	const block = {
     		c: function create() {
+    			h1 = element("h1");
+    			t0 = text(ctx.number);
+    			t1 = space();
     			if (if_block) if_block.c();
-    			t = space();
+    			t2 = space();
     			create_component(input.$$.fragment);
+    			add_location(h1, file$7, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
+    			insert_dev(target, h1, anchor);
+    			append_dev(h1, t0);
+    			insert_dev(target, t1, anchor);
     			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, t, anchor);
+    			insert_dev(target, t2, anchor);
     			mount_component(input, target, anchor);
     			current = true;
     		},
     		p: function update(changed, ctx) {
+    			if (!current || changed.number) set_data_dev(t0, ctx.number);
+
     			if (ctx.isVisbile) {
     				if (if_block) {
     					if_block.p(changed, ctx);
@@ -10639,7 +10651,7 @@ this.zerounip = (function () {
     					if_block = create_if_block$7(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
-    					if_block.m(t.parentNode, t);
+    					if_block.m(t2.parentNode, t2);
     				}
     			} else if (if_block) {
     				group_outros();
@@ -10668,8 +10680,10 @@ this.zerounip = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
+    			if (detaching) detach_dev(h1);
+    			if (detaching) detach_dev(t1);
     			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(t);
+    			if (detaching) detach_dev(t2);
     			destroy_component(input, detaching);
     		}
     	};
@@ -10711,7 +10725,7 @@ this.zerounip = (function () {
     	};
 
     	let { options = {} } = $$props;
-    	let { viewMode2 = "day" } = $$props;
+    	let { number = "day" } = $$props;
     	let { originalContainer = null } = $$props;
 
     	if (!options) {
@@ -10720,7 +10734,6 @@ this.zerounip = (function () {
     		$$invalidate("options", options = Object.assign(defaultconfig, options));
     	}
 
-    	$$invalidate("options", options.viewMode = viewMode2, options);
     	dispatcher("setConfig")(options);
     	let plotarea;
     	let isVisbile = false;
@@ -10819,7 +10832,7 @@ this.zerounip = (function () {
     		}
     	};
 
-    	const writable_props = ["options", "viewMode2", "originalContainer"];
+    	const writable_props = ["options", "number", "originalContainer"];
 
     	Object_1.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -10833,14 +10846,14 @@ this.zerounip = (function () {
 
     	$$self.$set = $$props => {
     		if ("options" in $$props) $$invalidate("options", options = $$props.options);
-    		if ("viewMode2" in $$props) $$invalidate("viewMode2", viewMode2 = $$props.viewMode2);
+    		if ("number" in $$props) $$invalidate("number", number = $$props.number);
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
     	};
 
     	$$self.$capture_state = () => {
     		return {
     			options,
-    			viewMode2,
+    			number,
     			originalContainer,
     			plotarea,
     			isVisbile,
@@ -10853,7 +10866,7 @@ this.zerounip = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ("options" in $$props) $$invalidate("options", options = $$props.options);
-    		if ("viewMode2" in $$props) $$invalidate("viewMode2", viewMode2 = $$props.viewMode2);
+    		if ("number" in $$props) $$invalidate("number", number = $$props.number);
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
     		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
     		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
@@ -10865,7 +10878,7 @@ this.zerounip = (function () {
 
     	return {
     		options,
-    		viewMode2,
+    		number,
     		originalContainer,
     		plotarea,
     		isVisbile,
@@ -10896,7 +10909,7 @@ this.zerounip = (function () {
 
     		init(this, options, instance$8, create_fragment$8, safe_not_equal, {
     			options: 0,
-    			viewMode2: 0,
+    			number: 0,
     			originalContainer: 0
     		});
 
@@ -10916,11 +10929,11 @@ this.zerounip = (function () {
     		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	get viewMode2() {
+    	get number() {
     		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	set viewMode2(value) {
+    	set number(value) {
     		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 

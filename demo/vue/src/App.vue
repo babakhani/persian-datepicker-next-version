@@ -14,10 +14,10 @@
       </select>
     </center>
     <SveltePlugin
-      :options="{
+      options="{
         inline: true,
       }"
-      :viewMode2="viewModeSelected"
+      :number="viewModeSelected"
       @onSelectPrevView="onSelectPrevView"
       @onSelectTime="onSelectTime"
     />
