@@ -45,7 +45,7 @@
 					in:fadeIn="{{duration: animateSpeed}}" 
 					class="pwt-date-navigator-button"
 					on:click={() => setViewMode("year")}>
-					{selectedYear}
+					{monthViewText}
 				</button>
 			{/if}
 		{/if}
@@ -56,8 +56,7 @@
 					in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
 					class="pwt-date-navigator-button"
 					on:click={() => setViewMode("month")}>
-					{selectedMonth}
-					{visualYear}
+					{dateViewText}
 				</button>
 			{/if}
 		{/if}
@@ -119,6 +118,9 @@
 	$: visualYear = new $dateObject(viewUnix).format('YYYY')
 	$: selectedMonth = new $dateObject(viewUnix).format('MMMM')
 	$: selectedDate = new $dateObject(viewUnix).format('DD')
+	$: dateViewText = $config.dayPicker.titleFormatter(viewUnix, $dateObject)
+	$: monthViewText = $config.monthPicker.titleFormatter(viewUnix, $dateObject)
+	$: yearViewText = $config.yearPicker.titleFormatter(viewUnix, $dateObject)
 
 	let startYear
 	let visible = true

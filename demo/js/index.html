@@ -48,7 +48,7 @@
       initialValue: false,  // DONE
       initialValueType: 'persian', // Works but deprecated in next version
       persianDigit: true, // Deprected
-      viewMode: 'date', // DONE
+      viewMode: 'year', // DONE
       format: 'LLLL', // DONE
       formatter (unixDate, dateObject) {
         return new dateObject(unixDate).format(this.format);
@@ -135,85 +135,80 @@
         return true;
       },
       'timePicker': {
-        'enabled': true,
-        'step': 1,
+        'enabled': true, // DONE
+        'step': 1, // DONE
         'hour': {
-          'enabled': true,
-          'step': null
+          'enabled': true, // DONE
+          'step': null // DONE
         },
         'minute': {
-          'enabled': true,
-          'step': null
+          'enabled': true, // DONE
+          'step': null // DONE
         },
         'second': {
-          'enabled': true,
-          'step': null
+          'enabled': true, // DONE
+          'step': null // DONE
         },
         'meridian': {
-          'enabled': false
+          'enabled': true // DONE
         }
       },
       dayPicker: {
-        'enabled': true,
-        'titleFormat': 'YYYY MMMM',
-        'titleFormatter': function (year, month) {
-        let titleDate = this.model.PersianDate.date([year, month]);
-        return titleDate.format(this.model.options.dayPicker.titleFormat);
+        'enabled': true, // DONE
+        'titleFormat': 'YYYY MMMM', // DONE
+        'titleFormatter': function (unix, dateObject) { // DONE
+          return new dateObject(unix).format(this.titleFormat)
         },
-          'onSelect': function (selectedDayUnix) {
-        Helper.debug(this, 'dayPicker Event: onSelect : ' + selectedDayUnix);
-          }
+        'onSelect': function (selectedDayUnix) { // DONE
+          console.log('on select date')
+        }
       },
       monthPicker: {
         'enabled': true,
-        'titleFormat': 'YYYY',
-        'titleFormatter': function (unix) {
-        let titleDate = this.model.PersianDate.date(unix);
-        return titleDate.format(this.model.options.monthPicker.titleFormat);
+        'titleFormat': 'YYYY', // DONE
+        'titleFormatter': function (unix, dateObject) { // DONE
+          return new dateObject(unix).format(this.titleFormat)
         },
-          'onSelect': function (monthIndex) {
-        Helper.debug(this, 'monthPicker Event: onSelect : ' + monthIndex);
+        'onSelect': function (monthIndex) { // DONE
         }
       },
       yearPicker: {
         'enabled': true,
-        'titleFormat': 'YYYY',
-        'titleFormatter': function (year) {
-          let remaining = parseInt(year / 12, 10) * 12;
-          let startYear = this.model.PersianDate.date([remaining]);
-          let endYear = this.model.PersianDate.date([remaining + 11]);
-          return startYear.format(this.model.options.yearPicker.titleFormat) + '-' + endYear.format(this.model.options.yearPicker.titleFormat);
+        'titleFormat': 'YYYY', // DONE
+        'titleFormatter': function (unix, dateObject) { // DONE
+          let selectedYear = new dateObject(unix).year()
+          let startYear = selectedYear - (selectedYear % 12)
+          return new dateObject(unix).year(startYear).format(this.titleFormat) + '-' + new
+            dateObject(unix).year(startYear+ 11).format(this.titleFormat)
         },
-        onSelect: function (year) {
-          Helper.debug(this, 'yearPicker Event: onSelect : ' + year);
+        onSelect: function (year) { // DONE
+          console.log('user event on select year')
         }
       },
       infobox : {
-         enabled: true
+         enabled: true, // DONE
+        'titleFormat': 'YYYY', // DONE
+        'titleFormatter': function (unix, dateObject) { // DONE
+          return new dateObject(unix).format(this.titleFormat)
+        },
+        'selectedDateFormat': ' dddd DD MMMM', // DONE
+        'selectedDateFormatter': function (unix, dateObject) { // DONE
+          return new dateObject(unix).format(this.selectedDateFormat)
+        },
       },
       onSelect: function (unixDate) {
-        Helper.debug(this, 'datepicker Event: onSelect : ' + unixDate);
+        console.log('user event onSelect')
       },
-      'onSet': function (unixDate) {
-      Helper.debug(this, 'datepicker Event: onSet : ' + unixDate);
-        },
       'position': 'auto',
-      'onShow': function (datepickerObject) {
-      Helper.debug(datepickerObject, 'Event: onShow ');
-      },
-      'onHide': function (datepickerObject) {
-      Helper.debug(datepickerObject, 'Event: onHide ');
-      },
-      'onToggle': function (datepickerObject) {
-      Helper.debug(datepickerObject, 'Event: onToggle ');
-      },
-      'onDestroy': function (datepickerObject) {
-      Helper.debug(datepickerObject, 'Event: onDestroy ');
-      },
       'autoClose': false,
       'template': null,
       'observer': false,
-      'inputDelay': 800
+      'inputDelay': 800,
+      'onSet': function (unixDate) {},
+      'onShow': function (datepickerObject) {},
+      'onHide': function (datepickerObject) {},
+      'onToggle': function (datepickerObject) {},
+      'onDestroy': function (datepickerObject) {}
     }
     zerounip(container, options)
   </script>

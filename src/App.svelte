@@ -149,6 +149,7 @@ originalContainer={originalContainer} />
 
 	const onSelectDate = function(event) {
 		dispatcher('onSelectDate')(event.detail)
+		$config.dayPicker.onSelect(event.detail)
 	}
 
 	const onSelectTime = function(event) {
@@ -157,10 +158,12 @@ originalContainer={originalContainer} />
 
 	const onSelectMonth = function(event) {
 		dispatcher('onSelectMonth')(event.detail)
+		$config.monthPicker.onSelect(event.detail)
 	}
 
 	const onSelectYear = function(event) {
 		dispatcher('onSelectYear')(event.detail)
+		$config.yearPicker.onSelect(event.detail)
 	}
 
 	const today = event => {

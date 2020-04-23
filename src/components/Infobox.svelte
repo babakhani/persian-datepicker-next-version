@@ -1,10 +1,10 @@
 <div class="pwt-date-info">
-	<span>{yearPrt}</span>
+	<span>{title}</span>
 	{#if visible}
 		<span
 			out:fadeOut="{{duration: animateSpeed, offset: 10}}" 
 			in:fadeIn="{{duration: animateSpeed, offset: 10}}" >
-			{otherPart}
+			{selectedDAte}
 		</span>
 	{/if}
 </div>
@@ -43,14 +43,14 @@
 
 	let oldotherPart
 
-	$: yearPrt = new $dateObject(selectedUnix).format('YYYY')
-	$: otherPart = new $dateObject(selectedUnix).format(' dddd DD MMMM')
+	$: title = $config.infobox.titleFormatter(selectedUnix, $dateObject)
+	$: selectedDAte = $config.infobox.selectedDateFormatter(selectedUnix, $dateObject)
 
 	let visible
 	let animateSpeed = 100
 	let cachedSelectedUnix = viewUnix
 	let transitionDirectionForward = true
-	$: if (otherPart){
+	$: if (selectedDAte){
 		if (selectedUnix >  cachedSelectedUnix) {
 			transitionDirectionForward = true
 		} else {

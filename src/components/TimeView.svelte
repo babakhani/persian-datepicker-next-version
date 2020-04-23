@@ -1,33 +1,36 @@
 <div class="pwt-date-time">
-	<div class="pwt-date-time-section pwt-date-time-hour">
-		<button 
-			on:click={() => updateTime('hour', 'up')}
-			class="pwt-date-time-arrow" >
-			<svg 
-				width="12"
-				height="12"
-				viewBox="0 0 240.811 240.811" >
-				<path d="M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155
-					c4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155
-					L129.007,57.819z"/>
-			</svg>
-		</button>
-		<span>
-			{ currentHour }
-		</span>
-		<button 
-			on:click={() => updateTime('hour', 'down')}
-			class="pwt-date-time-arrow" >
-			<svg 
-				width="12"
-				height="12"
-				viewBox="0 0 240.811 240.811">
-				<path d="M220.088,57.667l-99.671,99.695L20.746,57.655c-4.752-4.752-12.439-4.752-17.191,0
-					c-4.74,4.752-4.74,12.451,0,17.203l108.261,108.297l0,0l0,0c4.74,4.752,12.439,4.752,17.179,0L237.256,74.859
-					c4.74-4.752,4.74-12.463,0-17.215C232.528,52.915,224.828,52.915,220.088,57.667z"/>
-			</svg>
-		</button>
-	</div>
+	{#if $config.timePicker.hour.enabled}
+		<div class="pwt-date-time-section pwt-date-time-hour">
+			<button 
+				on:click={() => updateTime('hour', 'up')}
+				class="pwt-date-time-arrow" >
+				<svg 
+					width="12"
+					height="12"
+					viewBox="0 0 240.811 240.811" >
+					<path d="M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155
+						c4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155
+						L129.007,57.819z"/>
+				</svg>
+			</button>
+			<span>
+				{ currentHour }
+			</span>
+			<button 
+				on:click={() => updateTime('hour', 'down')}
+				class="pwt-date-time-arrow" >
+				<svg 
+					width="12"
+					height="12"
+					viewBox="0 0 240.811 240.811">
+					<path d="M220.088,57.667l-99.671,99.695L20.746,57.655c-4.752-4.752-12.439-4.752-17.191,0
+						c-4.74,4.752-4.74,12.451,0,17.203l108.261,108.297l0,0l0,0c4.74,4.752,12.439,4.752,17.179,0L237.256,74.859
+						c4.74-4.752,4.74-12.463,0-17.215C232.528,52.915,224.828,52.915,220.088,57.667z"/>
+				</svg>
+			</button>
+		</div>
+	{/if}
+	{#if $config.timePicker.minute.enabled}
 	<div class="pwt-date-time-section pwt-date-time-minute">
 		<button 
 			on:click={() => updateTime('minute', 'up')}
@@ -57,6 +60,8 @@
 			</svg>
 		</button>
 	</div>
+	{/if}
+	{#if $config.timePicker.second.enabled}
 	<div class="pwt-date-time-section pwt-date-time-second">
 		<button 
 			on:click={() => updateTime('second', 'up')}
@@ -86,6 +91,8 @@
 			</svg>
 		</button>
 	</div>
+	{/if}
+	{#if $config.timePicker.meridian.enabled}
 	<div class="pwt-date-time-section pwt-date-time-meridian">
 		<button
 			on:click={() => updateTime('meridian', 'up')}
@@ -115,6 +122,7 @@
 			</svg>
 		</button>
 	</div>
+	{/if}
 </div>
 
 <script>
@@ -143,10 +151,12 @@
 				selectedObj = selectedObj.subtract('hour', 12).clone()
 			}
 		} else {
+			let step = $config.timePicker[mode].step ? $config.timePicker[mode].step
+			: $config.timePicker.step
 			if (direction === 'up') {
-				selectedObj = selectedObj.add(mode, 1).clone()
+				selectedObj = selectedObj.add(mode, step).clone()
 			} else {
-				selectedObj = selectedObj.subtract(mode, 1).clone()
+				selectedObj = selectedObj.subtract(mode, step).clone()
 			}
 		}
 		selectDate(selectedObj)
