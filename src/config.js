@@ -1,7 +1,7 @@
 let Helper = {
-  debug (i) {
-    // console.log(i)
-  }
+  //debug (i) {
+  //  // console.log(i)
+  //}
 }
 /**
  * @description persian-datepicker configuration document
