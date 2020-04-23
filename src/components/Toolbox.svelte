@@ -9,7 +9,7 @@
 	{#if viewMode === 'time'}
 		<button 
 			class="pwt-date-toolbox-button"
-			on:click={() => setViewMode("date")}>
+			on:click={() => setViewMode("day")}>
 			Date
 		</button>
 	{/if}

@@ -1,6 +1,6 @@
 let Helper = {
   debug (i) {
-    console.log(i)
+    // console.log(i)
   }
 }
 /**
@@ -155,7 +155,7 @@ export default {
      * @type {string}
      * @default 'day'
      */
-    'viewMode': 'day',
+    'viewMode': 'month',
 
 
     /**
@@ -575,7 +575,7 @@ export default {
          * @description make timePicker enable or disable
          * @type boolean
          */
-        'enabled': false,
+        'enabled': true,
 
         /**
          * @description The amount that increases or decreases by pressing the button
@@ -651,7 +651,7 @@ export default {
              * @description if you set this as false, datepicker timepicker system moved to 24-hour system
              * @type boolean
              */
-            'enabled': false
+            'enabled': true
         }
     },
 
@@ -682,10 +682,10 @@ export default {
          * @param year
          * @param month
          * @return {*}
+         * @changed 2.0.0
          */
-        'titleFormatter': function (year, month) {
-            let titleDate = this.model.PersianDate.date([year, month]);
-            return titleDate.format(this.model.options.dayPicker.titleFormat);
+        'titleFormatter': function (unix, dateObject) {
+            return new dateObject(unix).format(this.titleFormat)
         },
 
         /**
@@ -724,10 +724,10 @@ export default {
          * @description monthPicker title formatter function
          * @param unix
          * @return {*}
+         * @changed 2.0.0
          */
-        'titleFormatter': function (unix) {
-            let titleDate = this.model.PersianDate.date(unix);
-            return titleDate.format(this.model.options.monthPicker.titleFormat);
+        'titleFormatter': function (unix, dateObject) {
+          return new dateObject(unix).format(this.titleFormat)
         },
 
         /**
@@ -765,12 +765,13 @@ export default {
          * @description yearPicker title formatter function
          * @param year
          * @return {string}
+         * @changed 2.0.0
          */
-        'titleFormatter': function (year) {
-            let remaining = parseInt(year / 12, 10) * 12;
-            let startYear = this.model.PersianDate.date([remaining]);
-            let endYear = this.model.PersianDate.date([remaining + 11]);
-            return startYear.format(this.model.options.yearPicker.titleFormat) + '-' + endYear.format(this.model.options.yearPicker.titleFormat);
+        'titleFormatter': function (unix, dateObject) {
+          let selectedYear = new dateObject(unix).year()
+          let startYear = selectedYear - (selectedYear % 12)
+          return new dateObject(unix).year(startYear).format(this.titleFormat) + '-' + new
+            dateObject(unix).year(startYear+ 11).format(this.titleFormat)
         },
 
         /**
@@ -781,6 +782,24 @@ export default {
         'onSelect': function (year) {
             Helper.debug(this, 'yearPicker Event: onSelect : ' + year);
         }
+    },
+
+
+    /**
+     * TODO: compelte Doc
+     * @description Material design like infobox
+     * @since 2.0.0
+     */
+    'infobox': {
+      'enabled': true,
+      'titleFormat': 'YYYY', 
+      'titleFormatter': function (unix, dateObject) {
+        return new dateObject(unix).format(this.titleFormat)
+      },
+      'selectedDateFormat': ' dddd DD MMMM',
+      'selectedDateFormatter': function (unix, dateObject) {
+        return new dateObject(unix).format(this.selectedDateFormat)
+      }
     },
 
 

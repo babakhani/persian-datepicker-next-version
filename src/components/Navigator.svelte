@@ -49,7 +49,7 @@
 				</button>
 			{/if}
 		{/if}
-		{#if viewMode === 'date'}
+		{#if viewMode === 'day'}
 			{#if visible}
 				<button 
 					out:fadeOut="{{duration: animateSpeed}}" 

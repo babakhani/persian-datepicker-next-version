@@ -4105,7 +4105,7 @@ this.zerounip = (function () {
 
     let Helper = {
       debug (i) {
-        console.log(i);
+        // console.log(i)
       }
     };
     /**
@@ -4260,7 +4260,7 @@ this.zerounip = (function () {
          * @type {string}
          * @default 'day'
          */
-        'viewMode': 'day',
+        'viewMode': 'month',
 
 
         /**
@@ -4411,7 +4411,6 @@ this.zerounip = (function () {
              *  }
              */
             'onNext': function (datepickerObject) {
-                Helper.debug(datepickerObject, 'Event: onNext');
             },
 
 
@@ -4423,7 +4422,6 @@ this.zerounip = (function () {
              *  }
              */
             'onPrev': function (datepickerObject) {
-                Helper.debug(datepickerObject, 'Event: onPrev');
             },
 
 
@@ -4435,7 +4433,6 @@ this.zerounip = (function () {
              *  }
              */
             'onSwitch': function (datepickerObject) {
-                Helper.debug(datepickerObject, 'dayPicker Event: onSwitch');
             }
         },
 
@@ -4520,7 +4517,6 @@ this.zerounip = (function () {
                  * @event
                  */
                 onSubmit: function (datepickerObject) {
-                    Helper.debug(datepickerObject, 'dayPicker Event: onSubmit');
                 }
             },
 
@@ -4570,7 +4566,6 @@ this.zerounip = (function () {
                  * @event
                  */
                 onToday: function (datepickerObject) {
-                    Helper.debug(datepickerObject, 'dayPicker Event: onToday');
                 }
             },
 
@@ -4608,7 +4603,6 @@ this.zerounip = (function () {
                  * @event
                  */
                 onSwitch: function (datepickerObject) {
-                    Helper.debug(datepickerObject, 'dayPicker Event: onSwitch');
                 }
             },
 
@@ -4621,7 +4615,6 @@ this.zerounip = (function () {
              *  @deprecated 1.0.0
              */
             onToday: function (datepickerObject) {
-                Helper.debug(datepickerObject, 'dayPicker Event: onToday');
             }
         },
 
@@ -4680,7 +4673,7 @@ this.zerounip = (function () {
              * @description make timePicker enable or disable
              * @type boolean
              */
-            'enabled': false,
+            'enabled': true,
 
             /**
              * @description The amount that increases or decreases by pressing the button
@@ -4756,7 +4749,7 @@ this.zerounip = (function () {
                  * @description if you set this as false, datepicker timepicker system moved to 24-hour system
                  * @type boolean
                  */
-                'enabled': false
+                'enabled': true
             }
         },
 
@@ -4787,10 +4780,10 @@ this.zerounip = (function () {
              * @param year
              * @param month
              * @return {*}
+             * @changed 2.0.0
              */
-            'titleFormatter': function (year, month) {
-                let titleDate = this.model.PersianDate.date([year, month]);
-                return titleDate.format(this.model.options.dayPicker.titleFormat);
+            'titleFormatter': function (unix, dateObject) {
+                return new dateObject(unix).format(this.titleFormat)
             },
 
             /**
@@ -4799,7 +4792,6 @@ this.zerounip = (function () {
              * @param selectedDayUnix
              */
             'onSelect': function (selectedDayUnix) {
-                Helper.debug(this, 'dayPicker Event: onSelect : ' + selectedDayUnix);
             }
 
         },
@@ -4829,10 +4821,10 @@ this.zerounip = (function () {
              * @description monthPicker title formatter function
              * @param unix
              * @return {*}
+             * @changed 2.0.0
              */
-            'titleFormatter': function (unix) {
-                let titleDate = this.model.PersianDate.date(unix);
-                return titleDate.format(this.model.options.monthPicker.titleFormat);
+            'titleFormatter': function (unix, dateObject) {
+              return new dateObject(unix).format(this.titleFormat)
             },
 
             /**
@@ -4841,7 +4833,6 @@ this.zerounip = (function () {
              * @param monthIndex
              */
             'onSelect': function (monthIndex) {
-                Helper.debug(this, 'monthPicker Event: onSelect : ' + monthIndex);
             }
         },
 
@@ -4870,12 +4861,13 @@ this.zerounip = (function () {
              * @description yearPicker title formatter function
              * @param year
              * @return {string}
+             * @changed 2.0.0
              */
-            'titleFormatter': function (year) {
-                let remaining = parseInt(year / 12, 10) * 12;
-                let startYear = this.model.PersianDate.date([remaining]);
-                let endYear = this.model.PersianDate.date([remaining + 11]);
-                return startYear.format(this.model.options.yearPicker.titleFormat) + '-' + endYear.format(this.model.options.yearPicker.titleFormat);
+            'titleFormatter': function (unix, dateObject) {
+              let selectedYear = new dateObject(unix).year();
+              let startYear = selectedYear - (selectedYear % 12);
+              return new dateObject(unix).year(startYear).format(this.titleFormat) + '-' + new
+                dateObject(unix).year(startYear+ 11).format(this.titleFormat)
             },
 
             /**
@@ -4884,8 +4876,25 @@ this.zerounip = (function () {
              * @param year
              */
             'onSelect': function (year) {
-                Helper.debug(this, 'yearPicker Event: onSelect : ' + year);
             }
+        },
+
+
+        /**
+         * TODO: compelte Doc
+         * @description Material design like infobox
+         * @since 2.0.0
+         */
+        'infobox': {
+          'enabled': true,
+          'titleFormat': 'YYYY', 
+          'titleFormatter': function (unix, dateObject) {
+            return new dateObject(unix).format(this.titleFormat)
+          },
+          'selectedDateFormat': ' dddd DD MMMM',
+          'selectedDateFormatter': function (unix, dateObject) {
+            return new dateObject(unix).format(this.selectedDateFormat)
+          }
         },
 
 
@@ -4895,7 +4904,6 @@ this.zerounip = (function () {
          * @param unixDate
          */
         'onSelect': function (unixDate) {
-            Helper.debug(this, 'datepicker Event: onSelect : ' + unixDate);
         },
 
 
@@ -4905,7 +4913,6 @@ this.zerounip = (function () {
          * @param unixDate
          */
         'onSet': function (unixDate) {
-            Helper.debug(this, 'datepicker Event: onSet : ' + unixDate);
         },
 
         /**
@@ -4924,7 +4931,6 @@ this.zerounip = (function () {
          * @event
          */
         'onShow': function (datepickerObject) {
-            Helper.debug(datepickerObject, 'Event: onShow ');
         },
 
 
@@ -4933,7 +4939,6 @@ this.zerounip = (function () {
          * @event
          */
         'onHide': function (datepickerObject) {
-            Helper.debug(datepickerObject, 'Event: onHide ');
         },
 
 
@@ -4942,7 +4947,6 @@ this.zerounip = (function () {
          * @event
          */
         'onToggle': function (datepickerObject) {
-            Helper.debug(datepickerObject, 'Event: onToggle ');
         },
 
 
@@ -4951,7 +4955,6 @@ this.zerounip = (function () {
          * @event
          */
         'onDestroy': function (datepickerObject) {
-            Helper.debug(datepickerObject, 'Event: onDestroy ');
         },
 
 
@@ -5142,13 +5145,13 @@ this.zerounip = (function () {
         let $config = get_store_value(config);
         if (currentViewMode === 'time') {
            if ($config.dayPicker.enabled) {
-             viewMode.set('date');
+             viewMode.set('day');
            } else if ($config.monthPicker.enabled) {
              viewMode.set('month');
            } else if ($config.yearPicker.enabled) {
              viewMode.set('year');
            }
-        } else if (currentViewMode === 'date') {
+        } else if (currentViewMode === 'day') {
            if ($config.monthPicker.enabled) {
              viewMode.set('month');
            } else if ($config.yearPicker.enabled) {
@@ -5167,17 +5170,17 @@ this.zerounip = (function () {
            if ($config.monthPicker.enabled) {
              viewMode.set('month');
            } else if ($config.dayPicker.enabled) {
-             viewMode.set('date');
+             viewMode.set('day');
            } else if ($config.timePicker.enabled) {
              viewMode.set('time');
            }
         } else if (currentViewMode === 'month') {
            if ($config.dayPicker.enabled) {
-             viewMode.set('date');
+             viewMode.set('day');
            } else if ($config.timePicker.enabled) {
              viewMode.set('time');
            }
-        } else if (currentViewMode === 'date') {
+        } else if (currentViewMode === 'day') {
            if ($config.timePicker.enabled && $config.timePicker.showAsLastStep) {
              viewMode.set('time');
            }
@@ -5195,7 +5198,7 @@ this.zerounip = (function () {
         this.setSelectedDate(Math.min(get_store_value(selectedUnix), get_store_value(maxUnix)));
       },
       onSelectNextView() {
-        if (get_store_value(viewMode) === 'date') {
+        if (get_store_value(viewMode) === 'day') {
           viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).add('month', 1)));
         }
         if (get_store_value(viewMode) === 'month') {
@@ -5206,7 +5209,7 @@ this.zerounip = (function () {
         }
       },
       onSelectPrevView() {
-        if (get_store_value(viewMode) === 'date') {
+        if (get_store_value(viewMode) === 'day') {
           viewUnix.set(persianDateToUnix(new persianDate$1(get_store_value(viewUnix)).subtract('month', 1)));
         }
         if (get_store_value(viewMode) === 'month') {
@@ -8057,7 +8060,7 @@ this.zerounip = (function () {
     	return block;
     }
 
-    // (52:2) {#if viewMode === 'date'}
+    // (52:2) {#if viewMode === 'day'}
     function create_if_block_2$2(ctx) {
     	let if_block_anchor;
     	let current;
@@ -8113,7 +8116,7 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_2$2.name,
     		type: "if",
-    		source: "(52:2) {#if viewMode === 'date'}",
+    		source: "(52:2) {#if viewMode === 'day'}",
     		ctx
     	});
 
@@ -8134,7 +8137,7 @@ this.zerounip = (function () {
     			button = element("button");
     			t = text(ctx.dateViewText);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 53, 4, 1701);
+    			add_location(button, file$4, 53, 4, 1700);
     			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -8260,7 +8263,7 @@ this.zerounip = (function () {
     			t1 = space();
     			t2 = text(ctx.selectedDate);
     			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 64, 4, 1996);
+    			add_location(button, file$4, 64, 4, 1995);
     			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -8319,7 +8322,7 @@ this.zerounip = (function () {
     	let if_block0 = ctx.viewMode !== "time" && create_if_block_8(ctx);
     	let if_block1 = ctx.viewMode === "year" && create_if_block_6(ctx);
     	let if_block2 = ctx.viewMode === "month" && create_if_block_4$1(ctx);
-    	let if_block3 = ctx.viewMode === "date" && create_if_block_2$2(ctx);
+    	let if_block3 = ctx.viewMode === "day" && create_if_block_2$2(ctx);
     	let if_block4 = ctx.viewMode === "time" && create_if_block$4(ctx);
 
     	const block = {
@@ -8411,7 +8414,7 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			if (ctx.viewMode === "date") {
+    			if (ctx.viewMode === "day") {
     				if (if_block3) {
     					if_block3.p(changed, ctx);
     					transition_in(if_block3, 1);
@@ -9105,7 +9108,7 @@ this.zerounip = (function () {
     			button = element("button");
     			button.textContent = "Today";
     			attr_dev(button, "class", "pwt-date-toolbox-button");
-    			add_location(button, file$6, 16, 1, 357);
+    			add_location(button, file$6, 16, 1, 356);
     			dispose = listen_dev(button, "click", ctx.today, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -9205,7 +9208,7 @@ this.zerounip = (function () {
     			button = element("button");
     			button.textContent = "gregorian";
     			attr_dev(button, "class", "pwt-date-toolbox-button");
-    			add_location(button, file$6, 24, 3, 541);
+    			add_location(button, file$6, 24, 3, 540);
     			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -9239,7 +9242,7 @@ this.zerounip = (function () {
     			button = element("button");
     			button.textContent = "Jalali";
     			attr_dev(button, "class", "pwt-date-toolbox-button");
-    			add_location(button, file$6, 31, 3, 718);
+    			add_location(button, file$6, 31, 3, 717);
     			dispose = listen_dev(button, "click", ctx.click_handler_3, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -9273,7 +9276,7 @@ this.zerounip = (function () {
     			button = element("button");
     			button.textContent = "Submit";
     			attr_dev(button, "class", "pwt-date-toolbox-button");
-    			add_location(button, file$6, 39, 1, 894);
+    			add_location(button, file$6, 39, 1, 893);
     			dispose = listen_dev(button, "click", ctx.click_handler_4, false, false, false);
     		},
     		m: function mount(target, anchor) {
@@ -9457,7 +9460,7 @@ this.zerounip = (function () {
     	});
 
     	const click_handler = () => setViewMode("time");
-    	const click_handler_1 = () => setViewMode("date");
+    	const click_handler_1 = () => setViewMode("day");
     	const click_handler_2 = () => setcalendar("gregorian");
     	const click_handler_3 = () => setcalendar("persian");
 
@@ -9707,26 +9710,34 @@ this.zerounip = (function () {
     	};
 
     	let updateInputs = function () {
-    		if ($config.initialValue || $isDirty) {
+    		if (originalContainer && originalContainer.tagName === "INPUT" && $config.initialValue || $isDirty) {
     			let selected = $config.formatter($selectedUnix, $dateObject);
-    			$$invalidate("originalContainer", originalContainer.value = selected, originalContainer);
+
+    			if (originalContainer && originalContainer.tagName === "INPUT") {
+    				$$invalidate("originalContainer", originalContainer.value = selected, originalContainer);
+    			}
 
     			if ($config.altField) {
     				let altField = document.querySelector($config.altField);
-    				altField.value = $config.altFieldFormatter($selectedUnix, $dateObject);
+
+    				if (altField && originalContainer.altField === "INPUT") {
+    					altField.value = $config.altFieldFormatter($selectedUnix, $dateObject);
+    				}
     			}
     		}
     	};
 
     	let getInputInitialValue = function () {
-    		let value = originalContainer.value;
+    		if (originalContainer) {
+    			let value = originalContainer.value;
 
-    		setTimeout(
-    			() => {
-    				dispatch("setinitialvalue", value);
-    			},
-    			0
-    		);
+    			setTimeout(
+    				() => {
+    					dispatch("setinitialvalue", value);
+    				},
+    				0
+    			);
+    		}
     	};
 
     	getInputInitialValue();
@@ -10145,7 +10156,7 @@ this.zerounip = (function () {
     	let current;
     	let if_block0 = ctx.$viewMode === "year" && ctx.$config.yearPicker.enabled && create_if_block_6$2(ctx);
     	let if_block1 = ctx.$viewMode === "month" && ctx.$config.monthPicker.enabled && create_if_block_5$2(ctx);
-    	let if_block2 = ctx.$viewMode === "date" && ctx.$config.dayPicker.enabled && create_if_block_4$3(ctx);
+    	let if_block2 = ctx.$viewMode === "day" && ctx.$config.dayPicker.enabled && create_if_block_4$3(ctx);
 
     	const block = {
     		c: function create() {
@@ -10206,7 +10217,7 @@ this.zerounip = (function () {
     				check_outros();
     			}
 
-    			if (ctx.$viewMode === "date" && ctx.$config.dayPicker.enabled) {
+    			if (ctx.$viewMode === "day" && ctx.$config.dayPicker.enabled) {
     				if (if_block2) {
     					if_block2.p(changed, ctx);
     					transition_in(if_block2, 1);
@@ -10396,7 +10407,7 @@ this.zerounip = (function () {
     	return block;
     }
 
-    // (42:5) {#if $viewMode === 'date' && $config.dayPicker.enabled}
+    // (42:5) {#if $viewMode === 'day' && $config.dayPicker.enabled}
     function create_if_block_4$3(ctx) {
     	let div;
     	let div_transition;
@@ -10418,7 +10429,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(dateview.$$.fragment);
-    			add_location(div, file$7, 42, 6, 1179);
+    			add_location(div, file$7, 42, 6, 1178);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -10459,7 +10470,7 @@ this.zerounip = (function () {
     		block,
     		id: create_if_block_4$3.name,
     		type: "if",
-    		source: "(42:5) {#if $viewMode === 'date' && $config.dayPicker.enabled}",
+    		source: "(42:5) {#if $viewMode === 'day' && $config.dayPicker.enabled}",
     		ctx
     	});
 
@@ -10483,7 +10494,7 @@ this.zerounip = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(timeview.$$.fragment);
-    			add_location(div, file$7, 54, 5, 1536);
+    			add_location(div, file$7, 54, 5, 1535);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -10687,8 +10698,7 @@ this.zerounip = (function () {
     	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
     	validate_store(viewMode, "viewMode");
     	component_subscribe($$self, viewMode, $$value => $$invalidate("$viewMode", $viewMode = $$value));
-    	let { options = {} } = $$props;
-    	let { originalContainer = null } = $$props;
+    	const dispatch = createEventDispatcher();
 
     	const dispatcher = function (input) {
     		if (options[input]) {
@@ -10700,12 +10710,17 @@ this.zerounip = (function () {
     		}
     	};
 
+    	let { options = {} } = $$props;
+    	let { viewMode2 = "day" } = $$props;
+    	let { originalContainer = null } = $$props;
+
     	if (!options) {
     		$$invalidate("options", options = defaultconfig);
     	} else {
     		$$invalidate("options", options = Object.assign(defaultconfig, options));
     	}
 
+    	$$invalidate("options", options.viewMode = viewMode2, options);
     	dispatcher("setConfig")(options);
     	let plotarea;
     	let isVisbile = false;
@@ -10804,7 +10819,7 @@ this.zerounip = (function () {
     		}
     	};
 
-    	const writable_props = ["options", "originalContainer"];
+    	const writable_props = ["options", "viewMode2", "originalContainer"];
 
     	Object_1.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -10818,12 +10833,14 @@ this.zerounip = (function () {
 
     	$$self.$set = $$props => {
     		if ("options" in $$props) $$invalidate("options", options = $$props.options);
+    		if ("viewMode2" in $$props) $$invalidate("viewMode2", viewMode2 = $$props.viewMode2);
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
     	};
 
     	$$self.$capture_state = () => {
     		return {
     			options,
+    			viewMode2,
     			originalContainer,
     			plotarea,
     			isVisbile,
@@ -10836,6 +10853,7 @@ this.zerounip = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ("options" in $$props) $$invalidate("options", options = $$props.options);
+    		if ("viewMode2" in $$props) $$invalidate("viewMode2", viewMode2 = $$props.viewMode2);
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
     		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
     		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
@@ -10847,6 +10865,7 @@ this.zerounip = (function () {
 
     	return {
     		options,
+    		viewMode2,
     		originalContainer,
     		plotarea,
     		isVisbile,
@@ -10874,7 +10893,12 @@ this.zerounip = (function () {
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { options: 0, originalContainer: 0 });
+
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {
+    			options: 0,
+    			viewMode2: 0,
+    			originalContainer: 0
+    		});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -10889,6 +10913,14 @@ this.zerounip = (function () {
     	}
 
     	set options(value) {
+    		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get viewMode2() {
+    		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set viewMode2(value) {
     		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 

@@ -81,21 +81,27 @@
 	}
 
 	let updateInputs = function () {
-		if ($config.initialValue || $isDirty) {
+		if (originalContainer && originalContainer.tagName === 'INPUT' && $config.initialValue || $isDirty) {
 		  let selected = $config.formatter($selectedUnix, $dateObject)
-			originalContainer.value = selected
+			if (originalContainer && originalContainer.tagName === 'INPUT') {
+			  originalContainer.value = selected
+			}
 			if ($config.altField) {
 				let altField = document.querySelector($config.altField)
-				altField.value = $config.altFieldFormatter($selectedUnix, $dateObject)
+				if (altField && originalContainer.altField === 'INPUT') {
+				  altField.value = $config.altFieldFormatter($selectedUnix, $dateObject)
+				}
 			}
 		}
 	}
 	
 	let getInputInitialValue = function () {
-		let value = originalContainer.value
-		setTimeout(() => {
-		  dispatch('setinitialvalue', value)
-		}, 0)
+		if (originalContainer) {
+			let value = originalContainer.value
+			setTimeout(() => {
+				dispatch('setinitialvalue', value)
+			}, 0)
+		}
 	}
 
 	$: {

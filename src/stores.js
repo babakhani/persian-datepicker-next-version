@@ -148,13 +148,13 @@ export const actions = {
     let $config = get(config)
     if (currentViewMode === 'time') {
        if ($config.dayPicker.enabled) {
-         viewMode.set('date')
+         viewMode.set('day')
        } else if ($config.monthPicker.enabled) {
          viewMode.set('month')
        } else if ($config.yearPicker.enabled) {
          viewMode.set('year')
        }
-    } else if (currentViewMode === 'date') {
+    } else if (currentViewMode === 'day') {
        if ($config.monthPicker.enabled) {
          viewMode.set('month')
        } else if ($config.yearPicker.enabled) {
@@ -173,17 +173,17 @@ export const actions = {
        if ($config.monthPicker.enabled) {
          viewMode.set('month')
        } else if ($config.dayPicker.enabled) {
-         viewMode.set('date')
+         viewMode.set('day')
        } else if ($config.timePicker.enabled) {
          viewMode.set('time')
        }
     } else if (currentViewMode === 'month') {
        if ($config.dayPicker.enabled) {
-         viewMode.set('date')
+         viewMode.set('day')
        } else if ($config.timePicker.enabled) {
          viewMode.set('time')
        }
-    } else if (currentViewMode === 'date') {
+    } else if (currentViewMode === 'day') {
        if ($config.timePicker.enabled && $config.timePicker.showAsLastStep) {
          viewMode.set('time')
        }
@@ -201,7 +201,7 @@ export const actions = {
     this.setSelectedDate(Math.min(get(selectedUnix), get(maxUnix)))
   },
   onSelectNextView() {
-    if (get(viewMode) === 'date') {
+    if (get(viewMode) === 'day') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
     }
     if (get(viewMode) === 'month') {
@@ -212,7 +212,7 @@ export const actions = {
     }
   },
   onSelectPrevView() {
-    if (get(viewMode) === 'date') {
+    if (get(viewMode) === 'day') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
     }
     if (get(viewMode) === 'month') {

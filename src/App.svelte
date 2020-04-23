@@ -39,7 +39,7 @@
 								selectedUnix="{$selectedUnix}" />
 						</div>
 					{/if}
-					{#if $viewMode === 'date' && $config.dayPicker.enabled}
+					{#if $viewMode === 'day' && $config.dayPicker.enabled}
 						<div
 							transition:fade={{duration: 0}}>
 							<DateView
@@ -91,13 +91,8 @@ originalContainer={originalContainer} />
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
 	import { config, actions, selectedUnix, viewUnix, viewMode } from './stores.js'
-
-
-	// Public props used in adapters
-	export let options = {}
-	export let originalContainer = null
-
-
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 	// Handle global event and store events
 	const dispatcher = function(input) {
 		if (options[input]) {
@@ -109,12 +104,21 @@ originalContainer={originalContainer} />
 		}
 	}
 
+
+	// Public props used in adapters
+	export let options = {}
+	export let viewMode2 = 'day'
+	export let originalContainer = null
+
 	// merge user defined config with predefined config and commit to store
 	if (!options) {
 		options = defaultconfig
 	} else {
 		options = Object.assign(defaultconfig, options)
 	}
+
+ options.viewMode = viewMode2
+
 	dispatcher('setConfig')(options)
 
 	let plotarea
@@ -209,6 +213,6 @@ originalContainer={originalContainer} />
 	}
 </script>
 
-<style>
+<style global lang="scss">
 @import './theme.scss';
 </style>

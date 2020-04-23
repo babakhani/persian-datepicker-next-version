@@ -5,12 +5,21 @@
       alt="Vue logo"
       src="../public/logo.png"
     />
+    <center>
+      <h1> Persian Datepicket Vue Example</h1>
+      <select v-model="viewModeSelected">
+        <option value="day">Day</option>
+        <option value="month">Month</option>
+        <option value="year">Year</option>
+      </select>
+    </center>
     <SveltePlugin
       :options="{
-        sampleConfig: 'passed from vue js',
+        inline: true,
       }"
-      @onSampleEvent="handleClick"
-      @onSampleEventOver="handleOver"
+      :viewMode2="viewModeSelected"
+      @onSelectPrevView="onSelectPrevView"
+      @onSelectTime="onSelectTime"
     />
   </div>
 </template>
@@ -21,9 +30,18 @@ import styles from '../../../dist/zerounip.css'
 export default {
   name: 'App',
   components: { SveltePlugin },
+  data () {
+    return {
+       viewModeSelected: 'year'
+    }
+  },
   methods: {
-    handleOver() {
-      console.log('Vue handle mouse over vue js')
+    onSelectTime(e) {
+      console.log('Vue handle onSelectTime')
+      console.log(e.detail)
+    },
+    onSelectPrevView() {
+      console.log('Vue handle onSelectPrevView')
     },
     handleClick() {
       alert('alert from vue js')
