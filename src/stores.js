@@ -232,11 +232,5 @@ export const actions = {
   },
   onSelectToday() {
     viewUnix.set(persianDateToUnix(new persianDate().startOf('day')))
-  },
-  onClickInput() {
-    this.setOpen(!isOpen)
-  },
-  setOpen(value) {
-    isOpen.set(value)
   }
 }

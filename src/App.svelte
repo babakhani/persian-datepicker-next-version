@@ -90,7 +90,7 @@ originalContainer={originalContainer} />
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
-	import { config, actions, selectedUnix, viewUnix, viewMode } from './stores.js'
+	import { config, isOpen, actions, selectedUnix, viewUnix, viewMode } from './stores.js'
 
 
 	// Public props used in adapters
@@ -150,6 +150,9 @@ originalContainer={originalContainer} />
 	const onSelectDate = function(event) {
 		dispatcher('onSelectDate')(event.detail)
 		$config.dayPicker.onSelect(event.detail)
+		if ($config.autoClose)  {
+	    setvisibility({detail: false})
+		}
 	}
 
 	const onSelectTime = function(event) {
