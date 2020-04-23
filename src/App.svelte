@@ -1,4 +1,3 @@
-<h1> { number }</h1>
 {#if isVisbile}
 	<div 
 		bind:this={plotarea}
@@ -108,7 +107,6 @@ originalContainer={originalContainer} />
 
 	// Public props used in adapters
 	export let options = {}
-	export let number = 'day'
 	export let originalContainer = null
 
 	// merge user defined config with predefined config and commit to store
