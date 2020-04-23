@@ -9629,12 +9629,15 @@ this.zerounip = (function () {
     	const dispatch = createEventDispatcher();
 
     	let setPlotPostion = function () {
+    		let configLeft = $config.position !== "auto" ? $config.position[0] : 0;
+    		let configTop = $config.position !== "auto" ? $config.position[1] : 0;
+
     		let set = () => {
     			if (plotarea) {
     				if (originalContainer && originalContainer.tagName === "INPUT") {
     					$$invalidate("plotarea", plotarea.style.position = "absolute", plotarea);
-    					$$invalidate("plotarea", plotarea.style.left = originalContainer.offsetLeft + "px", plotarea);
-    					$$invalidate("plotarea", plotarea.style.top = parseInt(originalContainer.offsetTop) + parseInt(originalContainer.clientHeight) + document.body.scrollTop + "px", plotarea);
+    					$$invalidate("plotarea", plotarea.style.left = originalContainer.offsetLeft + configLeft + "px", plotarea);
+    					$$invalidate("plotarea", plotarea.style.top = parseInt(originalContainer.offsetTop) + configTop + parseInt(originalContainer.clientHeight) + document.body.scrollTop + "px", plotarea);
     				}
     			}
     		};

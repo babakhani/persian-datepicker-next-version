@@ -9,12 +9,15 @@
 	const dispatch = createEventDispatcher()
 
 	let setPlotPostion = function () {
+		let configLeft = $config.position !== 'auto' ? $config.position[0] : 0
+		let configTop = $config.position !== 'auto' ? $config.position[1] : 0
 		let set = () => {
 			if (plotarea) {
 				if (originalContainer && originalContainer.tagName === 'INPUT' ) {
 					plotarea.style.position = "absolute"	
-					plotarea.style.left = originalContainer.offsetLeft + 'px'
+					plotarea.style.left = originalContainer.offsetLeft + configLeft + 'px'
 					plotarea.style.top =  (parseInt(originalContainer.offsetTop) +
+						configTop + 
 						parseInt(originalContainer.clientHeight) + document.body.scrollTop) + 'px'
 				}
 			}

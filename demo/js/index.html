@@ -196,14 +196,12 @@
           return new dateObject(unix).format(this.selectedDateFormat)
         },
       },
-      onSelect: function (unixDate) {
-        console.log('user event onSelect')
-      },
-      'position': 'auto',
+      'position': 'auto', // DONE
       'autoClose': false,
       'template': null,
       'observer': false,
       'inputDelay': 800,
+      onSelect: function (unixDate) { console.log('user event onSelect') },
       'onSet': function (unixDate) {},
       'onShow': function (datepickerObject) {},
       'onHide': function (datepickerObject) {},
