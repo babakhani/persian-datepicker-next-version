@@ -12,7 +12,6 @@ export const isDirty = writable(false)
 export const selectedUnix = writable(nowUnix)
 export const viewUnix = writable(nowUnix)
 export const viewMode = writable('date') // [date, month, year]
-export const isOpen = writable(false)
 export const minUnix = writable(null)
 export const maxUnix = writable(null)
 export const dateObject = writable(persianDate)
