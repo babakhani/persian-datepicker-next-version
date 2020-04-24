@@ -47,9 +47,6 @@
 </div>
 
 <script>
-	import { afterUpdate } from 'svelte'
-	import { flip } from 'svelte/animate'
-	import { time, elapsed, countable } from '../stores.js'
 	import { config, dateObject, currentCalendar } from '../stores.js'
 
 	function fadeOut(node, { duration, delay }) {

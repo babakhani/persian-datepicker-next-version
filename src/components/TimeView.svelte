@@ -126,7 +126,6 @@
 </div>
 
 <script>
-	import { time, elapsed, countable } from '../stores.js'
 	import { afterUpdate } from 'svelte'
 	import { config, dateObject } from '../stores.js'
 	import { createEventDispatcher } from 'svelte'

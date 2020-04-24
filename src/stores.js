@@ -1,6 +1,5 @@
 // TODO get default value from config by more priority
 import PersianDateParser from './parser'
-import persianDate from 'persian-date'
 import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
 import { writable, get } from 'svelte/store'
 import Config from './config.js'

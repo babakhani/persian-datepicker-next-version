@@ -17,7 +17,6 @@
 {/if}
 
 <script>
-  import { time, elapsed, countable } from '../stores.js'
   import { createEventDispatcher } from 'svelte'
 	import { config, dateObject } from '../stores.js'
 

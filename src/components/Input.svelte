@@ -1,6 +1,5 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
-	import persianDate from 'persian-date'
 	import { actions, isDirty, selectedUnix, viewUnix, viewMode, config, dateObject } from '../stores.js'
 
 	export let originalContainer

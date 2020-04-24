@@ -73,7 +73,7 @@
 		{/if}
 	</div>
 {/if}
-	<Input 
+<Input 
 on:setinitialvalue="{setInitialValue}"
 on:setvisibility={setvisibility}
 plotarea={plotarea} 
@@ -215,4 +215,5 @@ originalContainer={originalContainer} />
 
 <style global lang="scss">
 @import './theme.scss';
+@import './layout.scss';
 </style>
