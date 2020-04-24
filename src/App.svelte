@@ -108,7 +108,7 @@ originalContainer={originalContainer} />
 	// Public props used in adapters
 	export let options = {}
 	export let originalContainer = null
-	export let viewMode = 'test'
+	export let number = 'test'
 
 	$: {
     console.log('new number')
