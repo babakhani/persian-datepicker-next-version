@@ -13,7 +13,7 @@ module.exports = {
     es6: true, 
     browser: true
   },
-  global: ['persianDate'],
+  globals: ['persianDate'],
   plugins: [
     'svelte3'
   ],
