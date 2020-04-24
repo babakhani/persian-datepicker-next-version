@@ -19,7 +19,7 @@ export default {
   input: 'adapter/plugin-vue.js',
   output: {
     sourcemap: true,
-    format: 'es',
+    format: 'cjs',
     extend: true,
     name: pkg.name,
     file: `dist/zerounip-vue.js`,

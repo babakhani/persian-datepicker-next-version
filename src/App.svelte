@@ -105,11 +105,17 @@ originalContainer={originalContainer} />
 		}
 	}
 
-
 	// Public props used in adapters
 	export let options = {}
 	export let originalContainer = null
+	export let viewMode = 'test'
 
+	$: {
+    console.log('new number')
+		console.log(number)
+		setViewMode({ detail: number})
+	}
+  
 	// merge user defined config with predefined config and commit to store
 	if (!options) {
 		options = defaultconfig
@@ -123,7 +129,6 @@ originalContainer={originalContainer} />
 
 	let plotarea
 	let isVisbile = false
-
 
 	// Methods that would called by component events
 	const setvisibility = function(payload) {
