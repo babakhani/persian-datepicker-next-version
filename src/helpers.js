@@ -1,5 +1,3 @@
-import persianDate from 'persian-date'
-
 export function persianDateToUnix(pDate) {
   return pDate.unix() * 1000
 }

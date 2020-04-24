@@ -46,7 +46,6 @@
 </div>
 
 <script>
-  import persianDate from 'persian-date'
   import { createEventDispatcher } from 'svelte'
 	import { config  } from '../stores.js'
 
