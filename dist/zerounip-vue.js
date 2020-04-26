@@ -1739,8 +1739,6 @@ const isDirty = writable(false);
 const selectedUnix = writable(nowUnix);
 const viewUnix = writable(nowUnix);
 const viewMode = writable('date'); // [date, month, year]
-const minUnix = writable(null);
-const maxUnix = writable(null);
 const dateObject = writable(persianDate);
 const currentCalendar = writable('persian'); // [persian, gregorian]
 
@@ -1918,14 +1916,6 @@ const actions = {
   },
   updateIsDirty(value) {
     isDirty.set(value);
-  },
-  setMinUnix(date) {
-    minUnix.set(date);
-    this.setSelectedDate(Math.max(get_store_value(selectedUnix), get_store_value(minUnix)));
-  },
-  setMaxUnix(date) {
-    maxUnix.set(date);
-    this.setSelectedDate(Math.min(get_store_value(selectedUnix), get_store_value(maxUnix)));
   },
   onSelectNextView() {
     if (get_store_value(viewMode) === 'day') {
