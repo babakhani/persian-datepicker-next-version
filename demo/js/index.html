@@ -11,7 +11,62 @@
     html {
       font-family: 'Open Sans', sans-serif;
     }
-    
+    header {
+      display: block;
+      width: 100%;
+      float: left;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      display: block;
+      float: left;
+      margin-top: 30px;
+      margin-left: 1em;
+    }
+
+    .platform-logo {
+      float: left;
+      max-width: 120px;
+      max-height: 120px;
+    }
+
+    .demo-box {
+      display: block;
+      float: left;
+      width: 20%;
+      padding: 0;
+      margin: 0;
+    }
+    .config-area {
+      display: block;
+      float: left;
+      width: 70%;
+      padding: 0;
+      margin: 0;
+      background: #f1f1f1;
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      float: left;
+      width: 100%;
+    }
+
+    input,
+    select {
+      display: block;
+      float: left;
+      clear: both;
+      width: 250px;
+      height: 38px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      background: #fff;
+      font-size: 1.1em;
+    }
+
     #containerAlt,
     #container {
       border: 2px solid #000;
@@ -22,12 +77,23 @@
   </style>
 </head>
 <body>
-  <!--<center>-->
-    <!--<img width="180" style="padding-top: 4em;" src="https://i.pinimg.com/originals/63/d0/8d/63d08d548b8215a571ff61f56e4f47c0.jpg" />-->
-    <!--<h1> Pure javascript usage example </h1>-->
-  <!--</center>-->
+  <header>
+  <img 
+    class="platform-logo" 
+    src="https://i.pinimg.com/originals/63/d0/8d/63d08d548b8215a571ff61f56e4f47c0.jpg" />
+    <h1>
+    Persian Datepicker, Pure Javascript Example
+    </h1>
+  </header>
+  <div
+    class="demo-box">
   <input id="container" />
   <input id="containerAlt" />
+  </div>
+  <div
+    class="config-area" >
+    <h3>Settings</h3>
+  </div>
   <script>
     var container = document.getElementById('container')
     var options = {

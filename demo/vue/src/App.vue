@@ -1,32 +1,16 @@
 <template>
   <div id="app">
-    <img
-      class="vue-logo"
-      alt="Vue logo"
-      src="../public/logo.png"
-    />
-    <center>
-      <h1> Persian Datepicket Vue Example</h1>
-      <select v-model="viewModeSelected">
-        <option value="day">Day</option>
-        <option value="month">Month</option>
-        <option value="year">Year</option>
-      </select>
-      <select v-model="calendarType">
-        <option value="persian">persian</option>
-        <option value="gregorian">gregorian</option>
-      </select>
-      <select v-model="navigatorEnabled">
-        <option :value="true">true</option>
-        <option :value="false">false</option>
-      </select>
-      <select v-model="showHint">
-        <option :value="true">Show Hint</option>
-        <option :value="false">Dont Show Hint</option>
-      </select>
-    </center>
-
-    <SveltePlugin
+  <header>
+  <img 
+    class="platform-logo" 
+    src="../public/logo.png"/>
+    <h1>
+    Persian Datepicker, Vue Demo
+    </h1>
+  </header>
+  <div
+    class="demo-box" >
+    <Datepicker
       :options="{
         calendarType: calendarType,
         calendar: {
@@ -40,9 +24,26 @@
             showHint: showHint
           }
         },
-        inline: true,
+        format: 'LLLL',
+        formatter: function (unixDate, dateObject) {
+          return new dateObject(unixDate).format(this.format);
+        },
+        minDate: null,
+        maxDate: null,
         viewMode: viewModeSelected,
-        minDate: minDate,
+        navigator: {
+          enabled: true,
+          scroll: {
+            enabled: true
+          },
+          text: {
+            btnNextText: '<',
+            btnPrevText: '>'
+          },
+          onNext: function (datepickerObject) { },
+          onPrev: function (datepickerObject) { },
+          onSwitch: function (datepickerObject) { }
+        },
         navigator: {
           enabled: navigatorEnabled,
           scroll: {
@@ -54,19 +55,45 @@
       @onSelectTime="onSelectTime"
     />
   </div>
+  <div
+    class="config-area" >
+      <h3>Settings</h3>
+      <label>Calendar Type </label>
+      <select v-model="calendarType">
+        <option value="persian">persian</option>
+        <option value="gregorian">gregorian</option>
+      </select>
+      <label>Show Hint </label>
+      <select v-model="showHint">
+        <option :value="true">Show Hint</option>
+        <option :value="false">Dont Show Hint</option>
+      </select>
+      <label>View Mode </label>
+      <select v-model="viewModeSelected">
+        <option value="day">Day</option>
+        <option value="month">Month</option>
+        <option value="year">Year</option>
+      </select>
+      <label>Navigator Enabled </label>
+      <select v-model="navigatorEnabled">
+        <option :value="true">true</option>
+        <option :value="false">false</option>
+      </select>
+  </div>
+  </div>
 </template>
 <script>
-import SveltePlugin from '../../../dist/zerounip-vue.js'
+import Datepicker from '../../../dist/zerounip-vue.js'
 // eslint-disable-next-line no-unused-vars
 import styles from '../../../dist/zerounip.css'
 export default {
   name: 'App',
-  components: { SveltePlugin },
+  components: { Datepicker },
   data () {
     return {
       showHint: true,
-      navigatorEnabled: true,
-      viewModeSelected: 'year',
+      navigatorEnabled: false,
+      viewModeSelected: 'day',
       calendarType: 'persian',
       minDate: null,
     }
@@ -90,14 +117,59 @@ export default {
 html {
   font-family: 'Open Sans', sans-serif;
 }
-
-.vue-logo { 
+header {
   display: block;
-  margin: 0 auto;
+  width: 100%;
+  float: left;
+  margin-bottom: 20px;
 }
 
-#app {
-  color: #2c3e50;
-  margin-top: 60px;
+header h1 {
+  display: block;
+  float: left;
+  margin-top: 30px;
+  margin-left: 1em;
+}
+
+.platform-logo {
+  float: left;
+  max-width: 120px;
+  max-height: 120px;
+}
+
+.demo-box {
+  display: block;
+  float: left;
+  width: 20%;
+  padding: 0;
+  margin: 0;
+}
+.config-area {
+  display: block;
+  float: left;
+  width: 70%;
+  padding: 0;
+  margin: 0;
+  background: #f1f1f1;
+  padding: 20px;
+}
+
+label {
+  display: block;
+  float: left;
+  width: 100%;
+}
+
+input,
+select {
+  display: block;
+  float: left;
+  clear: both;
+  width: 250px;
+  height: 38px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  background: #fff;
+  font-size: 1.1em;
 }
 </style>

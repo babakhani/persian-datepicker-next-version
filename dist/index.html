@@ -7,14 +7,85 @@
 	<link rel='stylesheet' href='/zerounip.css'>
 	<script defer src='/zerounip.js?11'></script>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="http://babakhani.github.io/PersianWebToolkit/doc/lib/persian-date/dist/persian-date.js" ></script>
   <style>
     html {
       font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+    }
+    header {
+      display: block;
+      width: 100%;
+      float: left;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      display: block;
+      float: left;
+      margin-top: 30px;
+      margin-left: 1em;
+    }
+
+    .platform-logo {
+      float: left;
+      max-width: 120px;
+      max-height: 120px;
+    }
+
+    .demo-box {
+      display: block;
+      float: left;
+      width: 20%;
+      padding: 0;
+      margin: 0;
+    }
+
+    .config-area {
+      display: block;
+      float: left;
+      width: 70%;
+      padding: 0;
+      margin: 0;
+      background: #f1f1f1;
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      float: left;
+      width: 100%;
+    }
+
+    input,
+    select {
+      display: block;
+      float: left;
+      clear: both;
+      width: 250px;
+      height: 38px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      background: #fff;
+      font-size: 1.1em;
     }
   </style>
 </head>
 <body>
-  <img style="width: 200px; margin: 50px auto 0 auto;display: block;" src="./logo.png" />
-
+  <header>
+  <img 
+    class="platform-logo" 
+    src="./logo.png" />
+    <h1>
+    Persian Datepicker, Svelte Demo
+    </h1>
+  </header>
+  <div
+    class="demo-box"
+    id="container"></div>
+  <div
+    class="config-area" >
+    <h3>Settings</h3>
+  </div>
 </body>
 </html>
