@@ -12,12 +12,44 @@
         <option value="month">Month</option>
         <option value="year">Year</option>
       </select>
+      <select v-model="calendarType">
+        <option value="persian">persian</option>
+        <option value="gregorian">gregorian</option>
+      </select>
+      <select v-model="navigatorEnabled">
+        <option :value="true">true</option>
+        <option :value="false">false</option>
+      </select>
+      <select v-model="showHint">
+        <option :value="true">Show Hint</option>
+        <option :value="false">Dont Show Hint</option>
+      </select>
     </center>
+
     <SveltePlugin
-      options="{
+      :options="{
+        calendarType: calendarType,
+        calendar: {
+          persian: {
+            locale: 'fa',
+            showHint: showHint,
+            leapYearMode: 'algorithmic' 
+          },
+          gregorian: {
+            locale: 'en',
+            showHint: showHint
+          }
+        },
         inline: true,
+        viewMode: viewModeSelected,
+        minDate: minDate,
+        navigator: {
+          enabled: navigatorEnabled,
+          scroll: {
+            enabled:navigatorEnabled 
+          }
+        }
       }"
-      :number="viewModeSelected"
       @onSelectPrevView="onSelectPrevView"
       @onSelectTime="onSelectTime"
     />
@@ -32,7 +64,11 @@ export default {
   components: { SveltePlugin },
   data () {
     return {
-       viewModeSelected: 'year'
+      showHint: true,
+      navigatorEnabled: true,
+      viewModeSelected: 'year',
+      calendarType: 'persian',
+      minDate: null,
     }
   },
   methods: {

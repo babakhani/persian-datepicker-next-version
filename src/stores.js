@@ -1,8 +1,9 @@
 // TODO get default value from config by more priority
 import PersianDateParser from './parser'
 import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
-import { writable, get } from 'svelte/store'
+import { writable, derived, get } from 'svelte/store'
 import Config from './config.js'
+import lodash from 'lodash'
 
 const nowUnix = persianDateToUnix(new persianDate())
 
@@ -10,7 +11,9 @@ export const config = writable(Config)
 export const isDirty = writable(false)
 export const selectedUnix = writable(nowUnix)
 export const viewUnix = writable(nowUnix)
-export const viewMode = writable('date') // [date, month, year]
+export const privateViewModeDerived = derived(config, ($config) => {
+   return ($config && $config.viewMode) ? $config.viewMode : 'day'
+}) // [date, month, year]
 export const dateObject = writable(persianDate)
 export const currentCalendar = writable('persian') // [persian, gregorian]
 
@@ -38,7 +41,6 @@ export const actions = {
     })
     let currentLocale = get(config).calendar[payload].locale
     let obj = persianDate
-    currentCalendar.set(payload)
     obj.toCalendar(payload)
     obj.toLocale(currentLocale)
     obj.toLeapYearMode(get(config).calendar.persian.leapYearMode)
@@ -47,7 +49,20 @@ export const actions = {
   },
   setConfig (payload) {
     config.set(payload)
-    viewMode.set(payload.viewMode)
+    this.onSetCalendar(get(config).calendarType)
+  },
+  updateConfig (key) {
+    let ob = {}
+    ob[key[0]] = key[1] 
+    let conf = JSON.stringify(get(config))
+    conf = JSON.parse(conf)
+    conf[key[0]] = key[1]
+    config.update(() => {
+      return {
+        ...get(config),
+        ...ob
+      }
+    })
     this.onSetCalendar(get(config).calendarType)
   },
   onSelectTime (pDate) {
@@ -138,51 +153,54 @@ export const actions = {
     )
   },
   setViewMode(mode) {
-    viewMode.set(mode)
+    let conf = get(config)
+    config.set(lodash.merge(conf, {
+      viewMode: mode
+    }))
   },
   setViewModeToUpperAvailableLevel() {
-    let currentViewMode = get(viewMode)
+    let currentViewMode = get(privateViewModeDerived)
     let $config = get(config)
     if (currentViewMode === 'time') {
        if ($config.dayPicker.enabled) {
-         viewMode.set('day')
+         this.setViewMode('day')
        } else if ($config.monthPicker.enabled) {
-         viewMode.set('month')
+         this.setViewMode('month')
        } else if ($config.yearPicker.enabled) {
-         viewMode.set('year')
+         this.setViewMode('year')
        }
     } else if (currentViewMode === 'day') {
        if ($config.monthPicker.enabled) {
-         viewMode.set('month')
+         this.setViewMode('month')
        } else if ($config.yearPicker.enabled) {
-         viewMode.set('year')
+         this.setViewMode('year')
        }
     } else if (currentViewMode === 'month') {
        if ($config.yearPicker.enabled) {
-         viewMode.set('year')
+         this.setViewMode('year')
        }
     }
   },
   setViewModeToLowerAvailableLevel() {
-    let currentViewMode = get(viewMode)
+    let currentViewMode = get(privateViewModeDerived)
     let $config = get(config)
     if (currentViewMode === 'year') {
        if ($config.monthPicker.enabled) {
-         viewMode.set('month')
+         this.setViewMode('month')
        } else if ($config.dayPicker.enabled) {
-         viewMode.set('day')
+         this.setViewMode('day')
        } else if ($config.timePicker.enabled) {
-         viewMode.set('time')
+         this.setViewMode('time')
        }
     } else if (currentViewMode === 'month') {
        if ($config.dayPicker.enabled) {
-         viewMode.set('day')
+         this.setViewMode('day')
        } else if ($config.timePicker.enabled) {
-         viewMode.set('time')
+         this.setViewMode('time')
        }
     } else if (currentViewMode === 'day') {
        if ($config.timePicker.enabled && $config.timePicker.showAsLastStep) {
-         viewMode.set('time')
+         this.setViewMode('time')
        }
     }
   },
@@ -190,24 +208,24 @@ export const actions = {
     isDirty.set(value)
   },
   onSelectNextView() {
-    if (get(viewMode) === 'day') {
+    if (get(privateViewModeDerived) === 'day') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
     }
-    if (get(viewMode) === 'month') {
+    if (get(privateViewModeDerived) === 'month') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 1)))
     }
-    if (get(viewMode) === 'year') {
+    if (get(privateViewModeDerived) === 'year') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 12)))
     }
   },
   onSelectPrevView() {
-    if (get(viewMode) === 'day') {
+    if (get(privateViewModeDerived) === 'day') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
     }
-    if (get(viewMode) === 'month') {
+    if (get(privateViewModeDerived) === 'month') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 1)))
     }
-    if (get(viewMode) === 'year') {
+    if (get(privateViewModeDerived) === 'year') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 12)))
     }
   },

@@ -1,4 +1,3 @@
-{#if visible}
 	<div 
 		out:fadeOut="{{duration: animateSpeed}}" 
 		in:fadeIn="{{duration: animateSpeed}}" 
@@ -14,7 +13,6 @@
 			</div>
 		{/each}
 	</div>
-{/if}
 
 <script>
 	import { createEventDispatcher } from 'svelte'

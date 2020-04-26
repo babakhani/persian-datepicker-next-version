@@ -47,7 +47,7 @@
 </div>
 
 <script>
-	import { config, dateObject, currentCalendar } from '../stores.js'
+	import { config, dateObject  } from '../stores.js'
 
 	function fadeOut(node, { duration, delay }) {
 		return {
@@ -116,12 +116,12 @@
 
 	const getHintText = function (day) {
 		let out
-		if ($currentCalendar === 'persian') {
+		if ($config.calendarType === 'persian') {
 		  $dateObject.toCalendar('gregorian')
 		  out = new $dateObject(day.valueOf()).format('D')
 			$dateObject.toCalendar('persian')
 		}
-		if ($currentCalendar === 'gregorian') {
+		if ($config.calendarType === 'gregorian') {
 			$dateObject.toCalendar('persian')
 		  out = new $dateObject(day.valueOf()).format('D')
 			$dateObject.toCalendar('gregorian')

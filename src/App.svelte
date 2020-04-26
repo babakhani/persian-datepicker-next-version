@@ -1,3 +1,7 @@
+<pre>
+{ $config.navigator.enabled }
+{ $config.calendarType }
+</pre>
 {#if isVisbile}
 	<div 
 		bind:this={plotarea}
@@ -14,14 +18,14 @@
 					on:today="{today}"
 					on:next="{navNext}"
 					on:prev="{navPrev}"
-					viewMode="{$viewMode}"
+					viewMode="{$privateViewModeDerived}"
 					viewUnix="{$viewUnix}"
 					selectedUnix="{$selectedUnix}" />
 			{/if}
 			<div
 				class="pwt-datepicker-picker-section">
 				{#if !$config.onlyTimePicker}
-					{#if $viewMode === 'year' && $config.yearPicker.enabled}
+					{#if $privateViewModeDerived === 'year' && $config.yearPicker.enabled}
 						<div
 							transition:fade={{duration: 0}}>
 							<YearView
@@ -30,7 +34,7 @@
 								selectedUnix="{$selectedUnix}" />
 						</div>
 					{/if}
-					{#if $viewMode === 'month' && $config.monthPicker.enabled}
+					{#if $privateViewModeDerived === 'month' && $config.monthPicker.enabled}
 						<div
 							transition:fade={{duration: 0}}>
 							<MonthView
@@ -39,7 +43,7 @@
 								selectedUnix="{$selectedUnix}" />
 						</div>
 					{/if}
-					{#if $viewMode === 'day' && $config.dayPicker.enabled}
+					{#if $privateViewModeDerived === 'day' && $config.dayPicker.enabled}
 						<div
 							transition:fade={{duration: 0}}>
 							<DateView
@@ -51,7 +55,7 @@
 						</div>
 					{/if}
 				{/if}
-				{#if ($viewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
+				{#if ($privateViewModeDerived === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
 					<div
 						in:fade={{duration: 500}}>
 						<TimeView 
@@ -67,7 +71,7 @@
 				on:today="{today}"
 				on:next="{navNext}"
 				on:prev="{navPrev}"
-				viewMode="{$viewMode}"
+				viewMode="{$privateViewModeDerived}"
 				viewUnix="{$viewUnix}"
 				selectedUnix="{$selectedUnix}" />
 		{/if}
@@ -90,8 +94,9 @@ originalContainer={originalContainer} />
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
-	import { config, actions, selectedUnix, viewUnix, viewMode } from './stores.js'
+	import { config, actions, selectedUnix, viewUnix, privateViewModeDerived } from './stores.js'
 	import { createEventDispatcher } from 'svelte'
+	import lodash from 'lodash'
 	const dispatch = createEventDispatcher()
 	// Handle global event and store events
 	const dispatcher = function(input) {
@@ -108,24 +113,24 @@ originalContainer={originalContainer} />
 	// Public props used in adapters
 	export let options = {}
 	export let originalContainer = null
-	export let number = 'test'
 
-	$: {
-    console.log('new number')
-		console.log(number)
-		setViewMode({ detail: number})
-	}
   
 	// merge user defined config with predefined config and commit to store
-	if (!options) {
-		options = defaultconfig
-	} else {
-		options = Object.assign(defaultconfig, options)
+	//if (!options) {
+	//	options = defaultconfig
+	//} else {
+	//	options = Object.assign(defaultconfig, options)
+	//}
+
+	$: {
+		if (!options) {
+			options = defaultconfig
+		} else {
+			options = lodash.merge(defaultconfig, options)
+		}
+	  dispatcher('setConfig')(options)
 	}
 
-	//options.viewMode = viewMode2
-
-	dispatcher('setConfig')(options)
 
 	let plotarea
 	let isVisbile = false
