@@ -89,7 +89,6 @@ originalContainer={originalContainer} />
 	import Infobox from './components/Infobox.svelte'
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
-	import Sample from './components/sample.svelte'
 	import defaultconfig from './config.js'
 	import { config, actions, selectedUnix, viewUnix, privateViewModeDerived } from './stores.js'
 	import { createEventDispatcher } from 'svelte'
