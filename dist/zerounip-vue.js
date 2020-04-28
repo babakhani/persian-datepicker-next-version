@@ -24586,44 +24586,46 @@ function instance$8($$self, $$props, $$invalidate) {
 	let { model = null } = $$props;
 	let { model3 = null } = $$props;
 
-	let { setDate = function (unix) {
+	const setDate = function (unix) {
 		dispatcher("setDate")(unix);
-	} } = $$props;
+	};
 
-	let { show = function () {
+	const show = function () {
 		setvisibility({ detail: true });
-	} } = $$props;
+	};
 
-	let { hide = function () {
+	const hide = function () {
 		setvisibility({ detail: false });
-	} } = $$props;
+	};
 
-	let { toggle = function () {
+	const toggle = function () {
 		setvisibility({ detail: !isVisbile });
-	} } = $$props;
+	};
 
-	let { destroy = function () {
+	const destroy = function () {
 		if (plotarea.parentNode) {
 			plotarea.parentNode.removeChild(plotarea);
 		}
-	} } = $$props;
+	};
 
-	let { getState = function () {
+	const getState = function () {
 		return {
 			selected: $selectedUnix,
 			view: $viewUnix,
+			// Added In v2.0.0
 			config: $config,
+			// Added In v2.0.0
 			dateObject: $dateObject
 		};
-	} } = $$props;
+	};
 
-	let { setOptions = function (newOptions) {
+	const setOptions = function (newOptions) {
 		dispatcher("setConfig")(lodash.merge($config, newOptions));
-	} } = $$props;
+	};
 
-	let { getOptions = function (newOptions) {
+	const getOptions = function () {
 		return $config;
-	} } = $$props;
+	};
 
 	const dispatch = createEventDispatcher();
 
@@ -24761,20 +24763,7 @@ function instance$8($$self, $$props, $$invalidate) {
 		}
 	};
 
-	const writable_props = [
-		"options",
-		"originalContainer",
-		"model",
-		"model3",
-		"setDate",
-		"show",
-		"hide",
-		"toggle",
-		"destroy",
-		"getState",
-		"setOptions",
-		"getOptions"
-	];
+	const writable_props = ["options", "originalContainer", "model", "model3"];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -24800,14 +24789,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
 		if ("model" in $$props) $$invalidate(22, model = $$props.model);
 		if ("model3" in $$props) $$invalidate(23, model3 = $$props.model3);
-		if ("setDate" in $$props) $$invalidate(24, setDate = $$props.setDate);
-		if ("show" in $$props) $$invalidate(25, show = $$props.show);
-		if ("hide" in $$props) $$invalidate(26, hide = $$props.hide);
-		if ("toggle" in $$props) $$invalidate(27, toggle = $$props.toggle);
-		if ("destroy" in $$props) $$invalidate(28, destroy = $$props.destroy);
-		if ("getState" in $$props) $$invalidate(29, getState = $$props.getState);
-		if ("setOptions" in $$props) $$invalidate(30, setOptions = $$props.setOptions);
-		if ("getOptions" in $$props) $$invalidate(31, getOptions = $$props.getOptions);
 	};
 
 	$$self.$capture_state = () => ({
@@ -24876,14 +24857,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
 		if ("model" in $$props) $$invalidate(22, model = $$props.model);
 		if ("model3" in $$props) $$invalidate(23, model3 = $$props.model3);
-		if ("setDate" in $$props) $$invalidate(24, setDate = $$props.setDate);
-		if ("show" in $$props) $$invalidate(25, show = $$props.show);
-		if ("hide" in $$props) $$invalidate(26, hide = $$props.hide);
-		if ("toggle" in $$props) $$invalidate(27, toggle = $$props.toggle);
-		if ("destroy" in $$props) $$invalidate(28, destroy = $$props.destroy);
-		if ("getState" in $$props) $$invalidate(29, getState = $$props.getState);
-		if ("setOptions" in $$props) $$invalidate(30, setOptions = $$props.setOptions);
-		if ("getOptions" in $$props) $$invalidate(31, getOptions = $$props.getOptions);
 		if ("cashedoptions" in $$props) $$invalidate(32, cashedoptions = $$props.cashedoptions);
 		if ("cashedSelectedDate" in $$props) $$invalidate(33, cashedSelectedDate = $$props.cashedSelectedDate);
 	};
@@ -25042,72 +25015,64 @@ class App extends SvelteComponentDev {
 		return this.$$.ctx[24];
 	}
 
-	set setDate(setDate) {
-		this.$set({ setDate });
-		flush();
+	set setDate(value) {
+		throw new Error("<App>: Cannot set read-only property 'setDate'");
 	}
 
 	get show() {
 		return this.$$.ctx[25];
 	}
 
-	set show(show) {
-		this.$set({ show });
-		flush();
+	set show(value) {
+		throw new Error("<App>: Cannot set read-only property 'show'");
 	}
 
 	get hide() {
 		return this.$$.ctx[26];
 	}
 
-	set hide(hide) {
-		this.$set({ hide });
-		flush();
+	set hide(value) {
+		throw new Error("<App>: Cannot set read-only property 'hide'");
 	}
 
 	get toggle() {
 		return this.$$.ctx[27];
 	}
 
-	set toggle(toggle) {
-		this.$set({ toggle });
-		flush();
+	set toggle(value) {
+		throw new Error("<App>: Cannot set read-only property 'toggle'");
 	}
 
 	get destroy() {
 		return this.$$.ctx[28];
 	}
 
-	set destroy(destroy) {
-		this.$set({ destroy });
-		flush();
+	set destroy(value) {
+		throw new Error("<App>: Cannot set read-only property 'destroy'");
 	}
 
 	get getState() {
 		return this.$$.ctx[29];
 	}
 
-	set getState(getState) {
-		this.$set({ getState });
-		flush();
+	set getState(value) {
+		throw new Error("<App>: Cannot set read-only property 'getState'");
 	}
 
 	get setOptions() {
 		return this.$$.ctx[30];
 	}
 
-	set setOptions(setOptions) {
-		this.$set({ setOptions });
-		flush();
+	set setOptions(value) {
+		throw new Error("<App>: Cannot set read-only property 'setOptions'");
 	}
 
 	get getOptions() {
 		return this.$$.ctx[31];
 	}
 
-	set getOptions(getOptions) {
-		this.$set({ getOptions });
-		flush();
+	set getOptions(value) {
+		throw new Error("<App>: Cannot set read-only property 'getOptions'");
 	}
 }
 

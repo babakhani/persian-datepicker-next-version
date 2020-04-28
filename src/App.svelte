@@ -104,38 +104,39 @@ originalContainer={originalContainer} />
 	export let options = {}
 	export let originalContainer = null
 	export let model = null
-	export let model3 = null
-	export let setDate = function(unix) {
+	export const setDate = function(unix) {
 	  dispatcher('setDate')(unix)
   }	
-	export let show = function() {
+	export const show = function() {
 		setvisibility({detail: true})
   }	
-	export let hide = function() {
+	export const hide = function() {
 		setvisibility({detail: false})
   }	
-	export let toggle = function() {
+	export const toggle = function() {
 		setvisibility({detail: !isVisbile})
   }	
-	export let destroy = function() {
+	export const destroy = function() {
 		if(plotarea.parentNode) {
       plotarea.parentNode.removeChild(plotarea)
 		}
 	}	
-	export let getState = function() {
+	export const getState = function() {
 		return {
 			selected: $selectedUnix,
 			view: $viewUnix,
+      // Added In v2.0.0
 			config: $config,
+      // Added In v2.0.0
 			dateObject: $dateObject
 		}
 	}
   // Added In v2.0.0
-	export let setOptions = function (newOptions) {
+	export const setOptions = function (newOptions) {
 	  dispatcher('setConfig')(lodash.merge($config, newOptions))
 	}
   // Added In v2.0.0
-	export let getOptions = function (newOptions) {
+	export const getOptions = function () {
 	  return $config
 	}
 
@@ -189,7 +190,7 @@ originalContainer={originalContainer} />
 	const setvisibility = function(payload) {
 		isVisbile = payload.detail
 		if (inputComp) {
-		  inputComp.setPlotPostion()
+      inputComp.setPlotPostion()
 		}
 		setTimeout(() => {
 			if (plotarea) {
