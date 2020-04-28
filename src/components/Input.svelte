@@ -1,6 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
-	import { actions, isDirty, selectedUnix, viewUnix, viewMode, config, dateObject } from '../stores.js'
+	import { isDirty, selectedUnix, config, dateObject } from '../stores.js'
 
 	export let originalContainer
 	export let plotarea

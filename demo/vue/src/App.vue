@@ -252,12 +252,12 @@ export default {
         calendar: {
           persian: {
             locale: 'fa', // DONE
-            showHint: true, // DONE
+            showHint: false, // DONE
             leapYearMode: 'algorithmic' // "astronomical" // DONE
           },
           gregorian: {
             locale: 'en', // DONE
-            showHint: true  // DONE
+            showHint: false  // DONE
           }
         },
         responsive: true, // Deprecated
@@ -353,6 +353,10 @@ export default {
         'timePicker': {
           'enabled': true, // DONE
           'step': 1, // DONE
+          'titleFormat': 'YYYY MMMM',
+          'titleFormatter': function (unix, dateObject) {
+            return new dateObject(unix).format(this.titleFormat)
+          },
           'hour': {
             'enabled': true, // DONE
             'step': null // DONE

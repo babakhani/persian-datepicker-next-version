@@ -1,47 +1,51 @@
 <div class="pwt-date-view">
 	<table 
-		class="month-table next" 
+		class="pwt-month-table next" 
 		border="0">
-		<tr>
-			{#if groupedDay[1]}
-				{#each groupedDay[1] as day}
-					<th>
-						<span>
-							{day.format('ddd')}
-						</span>
-					</th>
-				{/each}
-			{/if}
-		</tr>
+		<thead>
+			<tr>
+				{#if groupedDay[1]}
+					{#each groupedDay[1] as day}
+						<th>
+							<span>
+								{day.format('ddd')}
+							</span>
+						</th>
+					{/each}
+				{/if}
+			</tr>
+		</thead>
 		{#if visible}
-			{#each groupedDay as week, i}
-				<tr
-					out:fadeOut="{{duration: animateSpeed}}" 
-					in:fadeIn="{{duration: animateSpeed}}" >
-					{#if week.length > 1}
-						{#each week as day}
-							<td
-								on:click="{(event) => { if (!isDisable(day) && day.month &&
-								currentViewMonth === day.month()) selectDate(day.valueOf()) }}"
-								class:othermonth="{!day.month}"
-								class:disable="{isDisable(day) || !checkDate(day)}"
-								class:selected="{day && day.isPersianDate && isSameDate(day.valueOf(), selectedDay)}"
-								class:today="{day && day.isPersianDate && isSameDate(day.valueOf(), today)}">
-								{#if day && day.month && day.format && currentViewMonth === day.month()}
-									<span class="pwt-date-view-text">
-										{day.format('D')}
-									</span>
-									{#if $config.calendar[$config.calendarType].showHint}
-										<span class="pwt-date-view-hint">
-												{getHintText(day)}
+			<tbody
+				out:fadeOut="{{duration: animateSpeed}}" 
+				in:fadeIn="{{duration: animateSpeed}}" >
+				{#each groupedDay as week, i}
+					<tr>
+						{#if week.length > 1}
+							{#each week as day}
+								<td
+									on:click="{(event) => { if (!isDisable(day) && day.month &&
+									currentViewMonth === day.month()) selectDate(day.valueOf()) }}"
+									class:othermonth="{!day.month}"
+									class:disable="{isDisable(day) || !checkDate(day)}"
+									class:selected="{day && day.isPersianDate && isSameDate(day.valueOf(), selectedDay)}"
+									class:today="{day && day.isPersianDate && isSameDate(day.valueOf(), today)}">
+									{#if day && day.month && day.format && currentViewMonth === day.month()}
+										<span class="pwt-date-view-text">
+											{day.format('D')}
 										</span>
+										{#if $config.calendar[$config.calendarType].showHint}
+											<span class="pwt-date-view-hint">
+												{getHintText(day)}
+											</span>
+										{/if}
 									{/if}
-								{/if}
-							</td>
-						{/each}
-					{/if}
-				</tr>
-			{/each}
+								</td>
+							{/each}
+						{/if}
+					</tr>
+				{/each}
+			</tbody>
 		{/if}
 	</table>
 </div>
@@ -200,7 +204,7 @@
 		width: 100%;
 		height: 100%;
 		position: relative;
-		.month-table {
+		.pwt-month-table {
 			width: 100%;
 			height: 100%;
 		}

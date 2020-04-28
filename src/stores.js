@@ -56,7 +56,11 @@ export const actions = {
   setConfig (payload) {
     config.set(payload)
     this.onSetCalendar(get(config).calendarType)
-    this.setViewMode(payload.viewMode)
+    if (payload.onlyTimePicker) {
+      this.setViewMode('time')
+    } else {
+      this.setViewMode(payload.viewMode)
+    }
   },
   updateConfig (key) {
     let ob = {}

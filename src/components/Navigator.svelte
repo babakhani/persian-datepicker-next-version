@@ -60,8 +60,7 @@
 				in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
 				class="pwt-date-navigator-button"
 				on:click={() => setViewMode("date")}>
-				{selectedMonth}
-				{selectedDate}
+				{timeViewText}
 			</button>
 		{/if}
 	</div>
@@ -111,6 +110,7 @@
 	$: selectedMonth = new $dateObject(viewUnix).format('MMMM')
 	$: selectedDate = new $dateObject(viewUnix).format('DD')
 	$: dateViewText = $config.dayPicker.titleFormatter(viewUnix, $dateObject)
+	$: timeViewText =  $config.timePicker.titleFormatter(viewUnix, $dateObject)
 	$: monthViewText = $config.monthPicker.titleFormatter(viewUnix, $dateObject)
 	$: yearViewText = $config.yearPicker.titleFormatter(viewUnix, $dateObject)
 

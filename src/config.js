@@ -584,6 +584,26 @@ export default {
         'step': 1,
 
         /**
+         * @description daypicker title format string
+         * @type string
+         * @default 'YYYY MMMM'
+         * @link http://babakhani.github.io/PersianWebToolkit/doc/persian-date/#format
+         * @Since 2.0.0
+         */
+        'titleFormat': 'YYYY MMMM',
+
+        /**
+         * @description daypicker title formatter function
+         * @param year
+         * @param month
+         * @return {*}
+         * @Since 2.0.0
+         */
+        'titleFormatter': function (unix, dateObject) {
+            return new dateObject(unix).format(this.titleFormat)
+        },
+
+        /**
          * @description hour selector configuration
          * @type object
          */
