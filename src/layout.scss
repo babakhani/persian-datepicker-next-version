@@ -1,4 +1,5 @@
 .pwt-datepicker {
+  box-sizing: border-box;
   display: none;
   font-family: "IRANSansWeb", tahoma;
   direction: ltr;
@@ -16,6 +17,10 @@
 	*:focus,
   *:hover {
     outline: 0;
+  } 
+  
+  * {
+    box-sizing: border-box;
   }
 
   .pwt-date-info,
@@ -48,7 +53,7 @@
   }
 
   .pwt-date-info {
-    width: calc(100% - 20px);
+    width: 100%;
     padding-right: 10px;
     padding-left: 10px;
     right: 0;
@@ -59,7 +64,7 @@
 
   > .pwt-date-time,
   > .pwt-datepicker-picker-section {
-    width: calc(100% - 20px);
+    width: 100%;
     padding-right: 10px;
     padding-left: 10px;
     float: left;
@@ -67,7 +72,7 @@
   }
 
   .pwt-date-navigator {
-    width: calc(100% - 20px);
+    width: 100%;
     padding-right: 10px;
     padding-left: 10px;
     height: 48px;
