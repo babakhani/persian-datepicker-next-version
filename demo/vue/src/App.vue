@@ -16,8 +16,6 @@
         v-model="selectedDate"
         v-if="rerenderFlag"
         :options="datepickerConfig"
-        @onSelectPrevView="onSelectPrevView"
-        @onSelectTime="onSelectTime"
         />
     </div>
       <div
@@ -265,19 +263,16 @@ export default {
         initialValue: false,  // DONE
         initialValueType: 'persian', // Works but deprecated in next version
         persianDigit: true, // Deprected
-        viewMode: 'day', // DONE
+        viewMode: 'month', // DONE
         format: 'LLLL', // DONE
         formatter (unixDate, dateObject) {
           return new dateObject(unixDate).format(this.format);
         }, // DONE
         altField: '#containerAlt',  // DONE
-        altFormat: 'unix', // DONE
+        altFormat: 'X', // DONE
         altFieldFormatter: function (unixDate, dateObject) {
           if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
             return new Date(unixDate)
-          }
-          else if (this.altFormat === 'unix' || this.altFormat === 'u') {
-            return new dateObject(unixDate).valueOf();
           } else {
             return new dateObject(unixDate).format(this.altFormat);
           }
@@ -438,17 +433,7 @@ export default {
     }
   },
   methods: {
-    onSelectTime(e) {
-      // console.log('Vue handle onSelectTime')
-      // console.log(e.detail)
-    },
-    onSelectPrevView() {
-      // console.log('Vue handle onSelectPrevView')
-    },
-    handleClick() {
-      alert('alert from vue js')
-    },
-  },
+  }
 }
 </script>
 

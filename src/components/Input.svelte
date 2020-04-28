@@ -1,13 +1,11 @@
+<svelte:options accessors={true} />
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import { isDirty, selectedUnix, config, dateObject } from '../stores.js'
 
 	export let originalContainer
 	export let plotarea
-
-	const dispatch = createEventDispatcher()
-
-	let setPlotPostion = function () {
+	export let setPlotPostion = function () {
 		let configLeft = $config.position !== 'auto' ? $config.position[0] : 0
 		let configTop = $config.position !== 'auto' ? $config.position[1] : 0
 		let set = () => {
@@ -21,22 +19,13 @@
 				}
 			}
 		}
+	  set()
 		setTimeout(() => {
 			set()
-		}, 100)
-		setTimeout(() => {
-			set()
-		}, 200)
-		setTimeout(() => {
-			set()
-		}, 300)
-		setTimeout(() => {
-			set()
-		}, 1000)
-		setTimeout(() => {
-			set()
-		}, 1500)
+		}, 0)
 	}
+
+	const dispatch = createEventDispatcher()
 
 	let initInputEvents = function () {
 		let bodyListener = (e) => {
@@ -57,8 +46,8 @@
 		}
 		if (originalContainer && originalContainer.tagName === 'INPUT') {
 			originalContainer.addEventListener('focus', () => {
-				dispatch('setvisibility', true)
 				setPlotPostion()
+				dispatch('setvisibility', true)
 				document.addEventListener('click', bodyListener)
 			})
 		}

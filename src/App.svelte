@@ -1,3 +1,4 @@
+<svelte:options accessors={true} immutable={true} />
 {#if isVisbile}
 	<div 
 		bind:this={plotarea}
@@ -74,6 +75,7 @@
 	</div>
 {/if}
 <Input 
+bind:this={inputComp}
 on:setinitialvalue="{setInitialValue}"
 on:setvisibility={setvisibility}
 plotarea={plotarea} 
@@ -94,10 +96,48 @@ originalContainer={originalContainer} />
 	import { createEventDispatcher } from 'svelte'
 	import lodash from 'lodash'
 
+	let plotarea
+	let inputComp
+	let isVisbile = false
+
 	// Public props used in adapters
 	export let options = {}
 	export let originalContainer = null
 	export let model = null
+	export let model3 = null
+	export let setDate = function(unix) {
+	  dispatcher('setDate')(unix)
+  }	
+	export let show = function() {
+		setvisibility({detail: true})
+  }	
+	export let hide = function() {
+		setvisibility({detail: false})
+  }	
+	export let toggle = function() {
+		setvisibility({detail: !isVisbile})
+  }	
+	export let destroy = function() {
+		if(plotarea.parentNode) {
+      plotarea.parentNode.removeChild(plotarea)
+		}
+	}	
+	export let getState = function() {
+		return {
+			selected: $selectedUnix,
+			view: $viewUnix,
+			config: $config,
+			dateObject: $dateObject
+		}
+	}
+  // Added In v2.0.0
+	export let setOptions = function (newOptions) {
+	  dispatcher('setConfig')(lodash.merge($config, newOptions))
+	}
+  // Added In v2.0.0
+	export let getOptions = function (newOptions) {
+	  return $config
+	}
 
 	const dispatch = createEventDispatcher()
 	// Handle global event and store events
@@ -145,21 +185,22 @@ originalContainer={originalContainer} />
 		}
 	}
 
-	let plotarea
-	let isVisbile = false
 	// Methods that would called by component events
 	const setvisibility = function(payload) {
 		isVisbile = payload.detail
+		if (inputComp) {
+		  inputComp.setPlotPostion()
+		}
 		setTimeout(() => {
 			if (plotarea) {
 				plotarea.style.display = isVisbile ? 'block' : 'none'
 			}
-		}, 0)
-		if (isVisbile) {
-      $config.onShow()
-		} else {
-      $config.onHide()
-		}
+			if (isVisbile) {
+				$config.onShow()
+			} else {
+				$config.onHide()
+			}
+		}, 150)
 	}
 
 	if ($config.inline) {

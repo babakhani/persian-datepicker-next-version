@@ -32,6 +32,9 @@ function is_function(thing) {
 function safe_not_equal(a, b) {
     return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
 }
+function not_equal(a, b) {
+    return a != a ? b == b : a !== b;
+}
 function validate_store(store, name) {
     if (store != null && typeof store.subscribe !== 'function') {
         throw new Error(`'${name}' is not a store with a 'subscribe' method`);
@@ -23458,18 +23461,17 @@ function instance$7($$self, $$props, $$invalidate) {
 	let $selectedUnix;
 	let $dateObject;
 	validate_store(config, "config");
-	component_subscribe($$self, config, $$value => $$invalidate(2, $config = $$value));
+	component_subscribe($$self, config, $$value => $$invalidate(3, $config = $$value));
 	validate_store(isDirty, "isDirty");
-	component_subscribe($$self, isDirty, $$value => $$invalidate(3, $isDirty = $$value));
+	component_subscribe($$self, isDirty, $$value => $$invalidate(4, $isDirty = $$value));
 	validate_store(selectedUnix, "selectedUnix");
-	component_subscribe($$self, selectedUnix, $$value => $$invalidate(4, $selectedUnix = $$value));
+	component_subscribe($$self, selectedUnix, $$value => $$invalidate(5, $selectedUnix = $$value));
 	validate_store(dateObject, "dateObject");
-	component_subscribe($$self, dateObject, $$value => $$invalidate(5, $dateObject = $$value));
+	component_subscribe($$self, dateObject, $$value => $$invalidate(6, $dateObject = $$value));
 	let { originalContainer } = $$props;
 	let { plotarea } = $$props;
-	const dispatch = createEventDispatcher();
 
-	let setPlotPostion = function () {
+	let { setPlotPostion = function () {
 		let configLeft = $config.position !== "auto" ? $config.position[0] : 0;
 		let configTop = $config.position !== "auto" ? $config.position[1] : 0;
 
@@ -23483,41 +23485,17 @@ function instance$7($$self, $$props, $$invalidate) {
 			}
 		};
 
-		setTimeout(
-			() => {
-				set();
-			},
-			100
-		);
+		set();
 
 		setTimeout(
 			() => {
 				set();
 			},
-			200
+			0
 		);
+	} } = $$props;
 
-		setTimeout(
-			() => {
-				set();
-			},
-			300
-		);
-
-		setTimeout(
-			() => {
-				set();
-			},
-			1000
-		);
-
-		setTimeout(
-			() => {
-				set();
-			},
-			1500
-		);
-	};
+	const dispatch = createEventDispatcher();
 
 	let initInputEvents = function () {
 		let bodyListener = e => {
@@ -23529,8 +23507,8 @@ function instance$7($$self, $$props, $$invalidate) {
 
 		if (originalContainer && originalContainer.tagName === "INPUT") {
 			originalContainer.addEventListener("focus", () => {
-				dispatch("setvisibility", true);
 				setPlotPostion();
+				dispatch("setvisibility", true);
 				document.addEventListener("click", bodyListener);
 			});
 		}
@@ -23597,7 +23575,7 @@ function instance$7($$self, $$props, $$invalidate) {
 		initInputObserver();
 	}
 
-	const writable_props = ["originalContainer", "plotarea"];
+	const writable_props = ["originalContainer", "plotarea", "setPlotPostion"];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Input> was created with unknown prop '${key}'`);
@@ -23609,6 +23587,7 @@ function instance$7($$self, $$props, $$invalidate) {
 	$$self.$set = $$props => {
 		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
 		if ("plotarea" in $$props) $$invalidate(1, plotarea = $$props.plotarea);
+		if ("setPlotPostion" in $$props) $$invalidate(2, setPlotPostion = $$props.setPlotPostion);
 	};
 
 	$$self.$capture_state = () => ({
@@ -23619,8 +23598,8 @@ function instance$7($$self, $$props, $$invalidate) {
 		dateObject,
 		originalContainer,
 		plotarea,
-		dispatch,
 		setPlotPostion,
+		dispatch,
 		initInputEvents,
 		initInputObserver,
 		updateInputs,
@@ -23634,7 +23613,7 @@ function instance$7($$self, $$props, $$invalidate) {
 	$$self.$inject_state = $$props => {
 		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
 		if ("plotarea" in $$props) $$invalidate(1, plotarea = $$props.plotarea);
-		if ("setPlotPostion" in $$props) setPlotPostion = $$props.setPlotPostion;
+		if ("setPlotPostion" in $$props) $$invalidate(2, setPlotPostion = $$props.setPlotPostion);
 		if ("initInputEvents" in $$props) initInputEvents = $$props.initInputEvents;
 		if ("initInputObserver" in $$props) initInputObserver = $$props.initInputObserver;
 		if ("updateInputs" in $$props) $$invalidate(10, updateInputs = $$props.updateInputs);
@@ -23646,7 +23625,7 @@ function instance$7($$self, $$props, $$invalidate) {
 	}
 
 	$$self.$$.update = () => {
-		if ($$self.$$.dirty & /*$selectedUnix*/ 16) {
+		if ($$self.$$.dirty & /*$selectedUnix*/ 32) {
 			 {
 				if ($selectedUnix) {
 					updateInputs();
@@ -23655,13 +23634,18 @@ function instance$7($$self, $$props, $$invalidate) {
 		}
 	};
 
-	return [originalContainer, plotarea];
+	return [originalContainer, plotarea, setPlotPostion];
 }
 
 class Input extends SvelteComponentDev {
 	constructor(options) {
 		super(options);
-		init(this, options, instance$7, create_fragment$7, safe_not_equal, { originalContainer: 0, plotarea: 1 });
+
+		init(this, options, instance$7, create_fragment$7, safe_not_equal, {
+			originalContainer: 0,
+			plotarea: 1,
+			setPlotPostion: 2
+		});
 
 		dispatch_dev("SvelteRegisterComponent", {
 			component: this,
@@ -23683,26 +23667,37 @@ class Input extends SvelteComponentDev {
 	}
 
 	get originalContainer() {
-		throw new Error("<Input>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx[0];
 	}
 
-	set originalContainer(value) {
-		throw new Error("<Input>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set originalContainer(originalContainer) {
+		this.$set({ originalContainer });
+		flush();
 	}
 
 	get plotarea() {
-		throw new Error("<Input>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx[1];
 	}
 
-	set plotarea(value) {
-		throw new Error("<Input>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set plotarea(plotarea) {
+		this.$set({ plotarea });
+		flush();
+	}
+
+	get setPlotPostion() {
+		return this.$$.ctx[2];
+	}
+
+	set setPlotPostion(setPlotPostion) {
+		this.$set({ setPlotPostion });
+		flush();
 	}
 }
 
 /* src/app.svelte generated by Svelte v3.21.0 */
 const file$7 = "src/app.svelte";
 
-// (1:0) {#if isVisbile}
+// (2:0) {#if isVisbile}
 function create_if_block$7(ctx) {
 	let div1;
 	let t0;
@@ -23712,11 +23707,11 @@ function create_if_block$7(ctx) {
 	let t3;
 	let current;
 	let dispose;
-	let if_block0 = /*$config*/ ctx[4].infobox.enabled && create_if_block_8(ctx);
-	let if_block1 = /*$config*/ ctx[4].navigator.enabled && create_if_block_7(ctx);
-	let if_block2 = !/*$config*/ ctx[4].onlyTimePicker && create_if_block_3$4(ctx);
-	let if_block3 = (/*$privateViewModeDerived*/ ctx[6] === "time" && /*$config*/ ctx[4].timePicker.enabled || /*$config*/ ctx[4].onlyTimePicker) && create_if_block_2$4(ctx);
-	let if_block4 = /*$config*/ ctx[4].toolbox.enabled && create_if_block_1$4(ctx);
+	let if_block0 = /*$config*/ ctx[6].infobox.enabled && create_if_block_8(ctx);
+	let if_block1 = /*$config*/ ctx[6].navigator.enabled && create_if_block_7(ctx);
+	let if_block2 = !/*$config*/ ctx[6].onlyTimePicker && create_if_block_3$4(ctx);
+	let if_block3 = (/*$privateViewModeDerived*/ ctx[7] === "time" && /*$config*/ ctx[6].timePicker.enabled || /*$config*/ ctx[6].onlyTimePicker) && create_if_block_2$4(ctx);
+	let if_block4 = /*$config*/ ctx[6].toolbox.enabled && create_if_block_1$4(ctx);
 
 	const block = {
 		c: function create() {
@@ -23732,9 +23727,9 @@ function create_if_block$7(ctx) {
 			t3 = space();
 			if (if_block4) if_block4.c();
 			attr_dev(div0, "class", "pwt-datepicker-picker-section");
-			add_location(div0, file$7, 20, 3, 516);
+			add_location(div0, file$7, 21, 3, 569);
 			attr_dev(div1, "class", "pwt-datepicker");
-			add_location(div1, file$7, 1, 1, 17);
+			add_location(div1, file$7, 2, 1, 70);
 		},
 		m: function mount(target, anchor, remount) {
 			insert_dev(target, div1, anchor);
@@ -23748,17 +23743,17 @@ function create_if_block$7(ctx) {
 			if (if_block3) if_block3.m(div0, null);
 			append_dev(div1, t3);
 			if (if_block4) if_block4.m(div1, null);
-			/*div1_binding*/ ctx[27](div1);
+			/*div1_binding*/ ctx[37](div1);
 			current = true;
 			if (remount) dispose();
-			dispose = listen_dev(div1, "wheel", /*handleWheel*/ ctx[19], false, false, false);
+			dispose = listen_dev(div1, "wheel", /*handleWheel*/ ctx[20], false, false, false);
 		},
 		p: function update(ctx, dirty) {
-			if (/*$config*/ ctx[4].infobox.enabled) {
+			if (/*$config*/ ctx[6].infobox.enabled) {
 				if (if_block0) {
 					if_block0.p(ctx, dirty);
 
-					if (dirty & /*$config*/ 16) {
+					if (dirty[0] & /*$config*/ 64) {
 						transition_in(if_block0, 1);
 					}
 				} else {
@@ -23777,11 +23772,11 @@ function create_if_block$7(ctx) {
 				check_outros();
 			}
 
-			if (/*$config*/ ctx[4].navigator.enabled) {
+			if (/*$config*/ ctx[6].navigator.enabled) {
 				if (if_block1) {
 					if_block1.p(ctx, dirty);
 
-					if (dirty & /*$config*/ 16) {
+					if (dirty[0] & /*$config*/ 64) {
 						transition_in(if_block1, 1);
 					}
 				} else {
@@ -23800,11 +23795,11 @@ function create_if_block$7(ctx) {
 				check_outros();
 			}
 
-			if (!/*$config*/ ctx[4].onlyTimePicker) {
+			if (!/*$config*/ ctx[6].onlyTimePicker) {
 				if (if_block2) {
 					if_block2.p(ctx, dirty);
 
-					if (dirty & /*$config*/ 16) {
+					if (dirty[0] & /*$config*/ 64) {
 						transition_in(if_block2, 1);
 					}
 				} else {
@@ -23823,11 +23818,11 @@ function create_if_block$7(ctx) {
 				check_outros();
 			}
 
-			if (/*$privateViewModeDerived*/ ctx[6] === "time" && /*$config*/ ctx[4].timePicker.enabled || /*$config*/ ctx[4].onlyTimePicker) {
+			if (/*$privateViewModeDerived*/ ctx[7] === "time" && /*$config*/ ctx[6].timePicker.enabled || /*$config*/ ctx[6].onlyTimePicker) {
 				if (if_block3) {
 					if_block3.p(ctx, dirty);
 
-					if (dirty & /*$privateViewModeDerived, $config*/ 80) {
+					if (dirty[0] & /*$privateViewModeDerived, $config*/ 192) {
 						transition_in(if_block3, 1);
 					}
 				} else {
@@ -23846,11 +23841,11 @@ function create_if_block$7(ctx) {
 				check_outros();
 			}
 
-			if (/*$config*/ ctx[4].toolbox.enabled) {
+			if (/*$config*/ ctx[6].toolbox.enabled) {
 				if (if_block4) {
 					if_block4.p(ctx, dirty);
 
-					if (dirty & /*$config*/ 16) {
+					if (dirty[0] & /*$config*/ 64) {
 						transition_in(if_block4, 1);
 					}
 				} else {
@@ -23893,7 +23888,7 @@ function create_if_block$7(ctx) {
 			if (if_block2) if_block2.d();
 			if (if_block3) if_block3.d();
 			if (if_block4) if_block4.d();
-			/*div1_binding*/ ctx[27](null);
+			/*div1_binding*/ ctx[37](null);
 			dispose();
 		}
 	};
@@ -23902,21 +23897,21 @@ function create_if_block$7(ctx) {
 		block,
 		id: create_if_block$7.name,
 		type: "if",
-		source: "(1:0) {#if isVisbile}",
+		source: "(2:0) {#if isVisbile}",
 		ctx
 	});
 
 	return block;
 }
 
-// (6:2) {#if $config.infobox.enabled}
+// (7:2) {#if $config.infobox.enabled}
 function create_if_block_8(ctx) {
 	let current;
 
 	const infobox = new Infobox({
 			props: {
 				viewUnix: /*$viewUnix*/ ctx[5],
-				selectedUnix: /*$selectedUnix*/ ctx[3]
+				selectedUnix: /*$selectedUnix*/ ctx[4]
 			},
 			$$inline: true
 		});
@@ -23931,8 +23926,8 @@ function create_if_block_8(ctx) {
 		},
 		p: function update(ctx, dirty) {
 			const infobox_changes = {};
-			if (dirty & /*$viewUnix*/ 32) infobox_changes.viewUnix = /*$viewUnix*/ ctx[5];
-			if (dirty & /*$selectedUnix*/ 8) infobox_changes.selectedUnix = /*$selectedUnix*/ ctx[3];
+			if (dirty[0] & /*$viewUnix*/ 32) infobox_changes.viewUnix = /*$viewUnix*/ ctx[5];
+			if (dirty[0] & /*$selectedUnix*/ 16) infobox_changes.selectedUnix = /*$selectedUnix*/ ctx[4];
 			infobox.$set(infobox_changes);
 		},
 		i: function intro(local) {
@@ -23953,30 +23948,30 @@ function create_if_block_8(ctx) {
 		block,
 		id: create_if_block_8.name,
 		type: "if",
-		source: "(6:2) {#if $config.infobox.enabled}",
+		source: "(7:2) {#if $config.infobox.enabled}",
 		ctx
 	});
 
 	return block;
 }
 
-// (11:3) {#if $config.navigator.enabled}
+// (12:3) {#if $config.navigator.enabled}
 function create_if_block_7(ctx) {
 	let current;
 
 	const navigator = new Navigator({
 			props: {
-				viewMode: /*$privateViewModeDerived*/ ctx[6],
+				viewMode: /*$privateViewModeDerived*/ ctx[7],
 				viewUnix: /*$viewUnix*/ ctx[5],
-				selectedUnix: /*$selectedUnix*/ ctx[3]
+				selectedUnix: /*$selectedUnix*/ ctx[4]
 			},
 			$$inline: true
 		});
 
-	navigator.$on("selectmode", /*setViewModeToUpperAvailableLevel*/ ctx[18]);
-	navigator.$on("today", /*today*/ ctx[15]);
-	navigator.$on("next", /*navNext*/ ctx[16]);
-	navigator.$on("prev", /*navPrev*/ ctx[17]);
+	navigator.$on("selectmode", /*setViewModeToUpperAvailableLevel*/ ctx[19]);
+	navigator.$on("today", /*today*/ ctx[16]);
+	navigator.$on("next", /*navNext*/ ctx[17]);
+	navigator.$on("prev", /*navPrev*/ ctx[18]);
 
 	const block = {
 		c: function create() {
@@ -23988,9 +23983,9 @@ function create_if_block_7(ctx) {
 		},
 		p: function update(ctx, dirty) {
 			const navigator_changes = {};
-			if (dirty & /*$privateViewModeDerived*/ 64) navigator_changes.viewMode = /*$privateViewModeDerived*/ ctx[6];
-			if (dirty & /*$viewUnix*/ 32) navigator_changes.viewUnix = /*$viewUnix*/ ctx[5];
-			if (dirty & /*$selectedUnix*/ 8) navigator_changes.selectedUnix = /*$selectedUnix*/ ctx[3];
+			if (dirty[0] & /*$privateViewModeDerived*/ 128) navigator_changes.viewMode = /*$privateViewModeDerived*/ ctx[7];
+			if (dirty[0] & /*$viewUnix*/ 32) navigator_changes.viewUnix = /*$viewUnix*/ ctx[5];
+			if (dirty[0] & /*$selectedUnix*/ 16) navigator_changes.selectedUnix = /*$selectedUnix*/ ctx[4];
 			navigator.$set(navigator_changes);
 		},
 		i: function intro(local) {
@@ -24011,22 +24006,22 @@ function create_if_block_7(ctx) {
 		block,
 		id: create_if_block_7.name,
 		type: "if",
-		source: "(11:3) {#if $config.navigator.enabled}",
+		source: "(12:3) {#if $config.navigator.enabled}",
 		ctx
 	});
 
 	return block;
 }
 
-// (23:4) {#if !$config.onlyTimePicker}
+// (24:4) {#if !$config.onlyTimePicker}
 function create_if_block_3$4(ctx) {
 	let t0;
 	let t1;
 	let if_block2_anchor;
 	let current;
-	let if_block0 = /*$privateViewModeDerived*/ ctx[6] === "year" && /*$config*/ ctx[4].yearPicker.enabled && create_if_block_6$1(ctx);
-	let if_block1 = /*$privateViewModeDerived*/ ctx[6] === "month" && /*$config*/ ctx[4].monthPicker.enabled && create_if_block_5$1(ctx);
-	let if_block2 = /*$privateViewModeDerived*/ ctx[6] === "day" && /*$config*/ ctx[4].dayPicker.enabled && create_if_block_4$3(ctx);
+	let if_block0 = /*$privateViewModeDerived*/ ctx[7] === "year" && /*$config*/ ctx[6].yearPicker.enabled && create_if_block_6$1(ctx);
+	let if_block1 = /*$privateViewModeDerived*/ ctx[7] === "month" && /*$config*/ ctx[6].monthPicker.enabled && create_if_block_5$1(ctx);
+	let if_block2 = /*$privateViewModeDerived*/ ctx[7] === "day" && /*$config*/ ctx[6].dayPicker.enabled && create_if_block_4$3(ctx);
 
 	const block = {
 		c: function create() {
@@ -24047,11 +24042,11 @@ function create_if_block_3$4(ctx) {
 			current = true;
 		},
 		p: function update(ctx, dirty) {
-			if (/*$privateViewModeDerived*/ ctx[6] === "year" && /*$config*/ ctx[4].yearPicker.enabled) {
+			if (/*$privateViewModeDerived*/ ctx[7] === "year" && /*$config*/ ctx[6].yearPicker.enabled) {
 				if (if_block0) {
 					if_block0.p(ctx, dirty);
 
-					if (dirty & /*$privateViewModeDerived, $config*/ 80) {
+					if (dirty[0] & /*$privateViewModeDerived, $config*/ 192) {
 						transition_in(if_block0, 1);
 					}
 				} else {
@@ -24070,11 +24065,11 @@ function create_if_block_3$4(ctx) {
 				check_outros();
 			}
 
-			if (/*$privateViewModeDerived*/ ctx[6] === "month" && /*$config*/ ctx[4].monthPicker.enabled) {
+			if (/*$privateViewModeDerived*/ ctx[7] === "month" && /*$config*/ ctx[6].monthPicker.enabled) {
 				if (if_block1) {
 					if_block1.p(ctx, dirty);
 
-					if (dirty & /*$privateViewModeDerived, $config*/ 80) {
+					if (dirty[0] & /*$privateViewModeDerived, $config*/ 192) {
 						transition_in(if_block1, 1);
 					}
 				} else {
@@ -24093,11 +24088,11 @@ function create_if_block_3$4(ctx) {
 				check_outros();
 			}
 
-			if (/*$privateViewModeDerived*/ ctx[6] === "day" && /*$config*/ ctx[4].dayPicker.enabled) {
+			if (/*$privateViewModeDerived*/ ctx[7] === "day" && /*$config*/ ctx[6].dayPicker.enabled) {
 				if (if_block2) {
 					if_block2.p(ctx, dirty);
 
-					if (dirty & /*$privateViewModeDerived, $config*/ 80) {
+					if (dirty[0] & /*$privateViewModeDerived, $config*/ 192) {
 						transition_in(if_block2, 1);
 					}
 				} else {
@@ -24143,14 +24138,14 @@ function create_if_block_3$4(ctx) {
 		block,
 		id: create_if_block_3$4.name,
 		type: "if",
-		source: "(23:4) {#if !$config.onlyTimePicker}",
+		source: "(24:4) {#if !$config.onlyTimePicker}",
 		ctx
 	});
 
 	return block;
 }
 
-// (24:5) {#if $privateViewModeDerived === 'year' && $config.yearPicker.enabled}
+// (25:5) {#if $privateViewModeDerived === 'year' && $config.yearPicker.enabled}
 function create_if_block_6$1(ctx) {
 	let div;
 	let div_transition;
@@ -24159,18 +24154,18 @@ function create_if_block_6$1(ctx) {
 	const yearview = new YearView({
 			props: {
 				viewUnix: /*$viewUnix*/ ctx[5],
-				selectedUnix: /*$selectedUnix*/ ctx[3]
+				selectedUnix: /*$selectedUnix*/ ctx[4]
 			},
 			$$inline: true
 		});
 
-	yearview.$on("select", /*onSelectYear*/ ctx[14]);
+	yearview.$on("select", /*onSelectYear*/ ctx[15]);
 
 	const block = {
 		c: function create() {
 			div = element("div");
 			create_component(yearview.$$.fragment);
-			add_location(div, file$7, 24, 6, 680);
+			add_location(div, file$7, 25, 6, 733);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -24179,8 +24174,8 @@ function create_if_block_6$1(ctx) {
 		},
 		p: function update(ctx, dirty) {
 			const yearview_changes = {};
-			if (dirty & /*$viewUnix*/ 32) yearview_changes.viewUnix = /*$viewUnix*/ ctx[5];
-			if (dirty & /*$selectedUnix*/ 8) yearview_changes.selectedUnix = /*$selectedUnix*/ ctx[3];
+			if (dirty[0] & /*$viewUnix*/ 32) yearview_changes.viewUnix = /*$viewUnix*/ ctx[5];
+			if (dirty[0] & /*$selectedUnix*/ 16) yearview_changes.selectedUnix = /*$selectedUnix*/ ctx[4];
 			yearview.$set(yearview_changes);
 		},
 		i: function intro(local) {
@@ -24211,14 +24206,14 @@ function create_if_block_6$1(ctx) {
 		block,
 		id: create_if_block_6$1.name,
 		type: "if",
-		source: "(24:5) {#if $privateViewModeDerived === 'year' && $config.yearPicker.enabled}",
+		source: "(25:5) {#if $privateViewModeDerived === 'year' && $config.yearPicker.enabled}",
 		ctx
 	});
 
 	return block;
 }
 
-// (33:5) {#if $privateViewModeDerived === 'month' && $config.monthPicker.enabled}
+// (34:5) {#if $privateViewModeDerived === 'month' && $config.monthPicker.enabled}
 function create_if_block_5$1(ctx) {
 	let div;
 	let div_transition;
@@ -24227,18 +24222,18 @@ function create_if_block_5$1(ctx) {
 	const monthview = new MonthView({
 			props: {
 				viewUnix: /*$viewUnix*/ ctx[5],
-				selectedUnix: /*$selectedUnix*/ ctx[3]
+				selectedUnix: /*$selectedUnix*/ ctx[4]
 			},
 			$$inline: true
 		});
 
-	monthview.$on("select", /*onSelectMonth*/ ctx[13]);
+	monthview.$on("select", /*onSelectMonth*/ ctx[14]);
 
 	const block = {
 		c: function create() {
 			div = element("div");
 			create_component(monthview.$$.fragment);
-			add_location(div, file$7, 33, 6, 958);
+			add_location(div, file$7, 34, 6, 1011);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -24247,8 +24242,8 @@ function create_if_block_5$1(ctx) {
 		},
 		p: function update(ctx, dirty) {
 			const monthview_changes = {};
-			if (dirty & /*$viewUnix*/ 32) monthview_changes.viewUnix = /*$viewUnix*/ ctx[5];
-			if (dirty & /*$selectedUnix*/ 8) monthview_changes.selectedUnix = /*$selectedUnix*/ ctx[3];
+			if (dirty[0] & /*$viewUnix*/ 32) monthview_changes.viewUnix = /*$viewUnix*/ ctx[5];
+			if (dirty[0] & /*$selectedUnix*/ 16) monthview_changes.selectedUnix = /*$selectedUnix*/ ctx[4];
 			monthview.$set(monthview_changes);
 		},
 		i: function intro(local) {
@@ -24279,14 +24274,14 @@ function create_if_block_5$1(ctx) {
 		block,
 		id: create_if_block_5$1.name,
 		type: "if",
-		source: "(33:5) {#if $privateViewModeDerived === 'month' && $config.monthPicker.enabled}",
+		source: "(34:5) {#if $privateViewModeDerived === 'month' && $config.monthPicker.enabled}",
 		ctx
 	});
 
 	return block;
 }
 
-// (42:5) {#if $privateViewModeDerived === 'day' && $config.dayPicker.enabled}
+// (43:5) {#if $privateViewModeDerived === 'day' && $config.dayPicker.enabled}
 function create_if_block_4$3(ctx) {
 	let div;
 	let div_transition;
@@ -24295,20 +24290,20 @@ function create_if_block_4$3(ctx) {
 	const dateview = new DateView({
 			props: {
 				viewUnix: /*$viewUnix*/ ctx[5],
-				selectedUnix: /*$selectedUnix*/ ctx[3]
+				selectedUnix: /*$selectedUnix*/ ctx[4]
 			},
 			$$inline: true
 		});
 
-	dateview.$on("prev", /*navPrev*/ ctx[17]);
-	dateview.$on("next", /*navNext*/ ctx[16]);
-	dateview.$on("selectDate", /*onSelectDate*/ ctx[11]);
+	dateview.$on("prev", /*navPrev*/ ctx[18]);
+	dateview.$on("next", /*navNext*/ ctx[17]);
+	dateview.$on("selectDate", /*onSelectDate*/ ctx[12]);
 
 	const block = {
 		c: function create() {
 			div = element("div");
 			create_component(dateview.$$.fragment);
-			add_location(div, file$7, 42, 6, 1234);
+			add_location(div, file$7, 43, 6, 1287);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -24317,8 +24312,8 @@ function create_if_block_4$3(ctx) {
 		},
 		p: function update(ctx, dirty) {
 			const dateview_changes = {};
-			if (dirty & /*$viewUnix*/ 32) dateview_changes.viewUnix = /*$viewUnix*/ ctx[5];
-			if (dirty & /*$selectedUnix*/ 8) dateview_changes.selectedUnix = /*$selectedUnix*/ ctx[3];
+			if (dirty[0] & /*$viewUnix*/ 32) dateview_changes.viewUnix = /*$viewUnix*/ ctx[5];
+			if (dirty[0] & /*$selectedUnix*/ 16) dateview_changes.selectedUnix = /*$selectedUnix*/ ctx[4];
 			dateview.$set(dateview_changes);
 		},
 		i: function intro(local) {
@@ -24349,31 +24344,31 @@ function create_if_block_4$3(ctx) {
 		block,
 		id: create_if_block_4$3.name,
 		type: "if",
-		source: "(42:5) {#if $privateViewModeDerived === 'day' && $config.dayPicker.enabled}",
+		source: "(43:5) {#if $privateViewModeDerived === 'day' && $config.dayPicker.enabled}",
 		ctx
 	});
 
 	return block;
 }
 
-// (54:4) {#if ($privateViewModeDerived === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
+// (55:4) {#if ($privateViewModeDerived === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
 function create_if_block_2$4(ctx) {
 	let div;
 	let div_intro;
 	let current;
 
 	const timeview = new TimeView({
-			props: { selectedUnix: /*$selectedUnix*/ ctx[3] },
+			props: { selectedUnix: /*$selectedUnix*/ ctx[4] },
 			$$inline: true
 		});
 
-	timeview.$on("selectTime", /*onSelectTime*/ ctx[12]);
+	timeview.$on("selectTime", /*onSelectTime*/ ctx[13]);
 
 	const block = {
 		c: function create() {
 			div = element("div");
 			create_component(timeview.$$.fragment);
-			add_location(div, file$7, 54, 5, 1605);
+			add_location(div, file$7, 55, 5, 1658);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -24382,7 +24377,7 @@ function create_if_block_2$4(ctx) {
 		},
 		p: function update(ctx, dirty) {
 			const timeview_changes = {};
-			if (dirty & /*$selectedUnix*/ 8) timeview_changes.selectedUnix = /*$selectedUnix*/ ctx[3];
+			if (dirty[0] & /*$selectedUnix*/ 16) timeview_changes.selectedUnix = /*$selectedUnix*/ ctx[4];
 			timeview.$set(timeview_changes);
 		},
 		i: function intro(local) {
@@ -24412,31 +24407,31 @@ function create_if_block_2$4(ctx) {
 		block,
 		id: create_if_block_2$4.name,
 		type: "if",
-		source: "(54:4) {#if ($privateViewModeDerived === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}",
+		source: "(55:4) {#if ($privateViewModeDerived === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}",
 		ctx
 	});
 
 	return block;
 }
 
-// (63:3) {#if $config.toolbox.enabled}
+// (64:3) {#if $config.toolbox.enabled}
 function create_if_block_1$4(ctx) {
 	let current;
 
 	const toolbox = new Toolbox({
 			props: {
-				viewMode: /*$privateViewModeDerived*/ ctx[6],
+				viewMode: /*$privateViewModeDerived*/ ctx[7],
 				viewUnix: /*$viewUnix*/ ctx[5],
-				selectedUnix: /*$selectedUnix*/ ctx[3]
+				selectedUnix: /*$selectedUnix*/ ctx[4]
 			},
 			$$inline: true
 		});
 
-	toolbox.$on("setcalendar", /*setcalendar*/ ctx[10]);
-	toolbox.$on("selectmode", /*setViewMode*/ ctx[9]);
-	toolbox.$on("today", /*today*/ ctx[15]);
-	toolbox.$on("next", /*navNext*/ ctx[16]);
-	toolbox.$on("prev", /*navPrev*/ ctx[17]);
+	toolbox.$on("setcalendar", /*setcalendar*/ ctx[11]);
+	toolbox.$on("selectmode", /*setViewMode*/ ctx[10]);
+	toolbox.$on("today", /*today*/ ctx[16]);
+	toolbox.$on("next", /*navNext*/ ctx[17]);
+	toolbox.$on("prev", /*navPrev*/ ctx[18]);
 
 	const block = {
 		c: function create() {
@@ -24448,9 +24443,9 @@ function create_if_block_1$4(ctx) {
 		},
 		p: function update(ctx, dirty) {
 			const toolbox_changes = {};
-			if (dirty & /*$privateViewModeDerived*/ 64) toolbox_changes.viewMode = /*$privateViewModeDerived*/ ctx[6];
-			if (dirty & /*$viewUnix*/ 32) toolbox_changes.viewUnix = /*$viewUnix*/ ctx[5];
-			if (dirty & /*$selectedUnix*/ 8) toolbox_changes.selectedUnix = /*$selectedUnix*/ ctx[3];
+			if (dirty[0] & /*$privateViewModeDerived*/ 128) toolbox_changes.viewMode = /*$privateViewModeDerived*/ ctx[7];
+			if (dirty[0] & /*$viewUnix*/ 32) toolbox_changes.viewUnix = /*$viewUnix*/ ctx[5];
+			if (dirty[0] & /*$selectedUnix*/ 16) toolbox_changes.selectedUnix = /*$selectedUnix*/ ctx[4];
 			toolbox.$set(toolbox_changes);
 		},
 		i: function intro(local) {
@@ -24471,7 +24466,7 @@ function create_if_block_1$4(ctx) {
 		block,
 		id: create_if_block_1$4.name,
 		type: "if",
-		source: "(63:3) {#if $config.toolbox.enabled}",
+		source: "(64:3) {#if $config.toolbox.enabled}",
 		ctx
 	});
 
@@ -24481,18 +24476,17 @@ function create_if_block_1$4(ctx) {
 function create_fragment$8(ctx) {
 	let t;
 	let current;
-	let if_block = /*isVisbile*/ ctx[2] && create_if_block$7(ctx);
+	let if_block = /*isVisbile*/ ctx[3] && create_if_block$7(ctx);
 
-	const input = new Input({
-			props: {
-				plotarea: /*plotarea*/ ctx[1],
-				originalContainer: /*originalContainer*/ ctx[0]
-			},
-			$$inline: true
-		});
+	let input_props = {
+		plotarea: /*plotarea*/ ctx[1],
+		originalContainer: /*originalContainer*/ ctx[0]
+	};
 
-	input.$on("setinitialvalue", /*setInitialValue*/ ctx[8]);
-	input.$on("setvisibility", /*setvisibility*/ ctx[7]);
+	const input = new Input({ props: input_props, $$inline: true });
+	/*input_binding*/ ctx[38](input);
+	input.$on("setinitialvalue", /*setInitialValue*/ ctx[9]);
+	input.$on("setvisibility", /*setvisibility*/ ctx[8]);
 
 	const block = {
 		c: function create() {
@@ -24509,12 +24503,12 @@ function create_fragment$8(ctx) {
 			mount_component(input, target, anchor);
 			current = true;
 		},
-		p: function update(ctx, [dirty]) {
-			if (/*isVisbile*/ ctx[2]) {
+		p: function update(ctx, dirty) {
+			if (/*isVisbile*/ ctx[3]) {
 				if (if_block) {
 					if_block.p(ctx, dirty);
 
-					if (dirty & /*isVisbile*/ 4) {
+					if (dirty[0] & /*isVisbile*/ 8) {
 						transition_in(if_block, 1);
 					}
 				} else {
@@ -24534,8 +24528,8 @@ function create_fragment$8(ctx) {
 			}
 
 			const input_changes = {};
-			if (dirty & /*plotarea*/ 2) input_changes.plotarea = /*plotarea*/ ctx[1];
-			if (dirty & /*originalContainer*/ 1) input_changes.originalContainer = /*originalContainer*/ ctx[0];
+			if (dirty[0] & /*plotarea*/ 2) input_changes.plotarea = /*plotarea*/ ctx[1];
+			if (dirty[0] & /*originalContainer*/ 1) input_changes.originalContainer = /*originalContainer*/ ctx[0];
 			input.$set(input_changes);
 		},
 		i: function intro(local) {
@@ -24552,6 +24546,7 @@ function create_fragment$8(ctx) {
 		d: function destroy(detaching) {
 			if (if_block) if_block.d(detaching);
 			if (detaching) detach_dev(t);
+			/*input_binding*/ ctx[38](null);
 			destroy_component(input, detaching);
 		}
 	};
@@ -24569,23 +24564,67 @@ function create_fragment$8(ctx) {
 
 function instance$8($$self, $$props, $$invalidate) {
 	let $selectedUnix;
+	let $viewUnix;
 	let $config;
 	let $dateObject;
-	let $viewUnix;
 	let $privateViewModeDerived;
 	validate_store(selectedUnix, "selectedUnix");
-	component_subscribe($$self, selectedUnix, $$value => $$invalidate(3, $selectedUnix = $$value));
-	validate_store(config, "config");
-	component_subscribe($$self, config, $$value => $$invalidate(4, $config = $$value));
-	validate_store(dateObject, "dateObject");
-	component_subscribe($$self, dateObject, $$value => $$invalidate(24, $dateObject = $$value));
+	component_subscribe($$self, selectedUnix, $$value => $$invalidate(4, $selectedUnix = $$value));
 	validate_store(viewUnix, "viewUnix");
 	component_subscribe($$self, viewUnix, $$value => $$invalidate(5, $viewUnix = $$value));
+	validate_store(config, "config");
+	component_subscribe($$self, config, $$value => $$invalidate(6, $config = $$value));
+	validate_store(dateObject, "dateObject");
+	component_subscribe($$self, dateObject, $$value => $$invalidate(34, $dateObject = $$value));
 	validate_store(privateViewModeDerived, "privateViewModeDerived");
-	component_subscribe($$self, privateViewModeDerived, $$value => $$invalidate(6, $privateViewModeDerived = $$value));
+	component_subscribe($$self, privateViewModeDerived, $$value => $$invalidate(7, $privateViewModeDerived = $$value));
+	let plotarea;
+	let inputComp;
+	let isVisbile = false;
 	let { options = {} } = $$props;
 	let { originalContainer = null } = $$props;
 	let { model = null } = $$props;
+	let { model3 = null } = $$props;
+
+	let { setDate = function (unix) {
+		dispatcher("setDate")(unix);
+	} } = $$props;
+
+	let { show = function () {
+		setvisibility({ detail: true });
+	} } = $$props;
+
+	let { hide = function () {
+		setvisibility({ detail: false });
+	} } = $$props;
+
+	let { toggle = function () {
+		setvisibility({ detail: !isVisbile });
+	} } = $$props;
+
+	let { destroy = function () {
+		if (plotarea.parentNode) {
+			plotarea.parentNode.removeChild(plotarea);
+		}
+	} } = $$props;
+
+	let { getState = function () {
+		return {
+			selected: $selectedUnix,
+			view: $viewUnix,
+			config: $config,
+			dateObject: $dateObject
+		};
+	} } = $$props;
+
+	let { setOptions = function (newOptions) {
+		dispatcher("setConfig")(lodash.merge($config, newOptions));
+	} } = $$props;
+
+	let { getOptions = function (newOptions) {
+		return $config;
+	} } = $$props;
+
 	const dispatch = createEventDispatcher();
 
 	// Handle global event and store events
@@ -24621,27 +24660,28 @@ function instance$8($$self, $$props, $$invalidate) {
 		cashedSelectedDate = parseInt(model);
 	}
 
-	let plotarea;
-	let isVisbile = false;
-
 	// Methods that would called by component events
 	const setvisibility = function (payload) {
-		$$invalidate(2, isVisbile = payload.detail);
+		$$invalidate(3, isVisbile = payload.detail);
+
+		if (inputComp) {
+			inputComp.setPlotPostion();
+		}
 
 		setTimeout(
 			() => {
 				if (plotarea) {
 					$$invalidate(1, plotarea.style.display = isVisbile ? "block" : "none", plotarea);
 				}
-			},
-			0
-		);
 
-		if (isVisbile) {
-			$config.onShow();
-		} else {
-			$config.onHide();
-		}
+				if (isVisbile) {
+					$config.onShow();
+				} else {
+					$config.onHide();
+				}
+			},
+			150
+		);
 	};
 
 	if ($config.inline) {
@@ -24721,7 +24761,20 @@ function instance$8($$self, $$props, $$invalidate) {
 		}
 	};
 
-	const writable_props = ["options", "originalContainer", "model"];
+	const writable_props = [
+		"options",
+		"originalContainer",
+		"model",
+		"model3",
+		"setDate",
+		"show",
+		"hide",
+		"toggle",
+		"destroy",
+		"getState",
+		"setOptions",
+		"getOptions"
+	];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -24736,10 +24789,25 @@ function instance$8($$self, $$props, $$invalidate) {
 		});
 	}
 
+	function input_binding($$value) {
+		binding_callbacks[$$value ? "unshift" : "push"](() => {
+			$$invalidate(2, inputComp = $$value);
+		});
+	}
+
 	$$self.$set = $$props => {
-		if ("options" in $$props) $$invalidate(20, options = $$props.options);
+		if ("options" in $$props) $$invalidate(21, options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
-		if ("model" in $$props) $$invalidate(21, model = $$props.model);
+		if ("model" in $$props) $$invalidate(22, model = $$props.model);
+		if ("model3" in $$props) $$invalidate(23, model3 = $$props.model3);
+		if ("setDate" in $$props) $$invalidate(24, setDate = $$props.setDate);
+		if ("show" in $$props) $$invalidate(25, show = $$props.show);
+		if ("hide" in $$props) $$invalidate(26, hide = $$props.hide);
+		if ("toggle" in $$props) $$invalidate(27, toggle = $$props.toggle);
+		if ("destroy" in $$props) $$invalidate(28, destroy = $$props.destroy);
+		if ("getState" in $$props) $$invalidate(29, getState = $$props.getState);
+		if ("setOptions" in $$props) $$invalidate(30, setOptions = $$props.setOptions);
+		if ("getOptions" in $$props) $$invalidate(31, getOptions = $$props.getOptions);
 	};
 
 	$$self.$capture_state = () => ({
@@ -24761,15 +24829,25 @@ function instance$8($$self, $$props, $$invalidate) {
 		dateObject,
 		createEventDispatcher,
 		lodash,
+		plotarea,
+		inputComp,
+		isVisbile,
 		options,
 		originalContainer,
 		model,
+		model3,
+		setDate,
+		show,
+		hide,
+		toggle,
+		destroy,
+		getState,
+		setOptions,
+		getOptions,
 		dispatch,
 		dispatcher,
 		cashedoptions,
 		cashedSelectedDate,
-		plotarea,
-		isVisbile,
 		setvisibility,
 		setInitialValue,
 		setViewMode,
@@ -24784,20 +24862,30 @@ function instance$8($$self, $$props, $$invalidate) {
 		setViewModeToUpperAvailableLevel,
 		handleWheel,
 		$selectedUnix,
+		$viewUnix,
 		$config,
 		$dateObject,
-		$viewUnix,
 		$privateViewModeDerived
 	});
 
 	$$self.$inject_state = $$props => {
-		if ("options" in $$props) $$invalidate(20, options = $$props.options);
-		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
-		if ("model" in $$props) $$invalidate(21, model = $$props.model);
-		if ("cashedoptions" in $$props) $$invalidate(22, cashedoptions = $$props.cashedoptions);
-		if ("cashedSelectedDate" in $$props) $$invalidate(23, cashedSelectedDate = $$props.cashedSelectedDate);
 		if ("plotarea" in $$props) $$invalidate(1, plotarea = $$props.plotarea);
-		if ("isVisbile" in $$props) $$invalidate(2, isVisbile = $$props.isVisbile);
+		if ("inputComp" in $$props) $$invalidate(2, inputComp = $$props.inputComp);
+		if ("isVisbile" in $$props) $$invalidate(3, isVisbile = $$props.isVisbile);
+		if ("options" in $$props) $$invalidate(21, options = $$props.options);
+		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
+		if ("model" in $$props) $$invalidate(22, model = $$props.model);
+		if ("model3" in $$props) $$invalidate(23, model3 = $$props.model3);
+		if ("setDate" in $$props) $$invalidate(24, setDate = $$props.setDate);
+		if ("show" in $$props) $$invalidate(25, show = $$props.show);
+		if ("hide" in $$props) $$invalidate(26, hide = $$props.hide);
+		if ("toggle" in $$props) $$invalidate(27, toggle = $$props.toggle);
+		if ("destroy" in $$props) $$invalidate(28, destroy = $$props.destroy);
+		if ("getState" in $$props) $$invalidate(29, getState = $$props.getState);
+		if ("setOptions" in $$props) $$invalidate(30, setOptions = $$props.setOptions);
+		if ("getOptions" in $$props) $$invalidate(31, getOptions = $$props.getOptions);
+		if ("cashedoptions" in $$props) $$invalidate(32, cashedoptions = $$props.cashedoptions);
+		if ("cashedSelectedDate" in $$props) $$invalidate(33, cashedSelectedDate = $$props.cashedSelectedDate);
 	};
 
 	if ($$props && "$$inject" in $$props) {
@@ -24805,31 +24893,31 @@ function instance$8($$self, $$props, $$invalidate) {
 	}
 
 	$$self.$$.update = () => {
-		if ($$self.$$.dirty & /*cashedoptions, options*/ 5242880) {
+		if ($$self.$$.dirty[0] & /*options*/ 2097152 | $$self.$$.dirty[1] & /*cashedoptions*/ 2) {
 			 {
 				if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
 					if (!options) {
-						$$invalidate(20, options = defaultconfig);
+						$$invalidate(21, options = defaultconfig);
 					} else {
-						$$invalidate(20, options = lodash.merge(defaultconfig, options));
+						$$invalidate(21, options = lodash.merge(defaultconfig, options));
 					}
 
 					dispatcher("setConfig")(options);
-					$$invalidate(22, cashedoptions = options);
+					$$invalidate(32, cashedoptions = options);
 				}
 			}
 		}
 
-		if ($$self.$$.dirty & /*model, cashedSelectedDate, $selectedUnix*/ 10485768) {
+		if ($$self.$$.dirty[0] & /*model, $selectedUnix*/ 4194320 | $$self.$$.dirty[1] & /*cashedSelectedDate*/ 4) {
 			 {
 				if (model && model !== cashedSelectedDate) {
 					dispatcher("setDate")(parseInt(model));
-					$$invalidate(23, cashedSelectedDate = $selectedUnix);
+					$$invalidate(33, cashedSelectedDate = $selectedUnix);
 				}
 			}
 		}
 
-		if ($$self.$$.dirty & /*$config, $selectedUnix, $dateObject*/ 16777240) {
+		if ($$self.$$.dirty[0] & /*$config, $selectedUnix*/ 80 | $$self.$$.dirty[1] & /*$dateObject*/ 8) {
 			 {
 				dispatcher("onSelect")($config.altFieldFormatter($selectedUnix, $dateObject));
 			}
@@ -24839,10 +24927,11 @@ function instance$8($$self, $$props, $$invalidate) {
 	return [
 		originalContainer,
 		plotarea,
+		inputComp,
 		isVisbile,
 		$selectedUnix,
-		$config,
 		$viewUnix,
+		$config,
 		$privateViewModeDerived,
 		setvisibility,
 		setInitialValue,
@@ -24859,12 +24948,22 @@ function instance$8($$self, $$props, $$invalidate) {
 		handleWheel,
 		options,
 		model,
+		model3,
+		setDate,
+		show,
+		hide,
+		toggle,
+		destroy,
+		getState,
+		setOptions,
+		getOptions,
 		cashedoptions,
 		cashedSelectedDate,
 		$dateObject,
 		dispatch,
 		dispatcher,
-		div1_binding
+		div1_binding,
+		input_binding
 	];
 }
 
@@ -24872,11 +24971,28 @@ class App extends SvelteComponentDev {
 	constructor(options) {
 		super(options);
 
-		init(this, options, instance$8, create_fragment$8, safe_not_equal, {
-			options: 20,
-			originalContainer: 0,
-			model: 21
-		});
+		init(
+			this,
+			options,
+			instance$8,
+			create_fragment$8,
+			not_equal,
+			{
+				options: 21,
+				originalContainer: 0,
+				model: 22,
+				model3: 23,
+				setDate: 24,
+				show: 25,
+				hide: 26,
+				toggle: 27,
+				destroy: 28,
+				getState: 29,
+				setOptions: 30,
+				getOptions: 31
+			},
+			[-1, -1]
+		);
 
 		dispatch_dev("SvelteRegisterComponent", {
 			component: this,
@@ -24887,27 +25003,111 @@ class App extends SvelteComponentDev {
 	}
 
 	get options() {
-		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx[21];
 	}
 
-	set options(value) {
-		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set options(options) {
+		this.$set({ options });
+		flush();
 	}
 
 	get originalContainer() {
-		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx[0];
 	}
 
-	set originalContainer(value) {
-		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set originalContainer(originalContainer) {
+		this.$set({ originalContainer });
+		flush();
 	}
 
 	get model() {
-		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx[22];
 	}
 
-	set model(value) {
-		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set model(model) {
+		this.$set({ model });
+		flush();
+	}
+
+	get model3() {
+		return this.$$.ctx[23];
+	}
+
+	set model3(model3) {
+		this.$set({ model3 });
+		flush();
+	}
+
+	get setDate() {
+		return this.$$.ctx[24];
+	}
+
+	set setDate(setDate) {
+		this.$set({ setDate });
+		flush();
+	}
+
+	get show() {
+		return this.$$.ctx[25];
+	}
+
+	set show(show) {
+		this.$set({ show });
+		flush();
+	}
+
+	get hide() {
+		return this.$$.ctx[26];
+	}
+
+	set hide(hide) {
+		this.$set({ hide });
+		flush();
+	}
+
+	get toggle() {
+		return this.$$.ctx[27];
+	}
+
+	set toggle(toggle) {
+		this.$set({ toggle });
+		flush();
+	}
+
+	get destroy() {
+		return this.$$.ctx[28];
+	}
+
+	set destroy(destroy) {
+		this.$set({ destroy });
+		flush();
+	}
+
+	get getState() {
+		return this.$$.ctx[29];
+	}
+
+	set getState(getState) {
+		this.$set({ getState });
+		flush();
+	}
+
+	get setOptions() {
+		return this.$$.ctx[30];
+	}
+
+	set setOptions(setOptions) {
+		this.$set({ setOptions });
+		flush();
+	}
+
+	get getOptions() {
+		return this.$$.ctx[31];
+	}
+
+	set getOptions(getOptions) {
+		this.$set({ getOptions });
+		flush();
 	}
 }
 

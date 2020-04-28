@@ -114,7 +114,7 @@
       initialValue: false,  // DONE
       initialValueType: 'persian', // Works but deprecated in next version
       persianDigit: true, // Deprected
-      viewMode: 'month', // DONE
+      viewMode: 'year', // DONE
       format: 'LLLL', // DONE
       formatter (unixDate, dateObject) {
         return new dateObject(unixDate).format(this.format);
@@ -125,9 +125,6 @@
         //console.log('user config alt formmater funciton')
         if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
           return new Date(unixDate)
-        }
-        else if (this.altFormat === 'unix' || this.altFormat === 'u') {
-          return new dateObject(unixDate).valueOf();
         } else {
           return new dateObject(unixDate).format(this.altFormat);
         }
@@ -275,7 +272,24 @@
       onSet: function (unixDate) { console.log('user event onSet') },
       onDestroy: function (unixDate) { console.log('user event onDestroy') }
     }
-    zerounip(container, options)
+    window.datepicker = zerounip(container, options)
+    // Check the datepicker instance
+    console.log("Datepicker Instance")
+    console.log(datepicker)
+    // Check API
+    // Test setDate, set selected date to 5 days after today
+    datepicker.setDate(new Date().valueOf() + (86400000 * 5))
+    // This will auto update datepicker
+    // New in 2.0.0
+    datepicker.setOptions({
+      calendarType: 'gregorian',
+      viewMode: 'day'
+    })
+    // New in 2.0.0
+    console.log("Datepicker Instance Options")
+    console.log(datepicker.getOptions())
+    console.log(datepicker.getState())
+    datepicker.show()
   </script>
 </body>
 </html>
