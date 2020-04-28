@@ -46,6 +46,7 @@ export default{
       container = this.$refs.container
       props.originalContainer = mainElement
     }
+    props.model = this.value
     this.comp = new SvelteApp({
       target: container,
       props: props

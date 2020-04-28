@@ -21,6 +21,7 @@ export const currentCalendar = writable('persian') // [persian, gregorian]
 
 export const actions = {
   setDate (unix) {
+    this.updateIsDirty(true)
     viewUnix.set(unix)
     selectedUnix.set(unix)
   },
@@ -168,7 +169,6 @@ export const actions = {
     privateViewModeDerived.set(mode)
   },
   setViewModeToUpperAvailableLevel() {
-    console.log('setViewModeToUpperAvailableLevel')
     let currentViewMode = get(privateViewModeDerived)
     let $config = get(config)
     if (currentViewMode === 'time') {

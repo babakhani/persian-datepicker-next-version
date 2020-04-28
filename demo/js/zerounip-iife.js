@@ -18896,6 +18896,7 @@ this.zerounip = (function () {
 
     const actions = {
       setDate (unix) {
+        this.updateIsDirty(true);
         viewUnix.set(unix);
         selectedUnix.set(unix);
       },
@@ -19043,7 +19044,6 @@ this.zerounip = (function () {
         privateViewModeDerived.set(mode);
       },
       setViewModeToUpperAvailableLevel() {
-        console.log('setViewModeToUpperAvailableLevel');
         let currentViewMode = get_store_value(privateViewModeDerived);
         let $config = get_store_value(config);
         if (currentViewMode === 'time') {
@@ -24238,6 +24238,12 @@ this.zerounip = (function () {
 
     	dispatcher("setConfig")(options);
     	let cashedSelectedDate = $selectedUnix;
+
+    	if (model) {
+    		dispatcher("setDate")(parseInt(model));
+    		$$invalidate("cashedSelectedDate", cashedSelectedDate = parseInt(model));
+    	}
+
     	let plotarea;
     	let isVisbile = false;
 

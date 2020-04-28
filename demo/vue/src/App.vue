@@ -54,7 +54,8 @@
           help="position of datepicker element relative to input element, accept auto, [x,y]"
           :options="[
             {label: 'auto', value: 'auto'},
-            {label: 'Offset 10', value: [10, 10]},
+            {label: 'Offset 20', value: [20, 20]},
+            {label: 'Offset -20', value: [-20, -20]},
           ]"
           v-model="datepickerConfig.position"/>
         <ConfigText

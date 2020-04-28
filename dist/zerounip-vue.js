@@ -18895,6 +18895,7 @@ const dateObject = writable(persianDate);
 
 const actions = {
   setDate (unix) {
+    this.updateIsDirty(true);
     viewUnix.set(unix);
     selectedUnix.set(unix);
   },
@@ -19042,7 +19043,6 @@ const actions = {
     privateViewModeDerived.set(mode);
   },
   setViewModeToUpperAvailableLevel() {
-    console.log('setViewModeToUpperAvailableLevel');
     let currentViewMode = get_store_value(privateViewModeDerived);
     let $config = get_store_value(config);
     if (currentViewMode === 'time') {
@@ -24237,6 +24237,12 @@ function instance$8($$self, $$props, $$invalidate) {
 
 	dispatcher("setConfig")(options);
 	let cashedSelectedDate = $selectedUnix;
+
+	if (model) {
+		dispatcher("setDate")(parseInt(model));
+		$$invalidate("cashedSelectedDate", cashedSelectedDate = parseInt(model));
+	}
+
 	let plotarea;
 	let isVisbile = false;
 
@@ -24535,6 +24541,7 @@ var pluginVue = {
       container = this.$refs.container;
       props.originalContainer = mainElement;
     }
+    props.model = this.value;
     this.comp = new App({
       target: container,
       props: props

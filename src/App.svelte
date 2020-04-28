@@ -134,6 +134,10 @@ originalContainer={originalContainer} />
  
 	// Update DAtepicker Via from reactivity models, like v-model
 	let cashedSelectedDate = $selectedUnix
+	if (model) {
+		dispatcher('setDate')(parseInt(model))
+		cashedSelectedDate = parseInt(model)
+	}
 	$: {
 		if (model && model !== cashedSelectedDate) {
 			dispatcher('setDate')(parseInt(model))
