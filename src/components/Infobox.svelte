@@ -45,7 +45,7 @@
 	$: selectedDAte = $config.infobox.selectedDateFormatter(selectedUnix, $dateObject)
 
 	let visible
-	let animateSpeed = 100
+	let animateSpeed = $config.animateSpeed
 	let cachedSelectedUnix = viewUnix
 	let transitionDirectionForward = true
 	$: if (selectedDAte){
@@ -55,10 +55,12 @@
 			transitionDirectionForward = false
 		}
 		cachedSelectedUnix = selectedUnix
-		visible = false
-		setTimeout(() => {
-			visible = true
-		}, 200)
+		if ($config.animate) {
+			visible = false
+			setTimeout(() => {
+				visible = true
+			}, animateSpeed*2)
+		}
 	}
 </script>
 

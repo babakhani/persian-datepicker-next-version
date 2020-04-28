@@ -934,6 +934,12 @@ let Helper = {
  * @description persian-datepicker configuration document
  */
 var defaultconfig = {
+     
+     /**
+      * @since 2.0.0
+      */
+    'animate': true,
+    'animateSpeed': 80,
 
 
     /**
@@ -19496,7 +19502,7 @@ function instance($$self, $$props, $$invalidate) {
 	let yearRange;
 	let startYear;
 	let visible = true;
-	let animateSpeed = 100;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["selectedUnix", "viewUnix"];
@@ -19569,7 +19575,7 @@ function instance($$self, $$props, $$invalidate) {
 			 $$invalidate(15, currentViewYear = new $dateObject(viewUnix).year());
 		}
 
-		if ($$self.$$.dirty & /*currentViewYear, yearRange, startYear, viewUnix, cachedViewUnix*/ 36353) {
+		if ($$self.$$.dirty & /*currentViewYear, yearRange, startYear, viewUnix, cachedViewUnix, $config*/ 44545) {
 			 {
 				$$invalidate(0, yearRange = []);
 				$$invalidate(10, startYear = currentViewYear - currentViewYear % 12);
@@ -19587,14 +19593,17 @@ function instance($$self, $$props, $$invalidate) {
 				}
 
 				$$invalidate(11, cachedViewUnix = viewUnix);
-				$$invalidate(1, visible = false);
 
-				setTimeout(
-					() => {
-						$$invalidate(1, visible = true);
-					},
-					200
-				);
+				if ($config.animate) {
+					$$invalidate(1, visible = false);
+
+					setTimeout(
+						() => {
+							$$invalidate(1, visible = true);
+						},
+						animateSpeed * 2
+					);
+				}
 			}
 		}
 	};
@@ -19975,7 +19984,7 @@ function instance$1($$self, $$props, $$invalidate) {
 	}
 
 	let visible = true;
-	let animateSpeed = 100;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["selectedUnix", "viewUnix"];
@@ -20058,7 +20067,7 @@ function instance$1($$self, $$props, $$invalidate) {
 			 $$invalidate(4, currentViewYear = new $dateObject(viewUnix).year());
 		}
 
-		if ($$self.$$.dirty & /*viewUnix, cachedViewUnix*/ 6144) {
+		if ($$self.$$.dirty & /*viewUnix, cachedViewUnix, $config*/ 22528) {
 			 {
 				if (viewUnix > cachedViewUnix) {
 					transitionDirectionForward = true;
@@ -20067,14 +20076,17 @@ function instance$1($$self, $$props, $$invalidate) {
 				}
 
 				$$invalidate(12, cachedViewUnix = viewUnix);
-				$$invalidate(0, visible = false);
 
-				setTimeout(
-					() => {
-						$$invalidate(0, visible = true);
-					},
-					200
-				);
+				if ($config.animate) {
+					$$invalidate(0, visible = false);
+
+					setTimeout(
+						() => {
+							$$invalidate(0, visible = true);
+						},
+						animateSpeed * 2
+					);
+				}
 			}
 		}
 	};
@@ -20857,7 +20869,7 @@ function instance$2($$self, $$props, $$invalidate) {
 
 	let groupedDay = [];
 	let visible = true;
-	let animateSpeed = 200;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
 	let animateTimer = null;
@@ -21004,7 +21016,7 @@ function instance$2($$self, $$props, $$invalidate) {
 					transitionDirectionForward = false;
 				}
 
-				if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
+				if ($config.animate && new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
 					$$invalidate(1, visible = false);
 					clearTimeout(animateTimer);
 
@@ -21012,7 +21024,7 @@ function instance$2($$self, $$props, $$invalidate) {
 						() => {
 							$$invalidate(1, visible = true);
 						},
-						250
+						animateSpeed * 2
 					));
 				}
 
@@ -22318,7 +22330,7 @@ function instance$4($$self, $$props, $$invalidate) {
 
 	let startYear;
 	let visible = true;
-	let animateSpeed = 200;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["viewUnix", "viewMode"];
@@ -22432,7 +22444,7 @@ function instance$4($$self, $$props, $$invalidate) {
 			 yearViewText = $config.yearPicker.titleFormatter(viewUnix, $dateObject);
 		}
 
-		if ($$self.$$.dirty & /*viewUnix, selectedYear, cachedViewUnix*/ 45056) {
+		if ($$self.$$.dirty & /*viewUnix, selectedYear, cachedViewUnix, $config*/ 1093632) {
 			 {
 				if (viewUnix) {
 					$$invalidate(1, startYear = selectedYear - selectedYear % 12);
@@ -22444,14 +22456,17 @@ function instance$4($$self, $$props, $$invalidate) {
 					}
 
 					$$invalidate(13, cachedViewUnix = viewUnix);
-					$$invalidate(2, visible = false);
 
-					setTimeout(
-						() => {
-							$$invalidate(2, visible = true);
-						},
-						400
-					);
+					if ($config.animate) {
+						$$invalidate(2, visible = false);
+
+						setTimeout(
+							() => {
+								$$invalidate(2, visible = true);
+							},
+							animateSpeed * 2
+						);
+					}
 				}
 			}
 		}
@@ -22715,7 +22730,7 @@ function instance$5($$self, $$props, $$invalidate) {
 	let { selectedUnix } = $$props;
 	let oldotherPart;
 	let visible;
-	let animateSpeed = 100;
+	let animateSpeed = $config.animateSpeed;
 	let cachedSelectedUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["viewUnix", "selectedUnix"];
@@ -22778,7 +22793,7 @@ function instance$5($$self, $$props, $$invalidate) {
 			 $$invalidate(2, selectedDAte = $config.infobox.selectedDateFormatter(selectedUnix, $dateObject));
 		}
 
-		if ($$self.$$.dirty & /*selectedDAte, selectedUnix, cachedSelectedUnix*/ 388) {
+		if ($$self.$$.dirty & /*selectedDAte, selectedUnix, cachedSelectedUnix, $config*/ 1412) {
 			 if (selectedDAte) {
 				if (selectedUnix > cachedSelectedUnix) {
 					transitionDirectionForward = true;
@@ -22787,14 +22802,17 @@ function instance$5($$self, $$props, $$invalidate) {
 				}
 
 				$$invalidate(8, cachedSelectedUnix = selectedUnix);
-				$$invalidate(0, visible = false);
 
-				setTimeout(
-					() => {
-						$$invalidate(0, visible = true);
-					},
-					200
-				);
+				if ($config.animate) {
+					$$invalidate(0, visible = false);
+
+					setTimeout(
+						() => {
+							$$invalidate(0, visible = true);
+						},
+						animateSpeed * 2
+					);
+				}
 			}
 		}
 	};

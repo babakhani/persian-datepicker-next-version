@@ -15,6 +15,8 @@
       <Datepicker
         v-model="selectedDate"
         v-if="rerenderFlag"
+        :animate="datepickerConfig.animate"
+        :animateSpeed="datepickerConfig.animateSpeed"
         :viewMode="datepickerConfig.viewMode"
         :inline="datepickerConfig.inline"
         :autoClose="datepickerConfig.autoClose"
@@ -38,6 +40,18 @@
         class="config-area">
         <h3>Settings</h3>
         <h4>General</h4>
+        <ConfigSwitch 
+          label="Animte"
+          v-model="datepickerConfig.animate"/>  
+        <ConfigSelect
+          label="Animate Speed"
+          :options="[
+            {label: '80ms', value: 80},
+            {label: '100ms', value: 100},
+            {label: '200ms', value: 200},
+            {label: '500ms', value: 500},
+          ]"
+          v-model="datepickerConfig.animateSpeed"/>
         <ConfigSelect
           label="View Mode"
           help="Default view mode, Acceptable value : day,month,year"
@@ -262,6 +276,8 @@ export default {
       selectedDate: new Date().valueOf(),
       rerenderFlag: true,
       datepickerConfig: {
+        animate: true,
+        animateSpeed: 80,
         calendarType: 'persian', // DONE
         calendar: {
           persian: {

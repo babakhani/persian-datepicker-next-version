@@ -138,7 +138,7 @@
 	$: today = new $dateObject(todayUnix)
 	$: currentViewMonth = new $dateObject(viewUnix).month()
 	let visible = true
-	let animateSpeed = 200
+	let animateSpeed = $config.animateSpeed
 	let cachedViewUnix = viewUnix
 	let transitionDirectionForward = true
 	let animateTimer = null
@@ -189,12 +189,12 @@
 		} else {
 			transitionDirectionForward = false
 		}
-		if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
+		if ($config.animate && new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
 			visible = false
 			clearTimeout(animateTimer)
 			animateTimer = setTimeout(() => {
 				visible = true 
-			}, 250)
+			}, animateSpeed * 2)
 		}
 		cachedViewUnix = viewUnix
 	}

@@ -7,6 +7,12 @@ let Helper = {
  * @description persian-datepicker configuration document
  */
 export default {
+     
+     /**
+      * @since 2.0.0
+      */
+    'animate': true,
+    'animateSpeed': 80,
 
 
     /**

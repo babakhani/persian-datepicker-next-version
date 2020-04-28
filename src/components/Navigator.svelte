@@ -116,7 +116,7 @@
 
 	let startYear
 	let visible = true
-	let animateSpeed = 200
+	let animateSpeed = $config.animateSpeed
 	let cachedViewUnix = viewUnix
 	let transitionDirectionForward = true
 	$: {
@@ -128,10 +128,12 @@
 				transitionDirectionForward = false
 			}
 			cachedViewUnix = viewUnix
-			visible = false
-			setTimeout(() => {
-				visible = true 
-			}, 400)
+			if ($config.animate) {
+				visible = false
+				setTimeout(() => {
+					visible = true 
+				}, animateSpeed * 2)
+			}
 		}
 	}
 </script>

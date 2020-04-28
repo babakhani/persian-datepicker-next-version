@@ -935,6 +935,12 @@ this.zerounip = (function () {
      * @description persian-datepicker configuration document
      */
     var defaultconfig = {
+         
+         /**
+          * @since 2.0.0
+          */
+        'animate': true,
+        'animateSpeed': 80,
 
 
         /**
@@ -19497,7 +19503,7 @@ this.zerounip = (function () {
     	let yearRange;
     	let startYear;
     	let visible = true;
-    	let animateSpeed = 100;
+    	let animateSpeed = $config.animateSpeed;
     	let cachedViewUnix = viewUnix;
     	let transitionDirectionForward = true;
     	const writable_props = ["selectedUnix", "viewUnix"];
@@ -19570,7 +19576,7 @@ this.zerounip = (function () {
     			 $$invalidate(15, currentViewYear = new $dateObject(viewUnix).year());
     		}
 
-    		if ($$self.$$.dirty & /*currentViewYear, yearRange, startYear, viewUnix, cachedViewUnix*/ 36353) {
+    		if ($$self.$$.dirty & /*currentViewYear, yearRange, startYear, viewUnix, cachedViewUnix, $config*/ 44545) {
     			 {
     				$$invalidate(0, yearRange = []);
     				$$invalidate(10, startYear = currentViewYear - currentViewYear % 12);
@@ -19588,14 +19594,17 @@ this.zerounip = (function () {
     				}
 
     				$$invalidate(11, cachedViewUnix = viewUnix);
-    				$$invalidate(1, visible = false);
 
-    				setTimeout(
-    					() => {
-    						$$invalidate(1, visible = true);
-    					},
-    					200
-    				);
+    				if ($config.animate) {
+    					$$invalidate(1, visible = false);
+
+    					setTimeout(
+    						() => {
+    							$$invalidate(1, visible = true);
+    						},
+    						animateSpeed * 2
+    					);
+    				}
     			}
     		}
     	};
@@ -19976,7 +19985,7 @@ this.zerounip = (function () {
     	}
 
     	let visible = true;
-    	let animateSpeed = 100;
+    	let animateSpeed = $config.animateSpeed;
     	let cachedViewUnix = viewUnix;
     	let transitionDirectionForward = true;
     	const writable_props = ["selectedUnix", "viewUnix"];
@@ -20059,7 +20068,7 @@ this.zerounip = (function () {
     			 $$invalidate(4, currentViewYear = new $dateObject(viewUnix).year());
     		}
 
-    		if ($$self.$$.dirty & /*viewUnix, cachedViewUnix*/ 6144) {
+    		if ($$self.$$.dirty & /*viewUnix, cachedViewUnix, $config*/ 22528) {
     			 {
     				if (viewUnix > cachedViewUnix) {
     					transitionDirectionForward = true;
@@ -20068,14 +20077,17 @@ this.zerounip = (function () {
     				}
 
     				$$invalidate(12, cachedViewUnix = viewUnix);
-    				$$invalidate(0, visible = false);
 
-    				setTimeout(
-    					() => {
-    						$$invalidate(0, visible = true);
-    					},
-    					200
-    				);
+    				if ($config.animate) {
+    					$$invalidate(0, visible = false);
+
+    					setTimeout(
+    						() => {
+    							$$invalidate(0, visible = true);
+    						},
+    						animateSpeed * 2
+    					);
+    				}
     			}
     		}
     	};
@@ -20858,7 +20870,7 @@ this.zerounip = (function () {
 
     	let groupedDay = [];
     	let visible = true;
-    	let animateSpeed = 200;
+    	let animateSpeed = $config.animateSpeed;
     	let cachedViewUnix = viewUnix;
     	let transitionDirectionForward = true;
     	let animateTimer = null;
@@ -21005,7 +21017,7 @@ this.zerounip = (function () {
     					transitionDirectionForward = false;
     				}
 
-    				if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
+    				if ($config.animate && new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
     					$$invalidate(1, visible = false);
     					clearTimeout(animateTimer);
 
@@ -21013,7 +21025,7 @@ this.zerounip = (function () {
     						() => {
     							$$invalidate(1, visible = true);
     						},
-    						250
+    						animateSpeed * 2
     					));
     				}
 
@@ -22319,7 +22331,7 @@ this.zerounip = (function () {
 
     	let startYear;
     	let visible = true;
-    	let animateSpeed = 200;
+    	let animateSpeed = $config.animateSpeed;
     	let cachedViewUnix = viewUnix;
     	let transitionDirectionForward = true;
     	const writable_props = ["viewUnix", "viewMode"];
@@ -22433,7 +22445,7 @@ this.zerounip = (function () {
     			 yearViewText = $config.yearPicker.titleFormatter(viewUnix, $dateObject);
     		}
 
-    		if ($$self.$$.dirty & /*viewUnix, selectedYear, cachedViewUnix*/ 45056) {
+    		if ($$self.$$.dirty & /*viewUnix, selectedYear, cachedViewUnix, $config*/ 1093632) {
     			 {
     				if (viewUnix) {
     					$$invalidate(1, startYear = selectedYear - selectedYear % 12);
@@ -22445,14 +22457,17 @@ this.zerounip = (function () {
     					}
 
     					$$invalidate(13, cachedViewUnix = viewUnix);
-    					$$invalidate(2, visible = false);
 
-    					setTimeout(
-    						() => {
-    							$$invalidate(2, visible = true);
-    						},
-    						400
-    					);
+    					if ($config.animate) {
+    						$$invalidate(2, visible = false);
+
+    						setTimeout(
+    							() => {
+    								$$invalidate(2, visible = true);
+    							},
+    							animateSpeed * 2
+    						);
+    					}
     				}
     			}
     		}
@@ -22716,7 +22731,7 @@ this.zerounip = (function () {
     	let { selectedUnix } = $$props;
     	let oldotherPart;
     	let visible;
-    	let animateSpeed = 100;
+    	let animateSpeed = $config.animateSpeed;
     	let cachedSelectedUnix = viewUnix;
     	let transitionDirectionForward = true;
     	const writable_props = ["viewUnix", "selectedUnix"];
@@ -22779,7 +22794,7 @@ this.zerounip = (function () {
     			 $$invalidate(2, selectedDAte = $config.infobox.selectedDateFormatter(selectedUnix, $dateObject));
     		}
 
-    		if ($$self.$$.dirty & /*selectedDAte, selectedUnix, cachedSelectedUnix*/ 388) {
+    		if ($$self.$$.dirty & /*selectedDAte, selectedUnix, cachedSelectedUnix, $config*/ 1412) {
     			 if (selectedDAte) {
     				if (selectedUnix > cachedSelectedUnix) {
     					transitionDirectionForward = true;
@@ -22788,14 +22803,17 @@ this.zerounip = (function () {
     				}
 
     				$$invalidate(8, cachedSelectedUnix = selectedUnix);
-    				$$invalidate(0, visible = false);
 
-    				setTimeout(
-    					() => {
-    						$$invalidate(0, visible = true);
-    					},
-    					200
-    				);
+    				if ($config.animate) {
+    					$$invalidate(0, visible = false);
+
+    					setTimeout(
+    						() => {
+    							$$invalidate(0, visible = true);
+    						},
+    						animateSpeed * 2
+    					);
+    				}
     			}
     		}
     	};
