@@ -11,7 +11,7 @@
     <div
       class="demo-box" >
       <h5>{{ selectedDate }}</h5>
-      <input v-model="selectedDate" type="range" min="0" max="1589052600000" step="1000" />
+      <input v-model="selectedDate" type="range" min="0" max="1589052600000" step="10" />
       <Datepicker
         v-model="selectedDate"
         v-if="rerenderFlag"

@@ -18,7 +18,7 @@ export default class PersianDateParser {
         //        return w.charCodeAt(0) - charCodeZero;
         //    });
         //};
-        inputString = inputString //.toEnglishDigits();
+        //inputString = inputString //.toEnglishDigits();
         if (jalaliPat.test(inputString)) {
           /* eslint-disable no-useless-escape */
           persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);

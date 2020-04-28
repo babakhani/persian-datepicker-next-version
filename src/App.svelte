@@ -98,9 +98,6 @@ originalContainer={originalContainer} />
 	export let options = {}
 	export let originalContainer = null
 	export let model = null
-	export let setModel = (date) => {
-     setSelectedDat(date)
-	}
 
 	const dispatch = createEventDispatcher()
 	// Handle global event and store events
@@ -139,14 +136,12 @@ originalContainer={originalContainer} />
 	let cashedSelectedDate = $selectedUnix
 	$: {
 		if (model && model !== cashedSelectedDate) {
-			dispatcher('onSelectDate')(parseInt(model))
+			dispatcher('setDate')(parseInt(model))
 		}
 	}
 
-
 	let plotarea
 	let isVisbile = false
-
 	// Methods that would called by component events
 	const setvisibility = function(payload) {
 		isVisbile = payload.detail
@@ -162,7 +157,6 @@ originalContainer={originalContainer} />
 		}
 	}
 
-	// TODO: develop time
 	if ($config.inline) {
 	  setvisibility({detail: true})
 	}

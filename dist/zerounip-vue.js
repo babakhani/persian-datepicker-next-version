@@ -747,7 +747,7 @@ class PersianDateParser {
         //        return w.charCodeAt(0) - charCodeZero;
         //    });
         //};
-        inputString = inputString; //.toEnglishDigits();
+        //inputString = inputString //.toEnglishDigits();
         if (jalaliPat.test(inputString)) {
           /* eslint-disable no-useless-escape */
           persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);
@@ -18894,6 +18894,10 @@ const dateObject = writable(persianDate);
 
 
 const actions = {
+  setDate (unix) {
+    viewUnix.set(unix);
+    selectedUnix.set(unix);
+  },
   parsInitialValue (inputString) {
     let pd = get_store_value(dateObject);
     let parse = new PersianDateParser();
@@ -24201,11 +24205,6 @@ function instance$8($$self, $$props, $$invalidate) {
 	let { options = {} } = $$props;
 	let { originalContainer = null } = $$props;
 	let { model = null } = $$props;
-
-	let { setModel = date => {
-		setSelectedDat(date);
-	} } = $$props;
-
 	const dispatch = createEventDispatcher();
 
 	const dispatcher = function (input) {
@@ -24333,7 +24332,7 @@ function instance$8($$self, $$props, $$invalidate) {
 		}
 	};
 
-	const writable_props = ["options", "originalContainer", "model", "setModel"];
+	const writable_props = ["options", "originalContainer", "model"];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -24349,7 +24348,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ("options" in $$props) $$invalidate("options", options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
 		if ("model" in $$props) $$invalidate("model", model = $$props.model);
-		if ("setModel" in $$props) $$invalidate("setModel", setModel = $$props.setModel);
 	};
 
 	$$self.$capture_state = () => {
@@ -24357,7 +24355,6 @@ function instance$8($$self, $$props, $$invalidate) {
 			options,
 			originalContainer,
 			model,
-			setModel,
 			cashedoptions,
 			cashedSelectedDate,
 			plotarea,
@@ -24373,7 +24370,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ("options" in $$props) $$invalidate("options", options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
 		if ("model" in $$props) $$invalidate("model", model = $$props.model);
-		if ("setModel" in $$props) $$invalidate("setModel", setModel = $$props.setModel);
 		if ("cashedoptions" in $$props) $$invalidate("cashedoptions", cashedoptions = $$props.cashedoptions);
 		if ("cashedSelectedDate" in $$props) $$invalidate("cashedSelectedDate", cashedSelectedDate = $$props.cashedSelectedDate);
 		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
@@ -24403,7 +24399,7 @@ function instance$8($$self, $$props, $$invalidate) {
 		if (changed.model || changed.cashedSelectedDate) {
 			 {
 				if (model && model !== cashedSelectedDate) {
-					dispatcher("onSelectDate")(parseInt(model));
+					dispatcher("setDate")(parseInt(model));
 				}
 			}
 		}
@@ -24413,7 +24409,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		options,
 		originalContainer,
 		model,
-		setModel,
 		plotarea,
 		isVisbile,
 		setvisibility,
@@ -24444,8 +24439,7 @@ class App extends SvelteComponentDev {
 		init(this, options, instance$8, create_fragment$8, safe_not_equal, {
 			options: 0,
 			originalContainer: 0,
-			model: 0,
-			setModel: 0
+			model: 0
 		});
 
 		dispatch_dev("SvelteRegisterComponent", {
@@ -24477,14 +24471,6 @@ class App extends SvelteComponentDev {
 	}
 
 	set model(value) {
-		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-	}
-
-	get setModel() {
-		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-	}
-
-	set setModel(value) {
 		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
 	}
 }

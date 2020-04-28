@@ -20,6 +20,10 @@ export const currentCalendar = writable('persian') // [persian, gregorian]
 
 
 export const actions = {
+  setDate (unix) {
+    viewUnix.set(unix)
+    selectedUnix.set(unix)
+  },
   parsInitialValue (inputString) {
     let pd = get(dateObject)
     let parse = new PersianDateParser()
