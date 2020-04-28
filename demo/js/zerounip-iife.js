@@ -748,7 +748,7 @@ this.zerounip = (function () {
             //        return w.charCodeAt(0) - charCodeZero;
             //    });
             //};
-            inputString = inputString; //.toEnglishDigits();
+            //inputString = inputString //.toEnglishDigits();
             if (jalaliPat.test(inputString)) {
               /* eslint-disable no-useless-escape */
               persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);
@@ -18895,6 +18895,10 @@ this.zerounip = (function () {
 
 
     const actions = {
+      setDate (unix) {
+        viewUnix.set(unix);
+        selectedUnix.set(unix);
+      },
       parsInitialValue (inputString) {
         let pd = get_store_value(dateObject);
         let parse = new PersianDateParser();
@@ -18986,8 +18990,9 @@ this.zerounip = (function () {
             new pd(get_store_value(viewUnix))
             .month(month)
           );
+        } else {
+          this.setViewModeToLowerAvailableLevel();
         }
-        this.setViewModeToLowerAvailableLevel();
         this.updateIsDirty(true);
       },
       onSelectYear(year) {
@@ -19002,8 +19007,9 @@ this.zerounip = (function () {
             new pd(get_store_value(selectedUnix))
             .year(year)
           );
+        } else {
+          this.setViewModeToLowerAvailableLevel();
         }
-        this.setViewModeToLowerAvailableLevel();
         this.updateIsDirty(true);
       },
       onSetHour(hour) {
@@ -19037,6 +19043,7 @@ this.zerounip = (function () {
         privateViewModeDerived.set(mode);
       },
       setViewModeToUpperAvailableLevel() {
+        console.log('setViewModeToUpperAvailableLevel');
         let currentViewMode = get_store_value(privateViewModeDerived);
         let $config = get_store_value(config);
         if (currentViewMode === 'time') {
@@ -24187,20 +24194,24 @@ this.zerounip = (function () {
     }
 
     function instance$8($$self, $$props, $$invalidate) {
-    	let $config;
-    	let $viewUnix;
     	let $selectedUnix;
+    	let $config;
+    	let $dateObject;
+    	let $viewUnix;
     	let $privateViewModeDerived;
-    	validate_store(config, "config");
-    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
-    	validate_store(viewUnix, "viewUnix");
-    	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
     	validate_store(selectedUnix, "selectedUnix");
     	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
+    	validate_store(config, "config");
+    	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
+    	validate_store(dateObject, "dateObject");
+    	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
+    	validate_store(viewUnix, "viewUnix");
+    	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
     	validate_store(privateViewModeDerived, "privateViewModeDerived");
     	component_subscribe($$self, privateViewModeDerived, $$value => $$invalidate("$privateViewModeDerived", $privateViewModeDerived = $$value));
     	let { options = {} } = $$props;
     	let { originalContainer = null } = $$props;
+    	let { model = null } = $$props;
     	const dispatch = createEventDispatcher();
 
     	const dispatcher = function (input) {
@@ -24226,6 +24237,7 @@ this.zerounip = (function () {
     	}
 
     	dispatcher("setConfig")(options);
+    	let cashedSelectedDate = $selectedUnix;
     	let plotarea;
     	let isVisbile = false;
 
@@ -24272,8 +24284,6 @@ this.zerounip = (function () {
     		if ($config.autoClose) {
     			setvisibility({ detail: false });
     		}
-
-    		dispatcher("onSelect")(event.detail);
     	};
 
     	const onSelectTime = function (event) {
@@ -24327,7 +24337,7 @@ this.zerounip = (function () {
     		}
     	};
 
-    	const writable_props = ["options", "originalContainer"];
+    	const writable_props = ["options", "originalContainer", "model"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -24342,18 +24352,22 @@ this.zerounip = (function () {
     	$$self.$set = $$props => {
     		if ("options" in $$props) $$invalidate("options", options = $$props.options);
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+    		if ("model" in $$props) $$invalidate("model", model = $$props.model);
     	};
 
     	$$self.$capture_state = () => {
     		return {
     			options,
     			originalContainer,
+    			model,
     			cashedoptions,
+    			cashedSelectedDate,
     			plotarea,
     			isVisbile,
-    			$config,
-    			$viewUnix,
     			$selectedUnix,
+    			$config,
+    			$dateObject,
+    			$viewUnix,
     			$privateViewModeDerived
     		};
     	};
@@ -24361,16 +24375,19 @@ this.zerounip = (function () {
     	$$self.$inject_state = $$props => {
     		if ("options" in $$props) $$invalidate("options", options = $$props.options);
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+    		if ("model" in $$props) $$invalidate("model", model = $$props.model);
     		if ("cashedoptions" in $$props) $$invalidate("cashedoptions", cashedoptions = $$props.cashedoptions);
+    		if ("cashedSelectedDate" in $$props) $$invalidate("cashedSelectedDate", cashedSelectedDate = $$props.cashedSelectedDate);
     		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
     		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
-    		if ("$config" in $$props) config.set($config = $$props.$config);
-    		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
     		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
+    		if ("$config" in $$props) config.set($config = $$props.$config);
+    		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
+    		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
     		if ("$privateViewModeDerived" in $$props) privateViewModeDerived.set($privateViewModeDerived = $$props.$privateViewModeDerived);
     	};
 
-    	$$self.$$.update = (changed = { cashedoptions: 1, options: 1 }) => {
+    	$$self.$$.update = (changed = { cashedoptions: 1, options: 1, model: 1, cashedSelectedDate: 1, $selectedUnix: 1, $config: 1, $dateObject: 1 }) => {
     		if (changed.cashedoptions || changed.options) {
     			 {
     				if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
@@ -24385,11 +24402,27 @@ this.zerounip = (function () {
     				}
     			}
     		}
+
+    		if (changed.model || changed.cashedSelectedDate || changed.$selectedUnix) {
+    			 {
+    				if (model && model !== cashedSelectedDate) {
+    					dispatcher("setDate")(parseInt(model));
+    					$$invalidate("cashedSelectedDate", cashedSelectedDate = $selectedUnix);
+    				}
+    			}
+    		}
+
+    		if (changed.$config || changed.$selectedUnix || changed.$dateObject) {
+    			 {
+    				dispatcher("onSelect")($config.altFieldFormatter($selectedUnix, $dateObject));
+    			}
+    		}
     	};
 
     	return {
     		options,
     		originalContainer,
+    		model,
     		plotarea,
     		isVisbile,
     		setvisibility,
@@ -24405,9 +24438,9 @@ this.zerounip = (function () {
     		navPrev,
     		setViewModeToUpperAvailableLevel,
     		handleWheel,
+    		$selectedUnix,
     		$config,
     		$viewUnix,
-    		$selectedUnix,
     		$privateViewModeDerived,
     		div1_binding
     	};
@@ -24416,7 +24449,12 @@ this.zerounip = (function () {
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { options: 0, originalContainer: 0 });
+
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {
+    			options: 0,
+    			originalContainer: 0,
+    			model: 0
+    		});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -24439,6 +24477,14 @@ this.zerounip = (function () {
     	}
 
     	set originalContainer(value) {
+    		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get model() {
+    		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set model(value) {
     		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }

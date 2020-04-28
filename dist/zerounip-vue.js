@@ -18989,8 +18989,9 @@ const actions = {
         new pd(get_store_value(viewUnix))
         .month(month)
       );
+    } else {
+      this.setViewModeToLowerAvailableLevel();
     }
-    this.setViewModeToLowerAvailableLevel();
     this.updateIsDirty(true);
   },
   onSelectYear(year) {
@@ -19005,8 +19006,9 @@ const actions = {
         new pd(get_store_value(selectedUnix))
         .year(year)
       );
+    } else {
+      this.setViewModeToLowerAvailableLevel();
     }
-    this.setViewModeToLowerAvailableLevel();
     this.updateIsDirty(true);
   },
   onSetHour(hour) {
@@ -19040,6 +19042,7 @@ const actions = {
     privateViewModeDerived.set(mode);
   },
   setViewModeToUpperAvailableLevel() {
+    console.log('setViewModeToUpperAvailableLevel');
     let currentViewMode = get_store_value(privateViewModeDerived);
     let $config = get_store_value(config);
     if (currentViewMode === 'time') {
@@ -24192,12 +24195,15 @@ function create_fragment$8(ctx) {
 function instance$8($$self, $$props, $$invalidate) {
 	let $selectedUnix;
 	let $config;
+	let $dateObject;
 	let $viewUnix;
 	let $privateViewModeDerived;
 	validate_store(selectedUnix, "selectedUnix");
 	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
 	validate_store(config, "config");
 	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
+	validate_store(dateObject, "dateObject");
+	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
 	validate_store(viewUnix, "viewUnix");
 	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
 	validate_store(privateViewModeDerived, "privateViewModeDerived");
@@ -24277,8 +24283,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ($config.autoClose) {
 			setvisibility({ detail: false });
 		}
-
-		dispatcher("onSelect")(event.detail);
 	};
 
 	const onSelectTime = function (event) {
@@ -24361,6 +24365,7 @@ function instance$8($$self, $$props, $$invalidate) {
 			isVisbile,
 			$selectedUnix,
 			$config,
+			$dateObject,
 			$viewUnix,
 			$privateViewModeDerived
 		};
@@ -24376,11 +24381,12 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
 		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
 		if ("$config" in $$props) config.set($config = $$props.$config);
+		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
 		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
 		if ("$privateViewModeDerived" in $$props) privateViewModeDerived.set($privateViewModeDerived = $$props.$privateViewModeDerived);
 	};
 
-	$$self.$$.update = (changed = { cashedoptions: 1, options: 1, model: 1, cashedSelectedDate: 1 }) => {
+	$$self.$$.update = (changed = { cashedoptions: 1, options: 1, model: 1, cashedSelectedDate: 1, $selectedUnix: 1, $config: 1, $dateObject: 1 }) => {
 		if (changed.cashedoptions || changed.options) {
 			 {
 				if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
@@ -24396,11 +24402,18 @@ function instance$8($$self, $$props, $$invalidate) {
 			}
 		}
 
-		if (changed.model || changed.cashedSelectedDate) {
+		if (changed.model || changed.cashedSelectedDate || changed.$selectedUnix) {
 			 {
 				if (model && model !== cashedSelectedDate) {
 					dispatcher("setDate")(parseInt(model));
+					$$invalidate("cashedSelectedDate", cashedSelectedDate = $selectedUnix);
 				}
+			}
+		}
+
+		if (changed.$config || changed.$selectedUnix || changed.$dateObject) {
+			 {
+				dispatcher("onSelect")($config.altFieldFormatter($selectedUnix, $dateObject));
 			}
 		}
 	};
@@ -24487,12 +24500,12 @@ var pluginVue = {
           props: { value : this.value}
         })
       ]
-    );
+    )
   },
   data() {
     return {
       comp: null
-    };
+    }
   },
   props: {
     value: {}
@@ -24524,8 +24537,7 @@ var pluginVue = {
     }
     this.comp = new App({
       target: container,
-      props: props,
-      accessors: true
+      props: props
     });
 
     this.comp.$on('onSelect', (e) => {

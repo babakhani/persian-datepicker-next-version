@@ -11,12 +11,12 @@ export default{
           props: { value : this.value}
         })
       ]
-    );
+    )
   },
   data() {
     return {
       comp: null
-    };
+    }
   },
   props: {
     value: {}
@@ -48,47 +48,46 @@ export default{
     }
     this.comp = new SvelteApp({
       target: container,
-      props: props,
-      accessors: true
+      props: props
     })
 
     this.comp.$on('onSelect', (e) => {
       this.$emit('change', e.detail)
       this.$emit('input', e.detail)
-    });
+    })
 
-    let watchers = [];
+    let watchers = []
 
     for (const key in this.$listeners) {
-      this.comp.$on(key, this.$listeners[key]);
-      const watchRe = /watch:([^]+)/;
+      this.comp.$on(key, this.$listeners[key])
+      const watchRe = /watch:([^]+)/
 
-      const watchMatch = key.match(watchRe);
+      const watchMatch = key.match(watchRe)
 
       if (watchMatch && typeof this.$listeners[key] === "function") {
         watchers.push([
           `${watchMatch[1][0].toLowerCase()}${watchMatch[1].slice(1)}`,
           this.$listeners[key]
-        ]);
+        ])
       }
     }
 
     if (watchers.length) {
-      let comp = this.comp;
-      const update = this.comp.$$.update;
+      let comp = this.comp
+      const update = this.comp.$$.update
       this.comp.$$.update = function() {
         watchers.forEach(([name, callback]) => {
-          const index = comp.$$.props[name];
-          callback(comp.$$.ctx[index]);
-        });
-        update.apply(null, arguments);
-      };
+          const index = comp.$$.props[name]
+          callback(comp.$$.ctx[index])
+        })
+        update.apply(null, arguments)
+      }
     }
   },
   updated() {
-    this.comp.$set(this.$attrs);
+    this.comp.$set(this.$attrs)
   },
   destroyed() {
-    this.comp.$destroy();
+    this.comp.$destroy()
   }
 }

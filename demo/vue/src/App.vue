@@ -270,7 +270,7 @@ export default {
           return new dateObject(unixDate).format(this.format);
         }, // DONE
         altField: '#containerAlt',  // DONE
-        altFormat: 'g', // DONE
+        altFormat: 'unix', // DONE
         altFieldFormatter: function (unixDate, dateObject) {
           if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
             return new Date(unixDate)

@@ -115,8 +115,9 @@ export const actions = {
         new pd(get(viewUnix))
         .month(month)
       )
+    } else {
+      this.setViewModeToLowerAvailableLevel()
     }
-    this.setViewModeToLowerAvailableLevel()
     this.updateIsDirty(true)
   },
   onSelectYear(year) {
@@ -131,8 +132,9 @@ export const actions = {
         new pd(get(selectedUnix))
         .year(year)
       )
+    } else {
+      this.setViewModeToLowerAvailableLevel()
     }
-    this.setViewModeToLowerAvailableLevel()
     this.updateIsDirty(true)
   },
   onSetHour(hour) {
@@ -166,6 +168,7 @@ export const actions = {
     privateViewModeDerived.set(mode)
   },
   setViewModeToUpperAvailableLevel() {
+    console.log('setViewModeToUpperAvailableLevel')
     let currentViewMode = get(privateViewModeDerived)
     let $config = get(config)
     if (currentViewMode === 'time') {

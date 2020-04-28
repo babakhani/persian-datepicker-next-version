@@ -90,7 +90,7 @@ originalContainer={originalContainer} />
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
-	import { config, actions, selectedUnix, viewUnix, privateViewModeDerived } from './stores.js'
+	import { config, actions, selectedUnix, viewUnix, privateViewModeDerived, dateObject } from './stores.js'
 	import { createEventDispatcher } from 'svelte'
 	import lodash from 'lodash'
 
@@ -137,6 +137,7 @@ originalContainer={originalContainer} />
 	$: {
 		if (model && model !== cashedSelectedDate) {
 			dispatcher('setDate')(parseInt(model))
+	    cashedSelectedDate = $selectedUnix
 		}
 	}
 
@@ -180,7 +181,6 @@ originalContainer={originalContainer} />
 		if ($config.autoClose)  {
 	    setvisibility({detail: false})
 		}
-		dispatcher('onSelect')(event.detail)
 	}
 
 	const onSelectTime = function(event) {
@@ -229,6 +229,10 @@ originalContainer={originalContainer} />
 				}
 			}, 1)
 		}
+	}
+
+	$: {
+		dispatcher('onSelect')($config.altFieldFormatter($selectedUnix, $dateObject))
 	}
 </script>
 
