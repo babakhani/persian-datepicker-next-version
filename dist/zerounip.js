@@ -21565,192 +21565,8 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
-    // (54:43) 
-    function create_if_block_3$2(ctx) {
-    	let button;
-    	let t0;
-    	let t1;
-    	let t2;
-    	let button_intro;
-    	let button_outro;
-    	let current;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			t0 = text(ctx.selectedMonth);
-    			t1 = space();
-    			t2 = text(ctx.selectedDate);
-    			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 54, 3, 1939);
-    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t0);
-    			append_dev(button, t1);
-    			append_dev(button, t2);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (!current || changed.selectedMonth) set_data_dev(t0, ctx.selectedMonth);
-    			if (!current || changed.selectedDate) set_data_dev(t2, ctx.selectedDate);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			add_render_callback(() => {
-    				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
-    				button_intro.start();
-    			});
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching && button_outro) button_outro.end();
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_3$2.name,
-    		type: "if",
-    		source: "(54:43) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (46:42) 
-    function create_if_block_2$2(ctx) {
-    	let button;
-    	let t;
-    	let button_intro;
-    	let button_outro;
-    	let current;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			t = text(ctx.dateViewText);
-    			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 46, 3, 1669);
-    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (!current || changed.dateViewText) set_data_dev(t, ctx.dateViewText);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			add_render_callback(() => {
-    				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
-    				button_intro.start();
-    			});
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching && button_outro) button_outro.end();
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2$2.name,
-    		type: "if",
-    		source: "(46:42) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (38:44) 
-    function create_if_block_1$2(ctx) {
-    	let button;
-    	let t;
-    	let button_intro;
-    	let button_outro;
-    	let current;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			t = text(ctx.monthViewText);
-    			attr_dev(button, "class", "pwt-date-navigator-button");
-    			add_location(button, file$4, 38, 3, 1411);
-    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t);
-    			current = true;
-    		},
-    		p: function update(changed, ctx) {
-    			if (!current || changed.monthViewText) set_data_dev(t, ctx.monthViewText);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			add_render_callback(() => {
-    				if (button_outro) button_outro.end(1);
-    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
-    				button_intro.start();
-    			});
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			if (button_intro) button_intro.invalidate();
-    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching && button_outro) button_outro.end();
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1$2.name,
-    		type: "if",
-    		source: "(38:44) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
     // (31:2) {#if viewMode === 'year' && visible}
-    function create_if_block$2(ctx) {
+    function create_if_block_3$2(ctx) {
     	let button;
     	let t0;
     	let t1;
@@ -21804,7 +21620,7 @@ this['persian-datepicker-next-version'] = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$2.name,
+    		id: create_if_block_3$2.name,
     		type: "if",
     		source: "(31:2) {#if viewMode === 'year' && visible}",
     		ctx
@@ -21813,36 +21629,217 @@ this['persian-datepicker-next-version'] = (function () {
     	return block;
     }
 
+    // (39:2) {#if viewMode === 'month' && visible}
+    function create_if_block_2$2(ctx) {
+    	let button;
+    	let t;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t = text(ctx.monthViewText);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 39, 3, 1416);
+    			dispose = listen_dev(button, "click", ctx.click_handler, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.monthViewText) set_data_dev(t, ctx.monthViewText);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$2.name,
+    		type: "if",
+    		source: "(39:2) {#if viewMode === 'month' && visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (48:2) {#if viewMode === 'day' && visible}
+    function create_if_block_1$2(ctx) {
+    	let button;
+    	let t;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t = text(ctx.dateViewText);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 48, 3, 1677);
+    			dispose = listen_dev(button, "click", ctx.click_handler_1, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.dateViewText) set_data_dev(t, ctx.dateViewText);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(48:2) {#if viewMode === 'day' && visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (57:3) {#if viewMode === 'time' && visible}
+    function create_if_block$2(ctx) {
+    	let button;
+    	let t0;
+    	let t1;
+    	let t2;
+    	let button_intro;
+    	let button_outro;
+    	let current;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t0 = text(ctx.selectedMonth);
+    			t1 = space();
+    			t2 = text(ctx.selectedDate);
+    			attr_dev(button, "class", "pwt-date-navigator-button");
+    			add_location(button, file$4, 57, 3, 1953);
+    			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    			current = true;
+    		},
+    		p: function update(changed, ctx) {
+    			if (!current || changed.selectedMonth) set_data_dev(t0, ctx.selectedMonth);
+    			if (!current || changed.selectedDate) set_data_dev(t2, ctx.selectedDate);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (button_outro) button_outro.end(1);
+    				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
+    				button_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (button_intro) button_intro.invalidate();
+    			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (detaching && button_outro) button_outro.end();
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$2.name,
+    		type: "if",
+    		source: "(57:3) {#if viewMode === 'time' && visible}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function create_fragment$4(ctx) {
     	let div1;
-    	let t;
+    	let t0;
     	let div0;
-    	let current_block_type_index;
-    	let if_block1;
+    	let t1;
+    	let t2;
+    	let t3;
     	let current;
     	let if_block0 = ctx.viewMode !== "time" && create_if_block_4$1(ctx);
-    	const if_block_creators = [create_if_block$2, create_if_block_1$2, create_if_block_2$2, create_if_block_3$2];
-    	const if_blocks = [];
-
-    	function select_block_type(changed, ctx) {
-    		if (ctx.viewMode === "year" && ctx.visible) return 0;
-    		if (ctx.viewMode === "month" && ctx.visible) return 1;
-    		if (ctx.viewMode === "day" && ctx.visible) return 2;
-    		if (ctx.viewMode === "time" && ctx.visible) return 3;
-    		return -1;
-    	}
-
-    	if (~(current_block_type_index = select_block_type(null, ctx))) {
-    		if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    	}
+    	let if_block1 = ctx.viewMode === "year" && ctx.visible && create_if_block_3$2(ctx);
+    	let if_block2 = ctx.viewMode === "month" && ctx.visible && create_if_block_2$2(ctx);
+    	let if_block3 = ctx.viewMode === "day" && ctx.visible && create_if_block_1$2(ctx);
+    	let if_block4 = ctx.viewMode === "time" && ctx.visible && create_if_block$2(ctx);
 
     	const block = {
     		c: function create() {
     			div1 = element("div");
     			if (if_block0) if_block0.c();
-    			t = space();
+    			t0 = space();
     			div0 = element("div");
     			if (if_block1) if_block1.c();
+    			t1 = space();
+    			if (if_block2) if_block2.c();
+    			t2 = space();
+    			if (if_block3) if_block3.c();
+    			t3 = space();
+    			if (if_block4) if_block4.c();
     			attr_dev(div0, "class", "pwt-date-navigator-center");
     			add_location(div0, file$4, 28, 1, 1093);
     			attr_dev(div1, "class", "pwt-date-navigator");
@@ -21854,13 +21851,15 @@ this['persian-datepicker-next-version'] = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
     			if (if_block0) if_block0.m(div1, null);
-    			append_dev(div1, t);
+    			append_dev(div1, t0);
     			append_dev(div1, div0);
-
-    			if (~current_block_type_index) {
-    				if_blocks[current_block_type_index].m(div0, null);
-    			}
-
+    			if (if_block1) if_block1.m(div0, null);
+    			append_dev(div0, t1);
+    			if (if_block2) if_block2.m(div0, null);
+    			append_dev(div0, t2);
+    			if (if_block3) if_block3.m(div0, null);
+    			append_dev(div0, t3);
+    			if (if_block4) if_block4.m(div0, null);
     			current = true;
     		},
     		p: function update(changed, ctx) {
@@ -21870,62 +21869,115 @@ this['persian-datepicker-next-version'] = (function () {
     				} else {
     					if_block0 = create_if_block_4$1(ctx);
     					if_block0.c();
-    					if_block0.m(div1, t);
+    					if_block0.m(div1, t0);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
     				if_block0 = null;
     			}
 
-    			let previous_block_index = current_block_type_index;
-    			current_block_type_index = select_block_type(changed, ctx);
-
-    			if (current_block_type_index === previous_block_index) {
-    				if (~current_block_type_index) {
-    					if_blocks[current_block_type_index].p(changed, ctx);
-    				}
-    			} else {
+    			if (ctx.viewMode === "year" && ctx.visible) {
     				if (if_block1) {
-    					group_outros();
-
-    					transition_out(if_blocks[previous_block_index], 1, 1, () => {
-    						if_blocks[previous_block_index] = null;
-    					});
-
-    					check_outros();
-    				}
-
-    				if (~current_block_type_index) {
-    					if_block1 = if_blocks[current_block_type_index];
-
-    					if (!if_block1) {
-    						if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    						if_block1.c();
-    					}
-
+    					if_block1.p(changed, ctx);
     					transition_in(if_block1, 1);
-    					if_block1.m(div0, null);
     				} else {
-    					if_block1 = null;
+    					if_block1 = create_if_block_3$2(ctx);
+    					if_block1.c();
+    					transition_in(if_block1, 1);
+    					if_block1.m(div0, t1);
     				}
+    			} else if (if_block1) {
+    				group_outros();
+
+    				transition_out(if_block1, 1, 1, () => {
+    					if_block1 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.viewMode === "month" && ctx.visible) {
+    				if (if_block2) {
+    					if_block2.p(changed, ctx);
+    					transition_in(if_block2, 1);
+    				} else {
+    					if_block2 = create_if_block_2$2(ctx);
+    					if_block2.c();
+    					transition_in(if_block2, 1);
+    					if_block2.m(div0, t2);
+    				}
+    			} else if (if_block2) {
+    				group_outros();
+
+    				transition_out(if_block2, 1, 1, () => {
+    					if_block2 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.viewMode === "day" && ctx.visible) {
+    				if (if_block3) {
+    					if_block3.p(changed, ctx);
+    					transition_in(if_block3, 1);
+    				} else {
+    					if_block3 = create_if_block_1$2(ctx);
+    					if_block3.c();
+    					transition_in(if_block3, 1);
+    					if_block3.m(div0, t3);
+    				}
+    			} else if (if_block3) {
+    				group_outros();
+
+    				transition_out(if_block3, 1, 1, () => {
+    					if_block3 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (ctx.viewMode === "time" && ctx.visible) {
+    				if (if_block4) {
+    					if_block4.p(changed, ctx);
+    					transition_in(if_block4, 1);
+    				} else {
+    					if_block4 = create_if_block$2(ctx);
+    					if_block4.c();
+    					transition_in(if_block4, 1);
+    					if_block4.m(div0, null);
+    				}
+    			} else if (if_block4) {
+    				group_outros();
+
+    				transition_out(if_block4, 1, 1, () => {
+    					if_block4 = null;
+    				});
+
+    				check_outros();
     			}
     		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(if_block1);
+    			transition_in(if_block2);
+    			transition_in(if_block3);
+    			transition_in(if_block4);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(if_block1);
+    			transition_out(if_block2);
+    			transition_out(if_block3);
+    			transition_out(if_block4);
     			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div1);
     			if (if_block0) if_block0.d();
-
-    			if (~current_block_type_index) {
-    				if_blocks[current_block_type_index].d();
-    			}
+    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			if (if_block3) if_block3.d();
+    			if (if_block4) if_block4.d();
     		}
     	};
 
@@ -22106,7 +22158,7 @@ this['persian-datepicker-next-version'] = (function () {
     						() => {
     							$$invalidate("visible", visible = true);
     						},
-    						200
+    						400
     					);
     				}
     			}

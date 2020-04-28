@@ -35,7 +35,8 @@
 				class="pwt-date-navigator-button">
 				{startYear} - {startYear + 11}
 			</button>
-		{:else if viewMode === 'month' && visible}
+    {/if}
+		{#if viewMode === 'month' && visible}
 			<button 
 				out:fadeOut="{{duration: animateSpeed}}" 
 				in:fadeIn="{{duration: animateSpeed}}" 
@@ -43,7 +44,8 @@
 				on:click={() => setViewMode("year")}>
 				{monthViewText}
 			</button>
-		{:else if viewMode === 'day' && visible}
+		{/if}
+		{#if viewMode === 'day' && visible}
 			<button 
 				out:fadeOut="{{duration: animateSpeed}}" 
 				in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
@@ -51,7 +53,8 @@
 				on:click={() => setViewMode("month")}>
 				{dateViewText}
 			</button>
-		{:else if viewMode === 'time' && visible}
+    {/if}
+	  {#if viewMode === 'time' && visible}
 			<button 
 				out:fadeOut="{{duration: animateSpeed}}" 
 				in:fadeIn="{{duration: animateSpeed, delay: 10}}" 
@@ -128,7 +131,7 @@
 			visible = false
 			setTimeout(() => {
 				visible = true 
-			}, 200)
+			}, 400)
 		}
 	}
 </script>
