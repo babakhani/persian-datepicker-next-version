@@ -3,10 +3,9 @@ export default{
   render(createElement) {
     return createElement('div', {
       ref: "container",
-      props: this.$attrs,
     }, 
       [
-        (this.$attrs.options && this.$attrs.options.inline) ? '' : createElement('input', { 
+        (this.$attrs.options && this.$attrs.options.inline) | this.$attrs.inline ? '' : createElement('input', { 
           ref: "inputElement" ,
           props: { value : this.value}
         })
@@ -34,17 +33,29 @@ export default{
     let props = this.$attrs
     let mainElement = this.$refs.inputElement
     let container = document.body
-    if (this.$attrs.options && this.$attrs.options.inline) {
+    if (this.$attrs.options && this.$attrs.options.inline || this.$attrs.inline) {
       mainElement = this.$refs.container
       container = this.$refs.container
     }
     if (this.$attrs.options) {
-      props = this.$attrs
+      props = {
+        ...this.$attrs,
+        options: {
+          ...this.$attrs.options,
+          ...this.$attrs,
+        },
+        originalContainer: mainElement
+      }
       props.originalContainer = mainElement
+
     } else {
-      props = {}
+      props = {
+        options: {
+          ...this.$attrs
+        },
+        originalContainer: mainElement
+      }
       container = this.$refs.container
-      props.originalContainer = mainElement
     }
     props.model = this.value
     this.comp = new SvelteApp({

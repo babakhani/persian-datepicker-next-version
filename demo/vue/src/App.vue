@@ -15,8 +15,24 @@
       <Datepicker
         v-model="selectedDate"
         v-if="rerenderFlag"
-        :options="datepickerConfig"
+        :viewMode="datepickerConfig.viewMode"
+        :inline="datepickerConfig.inline"
+        :autoClose="datepickerConfig.autoClose"
+        :onlyTimePicker="datepickerConfig.onlyTimePicker"
+        :onlySelectOnDate="datepickerConfig.onlySelectOnDate"
+        :position="datepickerConfig.position"
+        :format="datepickerConfig.format"
+        :altFormat="datepickerConfig.altFormat"
+        :minDate="datepickerConfig.minDate"
+        :maxDate="datepickerConfig.maxDate"
+        :observer="datepickerConfig.observer"
+        :calendarType="datepickerConfig.calendarType"
         />
+      <!--<Datepicker-->
+        <!--v-model="selectedDate"-->
+        <!--v-if="rerenderFlag"-->
+        <!--:options="datepickerConfig"-->
+      <!--/>-->
     </div>
       <div
         class="config-area">
@@ -263,13 +279,13 @@ export default {
         initialValue: false,  // DONE
         initialValueType: 'persian', // Works but deprecated in next version
         persianDigit: true, // Deprected
-        viewMode: 'month', // DONE
+        viewMode: 'day', // DONE
         format: 'LLLL', // DONE
         formatter (unixDate, dateObject) {
           return new dateObject(unixDate).format(this.format);
         }, // DONE
         altField: '#containerAlt',  // DONE
-        altFormat: 'X', // DONE
+        altFormat: 'u', // DONE
         altFieldFormatter: function (unixDate, dateObject) {
           if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
             return new Date(unixDate)

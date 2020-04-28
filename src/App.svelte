@@ -105,7 +105,7 @@ originalContainer={originalContainer} />
 	export let originalContainer = null
 	export let model = null
 	export const setDate = function(unix) {
-	  dispatcher('setDate')(unix)
+		dispatcher('setDate')(unix)
   }	
 	export const show = function() {
 		setvisibility({detail: true})
@@ -117,7 +117,7 @@ originalContainer={originalContainer} />
 		setvisibility({detail: !isVisbile})
   }	
 	export const destroy = function() {
-		if(plotarea.parentNode) {
+		if(plotarea.parentNode && plotarea.parentNode.removeChild) {
       plotarea.parentNode.removeChild(plotarea)
 		}
 	}	
@@ -227,20 +227,24 @@ originalContainer={originalContainer} />
 		if ($config.autoClose)  {
 	    setvisibility({detail: false})
 		}
+		dispatcher('onSelect')($config.altFieldFormatter($selectedUnix, $dateObject))
 	}
 
 	const onSelectTime = function(event) {
 		dispatcher('onSelectTime')(event)
+		dispatcher('onSelect')($selectedUnix)
 	}
 
 	const onSelectMonth = function(event) {
 		dispatcher('onSelectMonth')(event.detail)
 		$config.monthPicker.onSelect(event.detail)
+		dispatcher('onSelect')($selectedUnix)
 	}
 
 	const onSelectYear = function(event) {
 		dispatcher('onSelectYear')(event.detail)
 		$config.yearPicker.onSelect(event.detail)
+		dispatcher('onSelect')($selectedUnix)
 	}
 
 	const today = event => {
@@ -276,10 +280,8 @@ originalContainer={originalContainer} />
 			}, 1)
 		}
 	}
+  
 
-	$: {
-		dispatcher('onSelect')($config.altFieldFormatter($selectedUnix, $dateObject))
-	}
 </script>
 
 <style global lang="scss">

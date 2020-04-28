@@ -23743,7 +23743,7 @@ function create_if_block$7(ctx) {
 			if (if_block3) if_block3.m(div0, null);
 			append_dev(div1, t3);
 			if (if_block4) if_block4.m(div1, null);
-			/*div1_binding*/ ctx[37](div1);
+			/*div1_binding*/ ctx[36](div1);
 			current = true;
 			if (remount) dispose();
 			dispose = listen_dev(div1, "wheel", /*handleWheel*/ ctx[20], false, false, false);
@@ -23888,7 +23888,7 @@ function create_if_block$7(ctx) {
 			if (if_block2) if_block2.d();
 			if (if_block3) if_block3.d();
 			if (if_block4) if_block4.d();
-			/*div1_binding*/ ctx[37](null);
+			/*div1_binding*/ ctx[36](null);
 			dispose();
 		}
 	};
@@ -24484,7 +24484,7 @@ function create_fragment$8(ctx) {
 	};
 
 	const input = new Input({ props: input_props, $$inline: true });
-	/*input_binding*/ ctx[38](input);
+	/*input_binding*/ ctx[37](input);
 	input.$on("setinitialvalue", /*setInitialValue*/ ctx[9]);
 	input.$on("setvisibility", /*setvisibility*/ ctx[8]);
 
@@ -24546,7 +24546,7 @@ function create_fragment$8(ctx) {
 		d: function destroy(detaching) {
 			if (if_block) if_block.d(detaching);
 			if (detaching) detach_dev(t);
-			/*input_binding*/ ctx[38](null);
+			/*input_binding*/ ctx[37](null);
 			destroy_component(input, detaching);
 		}
 	};
@@ -24575,7 +24575,7 @@ function instance$8($$self, $$props, $$invalidate) {
 	validate_store(config, "config");
 	component_subscribe($$self, config, $$value => $$invalidate(6, $config = $$value));
 	validate_store(dateObject, "dateObject");
-	component_subscribe($$self, dateObject, $$value => $$invalidate(34, $dateObject = $$value));
+	component_subscribe($$self, dateObject, $$value => $$invalidate(33, $dateObject = $$value));
 	validate_store(privateViewModeDerived, "privateViewModeDerived");
 	component_subscribe($$self, privateViewModeDerived, $$value => $$invalidate(7, $privateViewModeDerived = $$value));
 	let plotarea;
@@ -24584,7 +24584,6 @@ function instance$8($$self, $$props, $$invalidate) {
 	let { options = {} } = $$props;
 	let { originalContainer = null } = $$props;
 	let { model = null } = $$props;
-	let { model3 = null } = $$props;
 
 	const setDate = function (unix) {
 		dispatcher("setDate")(unix);
@@ -24603,7 +24602,7 @@ function instance$8($$self, $$props, $$invalidate) {
 	};
 
 	const destroy = function () {
-		if (plotarea.parentNode) {
+		if (plotarea.parentNode && plotarea.parentNode.removeChild) {
 			plotarea.parentNode.removeChild(plotarea);
 		}
 	};
@@ -24710,20 +24709,25 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ($config.autoClose) {
 			setvisibility({ detail: false });
 		}
+
+		dispatcher("onSelect")($config.altFieldFormatter($selectedUnix, $dateObject));
 	};
 
 	const onSelectTime = function (event) {
 		dispatcher("onSelectTime")(event);
+		dispatcher("onSelect")($selectedUnix);
 	};
 
 	const onSelectMonth = function (event) {
 		dispatcher("onSelectMonth")(event.detail);
 		$config.monthPicker.onSelect(event.detail);
+		dispatcher("onSelect")($selectedUnix);
 	};
 
 	const onSelectYear = function (event) {
 		dispatcher("onSelectYear")(event.detail);
 		$config.yearPicker.onSelect(event.detail);
+		dispatcher("onSelect")($selectedUnix);
 	};
 
 	const today = event => {
@@ -24763,7 +24767,7 @@ function instance$8($$self, $$props, $$invalidate) {
 		}
 	};
 
-	const writable_props = ["options", "originalContainer", "model", "model3"];
+	const writable_props = ["options", "originalContainer", "model"];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -24788,7 +24792,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ("options" in $$props) $$invalidate(21, options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
 		if ("model" in $$props) $$invalidate(22, model = $$props.model);
-		if ("model3" in $$props) $$invalidate(23, model3 = $$props.model3);
 	};
 
 	$$self.$capture_state = () => ({
@@ -24816,7 +24819,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		options,
 		originalContainer,
 		model,
-		model3,
 		setDate,
 		show,
 		hide,
@@ -24856,9 +24858,8 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ("options" in $$props) $$invalidate(21, options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate(0, originalContainer = $$props.originalContainer);
 		if ("model" in $$props) $$invalidate(22, model = $$props.model);
-		if ("model3" in $$props) $$invalidate(23, model3 = $$props.model3);
-		if ("cashedoptions" in $$props) $$invalidate(32, cashedoptions = $$props.cashedoptions);
-		if ("cashedSelectedDate" in $$props) $$invalidate(33, cashedSelectedDate = $$props.cashedSelectedDate);
+		if ("cashedoptions" in $$props) $$invalidate(31, cashedoptions = $$props.cashedoptions);
+		if ("cashedSelectedDate" in $$props) $$invalidate(32, cashedSelectedDate = $$props.cashedSelectedDate);
 	};
 
 	if ($$props && "$$inject" in $$props) {
@@ -24866,7 +24867,7 @@ function instance$8($$self, $$props, $$invalidate) {
 	}
 
 	$$self.$$.update = () => {
-		if ($$self.$$.dirty[0] & /*options*/ 2097152 | $$self.$$.dirty[1] & /*cashedoptions*/ 2) {
+		if ($$self.$$.dirty[0] & /*options*/ 2097152 | $$self.$$.dirty[1] & /*cashedoptions*/ 1) {
 			 {
 				if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
 					if (!options) {
@@ -24876,23 +24877,17 @@ function instance$8($$self, $$props, $$invalidate) {
 					}
 
 					dispatcher("setConfig")(options);
-					$$invalidate(32, cashedoptions = options);
+					$$invalidate(31, cashedoptions = options);
 				}
 			}
 		}
 
-		if ($$self.$$.dirty[0] & /*model, $selectedUnix*/ 4194320 | $$self.$$.dirty[1] & /*cashedSelectedDate*/ 4) {
+		if ($$self.$$.dirty[0] & /*model, $selectedUnix*/ 4194320 | $$self.$$.dirty[1] & /*cashedSelectedDate*/ 2) {
 			 {
 				if (model && model !== cashedSelectedDate) {
 					dispatcher("setDate")(parseInt(model));
-					$$invalidate(33, cashedSelectedDate = $selectedUnix);
+					$$invalidate(32, cashedSelectedDate = $selectedUnix);
 				}
-			}
-		}
-
-		if ($$self.$$.dirty[0] & /*$config, $selectedUnix*/ 80 | $$self.$$.dirty[1] & /*$dateObject*/ 8) {
-			 {
-				dispatcher("onSelect")($config.altFieldFormatter($selectedUnix, $dateObject));
 			}
 		}
 	};
@@ -24921,7 +24916,6 @@ function instance$8($$self, $$props, $$invalidate) {
 		handleWheel,
 		options,
 		model,
-		model3,
 		setDate,
 		show,
 		hide,
@@ -24954,15 +24948,14 @@ class App extends SvelteComponentDev {
 				options: 21,
 				originalContainer: 0,
 				model: 22,
-				model3: 23,
-				setDate: 24,
-				show: 25,
-				hide: 26,
-				toggle: 27,
-				destroy: 28,
-				getState: 29,
-				setOptions: 30,
-				getOptions: 31
+				setDate: 23,
+				show: 24,
+				hide: 25,
+				toggle: 26,
+				destroy: 27,
+				getState: 28,
+				setOptions: 29,
+				getOptions: 30
 			},
 			[-1, -1]
 		);
@@ -25002,17 +24995,8 @@ class App extends SvelteComponentDev {
 		flush();
 	}
 
-	get model3() {
-		return this.$$.ctx[23];
-	}
-
-	set model3(model3) {
-		this.$set({ model3 });
-		flush();
-	}
-
 	get setDate() {
-		return this.$$.ctx[24];
+		return this.$$.ctx[23];
 	}
 
 	set setDate(value) {
@@ -25020,7 +25004,7 @@ class App extends SvelteComponentDev {
 	}
 
 	get show() {
-		return this.$$.ctx[25];
+		return this.$$.ctx[24];
 	}
 
 	set show(value) {
@@ -25028,7 +25012,7 @@ class App extends SvelteComponentDev {
 	}
 
 	get hide() {
-		return this.$$.ctx[26];
+		return this.$$.ctx[25];
 	}
 
 	set hide(value) {
@@ -25036,7 +25020,7 @@ class App extends SvelteComponentDev {
 	}
 
 	get toggle() {
-		return this.$$.ctx[27];
+		return this.$$.ctx[26];
 	}
 
 	set toggle(value) {
@@ -25044,7 +25028,7 @@ class App extends SvelteComponentDev {
 	}
 
 	get destroy() {
-		return this.$$.ctx[28];
+		return this.$$.ctx[27];
 	}
 
 	set destroy(value) {
@@ -25052,7 +25036,7 @@ class App extends SvelteComponentDev {
 	}
 
 	get getState() {
-		return this.$$.ctx[29];
+		return this.$$.ctx[28];
 	}
 
 	set getState(value) {
@@ -25060,7 +25044,7 @@ class App extends SvelteComponentDev {
 	}
 
 	get setOptions() {
-		return this.$$.ctx[30];
+		return this.$$.ctx[29];
 	}
 
 	set setOptions(value) {
@@ -25068,7 +25052,7 @@ class App extends SvelteComponentDev {
 	}
 
 	get getOptions() {
-		return this.$$.ctx[31];
+		return this.$$.ctx[30];
 	}
 
 	set getOptions(value) {
@@ -25080,10 +25064,9 @@ var pluginVue = {
   render(createElement) {
     return createElement('div', {
       ref: "container",
-      props: this.$attrs,
     }, 
       [
-        (this.$attrs.options && this.$attrs.options.inline) ? '' : createElement('input', { 
+        (this.$attrs.options && this.$attrs.options.inline) | this.$attrs.inline ? '' : createElement('input', { 
           ref: "inputElement" ,
           props: { value : this.value}
         })
@@ -25111,17 +25094,29 @@ var pluginVue = {
     let props = this.$attrs;
     let mainElement = this.$refs.inputElement;
     let container = document.body;
-    if (this.$attrs.options && this.$attrs.options.inline) {
+    if (this.$attrs.options && this.$attrs.options.inline || this.$attrs.inline) {
       mainElement = this.$refs.container;
       container = this.$refs.container;
     }
     if (this.$attrs.options) {
-      props = this.$attrs;
+      props = {
+        ...this.$attrs,
+        options: {
+          ...this.$attrs.options,
+          ...this.$attrs,
+        },
+        originalContainer: mainElement
+      };
       props.originalContainer = mainElement;
+
     } else {
-      props = {};
+      props = {
+        options: {
+          ...this.$attrs
+        },
+        originalContainer: mainElement
+      };
       container = this.$refs.container;
-      props.originalContainer = mainElement;
     }
     props.model = this.value;
     this.comp = new App({
