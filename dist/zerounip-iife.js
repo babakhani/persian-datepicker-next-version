@@ -20148,20 +20148,20 @@ this.zerounip = (function () {
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[25] = list[i];
+    	child_ctx[26] = list[i];
     	return child_ctx;
     }
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[22] = list[i];
-    	child_ctx[24] = i;
+    	child_ctx[23] = list[i];
+    	child_ctx[25] = i;
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[25] = list[i];
+    	child_ctx[26] = list[i];
     	return child_ctx;
     }
 
@@ -20237,7 +20237,7 @@ this.zerounip = (function () {
     function create_each_block_2(ctx) {
     	let th;
     	let span;
-    	let t0_value = /*day*/ ctx[25].format("ddd") + "";
+    	let t0_value = /*day*/ ctx[26].format("ddd") + "";
     	let t0;
     	let t1;
 
@@ -20257,7 +20257,7 @@ this.zerounip = (function () {
     			append_dev(th, t1);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*groupedDay*/ 1 && t0_value !== (t0_value = /*day*/ ctx[25].format("ddd") + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*groupedDay*/ 1 && t0_value !== (t0_value = /*day*/ ctx[26].format("ddd") + "")) set_data_dev(t0, t0_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(th);
@@ -20370,7 +20370,7 @@ this.zerounip = (function () {
     // (24:6) {#if week.length > 1}
     function create_if_block_1(ctx) {
     	let each_1_anchor;
-    	let each_value_1 = /*week*/ ctx[22];
+    	let each_value_1 = /*week*/ ctx[23];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -20395,7 +20395,7 @@ this.zerounip = (function () {
     		},
     		p: function update(ctx, dirty) {
     			if (dirty & /*groupedDay, isDisable, checkDate, isSameDate, selectedDay, today, currentViewMonth, selectDate, getHintText, $config*/ 7997) {
-    				each_value_1 = /*week*/ ctx[22];
+    				each_value_1 = /*week*/ ctx[23];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -20438,7 +20438,7 @@ this.zerounip = (function () {
     // (33:9) {#if day && day.month && day.format && currentViewMonth === day.month()}
     function create_if_block_2(ctx) {
     	let span;
-    	let t0_value = /*day*/ ctx[25].format("D") + "";
+    	let t0_value = /*day*/ ctx[26].format("D") + "";
     	let t0;
     	let t1;
     	let if_block_anchor;
@@ -20462,7 +20462,7 @@ this.zerounip = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*groupedDay*/ 1 && t0_value !== (t0_value = /*day*/ ctx[25].format("D") + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*groupedDay*/ 1 && t0_value !== (t0_value = /*day*/ ctx[26].format("D") + "")) set_data_dev(t0, t0_value);
 
     			if (/*$config*/ ctx[2].calendar[/*$config*/ ctx[2].calendarType].showHint) {
     				if (if_block) {
@@ -20499,7 +20499,7 @@ this.zerounip = (function () {
     // (37:10) {#if $config.calendar[$config.calendarType].showHint}
     function create_if_block_3(ctx) {
     	let span;
-    	let t_value = /*getHintText*/ ctx[12](/*day*/ ctx[25]) + "";
+    	let t_value = /*getHintText*/ ctx[12](/*day*/ ctx[26]) + "";
     	let t;
 
     	const block = {
@@ -20514,7 +20514,7 @@ this.zerounip = (function () {
     			append_dev(span, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*groupedDay*/ 1 && t_value !== (t_value = /*getHintText*/ ctx[12](/*day*/ ctx[25]) + "")) set_data_dev(t, t_value);
+    			if (dirty & /*groupedDay*/ 1 && t_value !== (t_value = /*getHintText*/ ctx[12](/*day*/ ctx[26]) + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(span);
@@ -20535,13 +20535,13 @@ this.zerounip = (function () {
     // (25:7) {#each week as day}
     function create_each_block_1(ctx) {
     	let td;
-    	let show_if = /*day*/ ctx[25] && /*day*/ ctx[25].month && /*day*/ ctx[25].format && /*currentViewMonth*/ ctx[5] === /*day*/ ctx[25].month();
+    	let show_if = /*day*/ ctx[26] && /*day*/ ctx[26].month && /*day*/ ctx[26].format && /*currentViewMonth*/ ctx[5] === /*day*/ ctx[26].month();
     	let t;
     	let dispose;
     	let if_block = show_if && create_if_block_2(ctx);
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[21](/*day*/ ctx[25], ...args);
+    		return /*click_handler*/ ctx[22](/*day*/ ctx[26], ...args);
     	}
 
     	const block = {
@@ -20549,10 +20549,10 @@ this.zerounip = (function () {
     			td = element("td");
     			if (if_block) if_block.c();
     			t = space();
-    			toggle_class(td, "othermonth", !/*day*/ ctx[25].month);
-    			toggle_class(td, "disable", /*isDisable*/ ctx[10](/*day*/ ctx[25]) || !/*checkDate*/ ctx[9](/*day*/ ctx[25]));
-    			toggle_class(td, "selected", /*day*/ ctx[25] && /*day*/ ctx[25].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[25].valueOf(), /*selectedDay*/ ctx[3]));
-    			toggle_class(td, "today", /*day*/ ctx[25] && /*day*/ ctx[25].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[25].valueOf(), /*today*/ ctx[4]));
+    			toggle_class(td, "othermonth", !/*day*/ ctx[26].month);
+    			toggle_class(td, "disable", /*isDisable*/ ctx[10](/*day*/ ctx[26]) || !/*checkDate*/ ctx[9](/*day*/ ctx[26]));
+    			toggle_class(td, "selected", /*day*/ ctx[26] && /*day*/ ctx[26].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[26].valueOf(), /*selectedDay*/ ctx[3]));
+    			toggle_class(td, "today", /*day*/ ctx[26] && /*day*/ ctx[26].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[26].valueOf(), /*today*/ ctx[4]));
     			add_location(td, file$2, 25, 8, 506);
     		},
     		m: function mount(target, anchor, remount) {
@@ -20564,7 +20564,7 @@ this.zerounip = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*groupedDay, currentViewMonth*/ 33) show_if = /*day*/ ctx[25] && /*day*/ ctx[25].month && /*day*/ ctx[25].format && /*currentViewMonth*/ ctx[5] === /*day*/ ctx[25].month();
+    			if (dirty & /*groupedDay, currentViewMonth*/ 33) show_if = /*day*/ ctx[26] && /*day*/ ctx[26].month && /*day*/ ctx[26].format && /*currentViewMonth*/ ctx[5] === /*day*/ ctx[26].month();
 
     			if (show_if) {
     				if (if_block) {
@@ -20580,19 +20580,19 @@ this.zerounip = (function () {
     			}
 
     			if (dirty & /*groupedDay*/ 1) {
-    				toggle_class(td, "othermonth", !/*day*/ ctx[25].month);
+    				toggle_class(td, "othermonth", !/*day*/ ctx[26].month);
     			}
 
     			if (dirty & /*isDisable, groupedDay, checkDate*/ 1537) {
-    				toggle_class(td, "disable", /*isDisable*/ ctx[10](/*day*/ ctx[25]) || !/*checkDate*/ ctx[9](/*day*/ ctx[25]));
+    				toggle_class(td, "disable", /*isDisable*/ ctx[10](/*day*/ ctx[26]) || !/*checkDate*/ ctx[9](/*day*/ ctx[26]));
     			}
 
     			if (dirty & /*groupedDay, isSameDate, selectedDay*/ 265) {
-    				toggle_class(td, "selected", /*day*/ ctx[25] && /*day*/ ctx[25].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[25].valueOf(), /*selectedDay*/ ctx[3]));
+    				toggle_class(td, "selected", /*day*/ ctx[26] && /*day*/ ctx[26].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[26].valueOf(), /*selectedDay*/ ctx[3]));
     			}
 
     			if (dirty & /*groupedDay, isSameDate, today*/ 273) {
-    				toggle_class(td, "today", /*day*/ ctx[25] && /*day*/ ctx[25].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[25].valueOf(), /*today*/ ctx[4]));
+    				toggle_class(td, "today", /*day*/ ctx[26] && /*day*/ ctx[26].isPersianDate && /*isSameDate*/ ctx[8](/*day*/ ctx[26].valueOf(), /*today*/ ctx[4]));
     			}
     		},
     		d: function destroy(detaching) {
@@ -20617,7 +20617,7 @@ this.zerounip = (function () {
     function create_each_block$2(ctx) {
     	let tr;
     	let t;
-    	let if_block = /*week*/ ctx[22].length > 1 && create_if_block_1(ctx);
+    	let if_block = /*week*/ ctx[23].length > 1 && create_if_block_1(ctx);
 
     	const block = {
     		c: function create() {
@@ -20632,7 +20632,7 @@ this.zerounip = (function () {
     			append_dev(tr, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (/*week*/ ctx[22].length > 1) {
+    			if (/*week*/ ctx[23].length > 1) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -20770,7 +20770,7 @@ this.zerounip = (function () {
     	let $dateObject;
     	let $config;
     	validate_store(dateObject, "dateObject");
-    	component_subscribe($$self, dateObject, $$value => $$invalidate(19, $dateObject = $$value));
+    	component_subscribe($$self, dateObject, $$value => $$invalidate(20, $dateObject = $$value));
     	validate_store(config, "config");
     	component_subscribe($$self, config, $$value => $$invalidate(2, $config = $$value));
 
@@ -20858,9 +20858,10 @@ this.zerounip = (function () {
 
     	let groupedDay = [];
     	let visible = true;
-    	let animateSpeed = 100;
+    	let animateSpeed = 200;
     	let cachedViewUnix = viewUnix;
     	let transitionDirectionForward = true;
+    	let animateTimer = null;
     	const writable_props = ["viewUnix", "selectedUnix", "todayUnix"];
 
     	Object.keys($$props).forEach(key => {
@@ -20900,6 +20901,7 @@ this.zerounip = (function () {
     		animateSpeed,
     		cachedViewUnix,
     		transitionDirectionForward,
+    		animateTimer,
     		$dateObject,
     		$config,
     		selectedDay,
@@ -20916,6 +20918,7 @@ this.zerounip = (function () {
     		if ("animateSpeed" in $$props) $$invalidate(13, animateSpeed = $$props.animateSpeed);
     		if ("cachedViewUnix" in $$props) $$invalidate(17, cachedViewUnix = $$props.cachedViewUnix);
     		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
+    		if ("animateTimer" in $$props) $$invalidate(19, animateTimer = $$props.animateTimer);
     		if ("selectedDay" in $$props) $$invalidate(3, selectedDay = $$props.selectedDay);
     		if ("today" in $$props) $$invalidate(4, today = $$props.today);
     		if ("currentViewMonth" in $$props) $$invalidate(5, currentViewMonth = $$props.currentViewMonth);
@@ -20930,19 +20933,19 @@ this.zerounip = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$dateObject, selectedUnix*/ 557056) {
+    		if ($$self.$$.dirty & /*$dateObject, selectedUnix*/ 1081344) {
     			 $$invalidate(3, selectedDay = new $dateObject(selectedUnix).startOf("day"));
     		}
 
-    		if ($$self.$$.dirty & /*$dateObject, todayUnix*/ 589824) {
+    		if ($$self.$$.dirty & /*$dateObject, todayUnix*/ 1114112) {
     			 $$invalidate(4, today = new $dateObject(todayUnix));
     		}
 
-    		if ($$self.$$.dirty & /*$dateObject, viewUnix*/ 540672) {
+    		if ($$self.$$.dirty & /*$dateObject, viewUnix*/ 1064960) {
     			 $$invalidate(5, currentViewMonth = new $dateObject(viewUnix).month());
     		}
 
-    		if ($$self.$$.dirty & /*$dateObject, viewUnix, $config, groupedDay, cachedViewUnix*/ 671749) {
+    		if ($$self.$$.dirty & /*$dateObject, viewUnix, $config, groupedDay, cachedViewUnix, animateTimer*/ 1720325) {
     			 {
     				$$invalidate(0, groupedDay = []);
     				let days = [];
@@ -21004,13 +21007,14 @@ this.zerounip = (function () {
 
     				if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
     					$$invalidate(1, visible = false);
+    					clearTimeout(animateTimer);
 
-    					setTimeout(
+    					$$invalidate(19, animateTimer = setTimeout(
     						() => {
     							$$invalidate(1, visible = true);
     						},
-    						200
-    					);
+    						250
+    					));
     				}
 
     				$$invalidate(17, cachedViewUnix = viewUnix);
@@ -21038,6 +21042,7 @@ this.zerounip = (function () {
     		todayUnix,
     		cachedViewUnix,
     		transitionDirectionForward,
+    		animateTimer,
     		$dateObject,
     		dispatch,
     		click_handler

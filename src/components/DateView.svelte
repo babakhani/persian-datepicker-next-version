@@ -138,9 +138,10 @@
 	$: today = new $dateObject(todayUnix)
 	$: currentViewMonth = new $dateObject(viewUnix).month()
 	let visible = true
-	let animateSpeed = 100
+	let animateSpeed = 200
 	let cachedViewUnix = viewUnix
 	let transitionDirectionForward = true
+	let animateTimer = null
 	$: {
 		groupedDay = []
 		let days = []
@@ -190,9 +191,10 @@
 		}
 		if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
 			visible = false
-			setTimeout(() => {
+			clearTimeout(animateTimer)
+			animateTimer = setTimeout(() => {
 				visible = true 
-			}, 200)
+			}, 250)
 		}
 		cachedViewUnix = viewUnix
 	}
