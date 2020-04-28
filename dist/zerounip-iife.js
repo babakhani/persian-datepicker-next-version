@@ -742,13 +742,13 @@ this.zerounip = (function () {
                 isoPat = new RegExp(that.pattern.iso),
                 jalaliPat = new RegExp(that.pattern.jalali);
 
-            String.prototype.toEnglishDigits = function () {
-                let charCodeZero = '۰'.charCodeAt(0);
-                return this.replace(/[۰-۹]/g, function (w) {
-                    return w.charCodeAt(0) - charCodeZero;
-                });
-            };
-            inputString = inputString.toEnglishDigits();
+            //String.prototype.toEnglishDigits = function () {
+            //    let charCodeZero = '۰'.charCodeAt(0);
+            //    return this.replace(/[۰-۹]/g, function (w) {
+            //        return w.charCodeAt(0) - charCodeZero;
+            //    });
+            //};
+            inputString = inputString; //.toEnglishDigits();
             if (jalaliPat.test(inputString)) {
               /* eslint-disable no-useless-escape */
               persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);
@@ -18887,7 +18887,8 @@ this.zerounip = (function () {
     const isDirty = writable(false);
     const selectedUnix = writable(nowUnix);
     const viewUnix = writable(nowUnix);
-    const privateViewModeDerived = derived(config, ($config) => {
+    const privateViewModeDerived = writable('day');
+    const piiirivateViewModeDerived = derived(config, ($config) => {
        return ($config && $config.viewMode) ? $config.viewMode : 'day'
     }); // [date, month, year]
     const dateObject = writable(persianDate);
@@ -18925,6 +18926,7 @@ this.zerounip = (function () {
       setConfig (payload) {
         config.set(payload);
         this.onSetCalendar(get_store_value(config).calendarType);
+        this.setViewMode(payload.viewMode);
       },
       updateConfig (key) {
         let ob = {};
@@ -19032,6 +19034,7 @@ this.zerounip = (function () {
         config.set(lodash.merge(conf, {
           viewMode: mode
         }));
+        privateViewModeDerived.set(mode);
       },
       setViewModeToUpperAvailableLevel() {
         let currentViewMode = get_store_value(privateViewModeDerived);
@@ -20776,9 +20779,7 @@ this.zerounip = (function () {
     					transitionDirectionForward = false;
     				}
 
-    				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
-
-    				if (viewUnix) {
+    				if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
     					$$invalidate("visible", visible = false);
 
     					setTimeout(
@@ -20788,6 +20789,8 @@ this.zerounip = (function () {
     						200
     					);
     				}
+
+    				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
     			}
     		}
     	};
@@ -24196,22 +24199,33 @@ this.zerounip = (function () {
     	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
     	validate_store(privateViewModeDerived, "privateViewModeDerived");
     	component_subscribe($$self, privateViewModeDerived, $$value => $$invalidate("$privateViewModeDerived", $privateViewModeDerived = $$value));
+    	let { options = {} } = $$props;
+    	let { originalContainer = null } = $$props;
     	const dispatch = createEventDispatcher();
 
     	const dispatcher = function (input) {
-    		dispatch(input);
+    		return event => {
+    			dispatch(input, event);
 
-    		if (options[input]) {
-    			return event => options[input](event);
-    		} else {
-    			return event => {
+    			if (options[input]) {
+    				return event => options[input](event);
+    			}
+
+    			if (actions[input]) {
     				actions[input](event);
-    			};
-    		}
+    			}
+    		};
     	};
 
-    	let { options = {} } = $$props;
-    	let { originalContainer = null } = $$props;
+    	let cashedoptions = options;
+
+    	if (!options) {
+    		$$invalidate("options", options = defaultconfig);
+    	} else {
+    		$$invalidate("options", options = lodash.merge(defaultconfig, options));
+    	}
+
+    	dispatcher("setConfig")(options);
     	let plotarea;
     	let isVisbile = false;
 
@@ -24234,7 +24248,9 @@ this.zerounip = (function () {
     		}
     	};
 
-    	setvisibility({ detail: true });
+    	if ($config.inline) {
+    		setvisibility({ detail: true });
+    	}
 
     	const setInitialValue = function (event) {
     		dispatcher("setFromDefaultValue")(event.detail);
@@ -24256,6 +24272,8 @@ this.zerounip = (function () {
     		if ($config.autoClose) {
     			setvisibility({ detail: false });
     		}
+
+    		dispatcher("onSelect")(event.detail);
     	};
 
     	const onSelectTime = function (event) {
@@ -24330,6 +24348,7 @@ this.zerounip = (function () {
     		return {
     			options,
     			originalContainer,
+    			cashedoptions,
     			plotarea,
     			isVisbile,
     			$config,
@@ -24342,6 +24361,7 @@ this.zerounip = (function () {
     	$$self.$inject_state = $$props => {
     		if ("options" in $$props) $$invalidate("options", options = $$props.options);
     		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+    		if ("cashedoptions" in $$props) $$invalidate("cashedoptions", cashedoptions = $$props.cashedoptions);
     		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
     		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
     		if ("$config" in $$props) config.set($config = $$props.$config);
@@ -24350,16 +24370,19 @@ this.zerounip = (function () {
     		if ("$privateViewModeDerived" in $$props) privateViewModeDerived.set($privateViewModeDerived = $$props.$privateViewModeDerived);
     	};
 
-    	$$self.$$.update = (changed = { options: 1 }) => {
-    		if (changed.options) {
+    	$$self.$$.update = (changed = { cashedoptions: 1, options: 1 }) => {
+    		if (changed.cashedoptions || changed.options) {
     			 {
-    				if (!options) {
-    					$$invalidate("options", options = defaultconfig);
-    				} else {
-    					$$invalidate("options", options = lodash.merge(defaultconfig, options));
-    				}
+    				if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
+    					if (!options) {
+    						$$invalidate("options", options = defaultconfig);
+    					} else {
+    						$$invalidate("options", options = lodash.merge(defaultconfig, options));
+    					}
 
-    				dispatcher("setConfig")(options);
+    					dispatcher("setConfig")(options);
+    					$$invalidate("cashedoptions", cashedoptions = options);
+    				}
     			}
     		}
     	};

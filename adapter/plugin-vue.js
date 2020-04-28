@@ -3,18 +3,58 @@ export default{
   render(createElement) {
     return createElement('div', {
       ref: "container",
-      props: this.$attrs
-    });
+      props: this.$attrs,
+    }, 
+      [
+        (this.$attrs.options && this.$attrs.options.inline) ? '' : createElement('input', { 
+          ref: "inputElement" ,
+          props: { value : this.value}
+        })
+      ]
+    );
   },
   data() {
     return {
       comp: null
     };
   },
+  props: {
+    value: {}
+  },
+  watch: {
+    value (next, old) {
+      if (this.comp && next !== old) {
+        this.comp.$set({
+          model: this.value
+        })
+      }
+    }
+  },
   mounted() {
+    let props = this.$attrs
+    let mainElement = this.$refs.inputElement
+    let container = document.body
+    if (this.$attrs.options && this.$attrs.options.inline) {
+      mainElement = this.$refs.container
+      container = this.$refs.container
+    }
+    if (this.$attrs.options) {
+      props = this.$attrs
+      props.originalContainer = mainElement
+    } else {
+      props = {}
+      container = this.$refs.container
+      props.originalContainer = mainElement
+    }
     this.comp = new SvelteApp({
-      target: this.$refs.container,
-      props: this.$attrs
+      target: container,
+      props: props,
+      accessors: true
+    })
+
+    this.comp.$on('onSelect', (e) => {
+      this.$emit('change', e.detail)
+      this.$emit('input', e.detail)
     });
 
     let watchers = [];

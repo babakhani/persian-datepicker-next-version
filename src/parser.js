@@ -12,13 +12,13 @@ export default class PersianDateParser {
             isoPat = new RegExp(that.pattern.iso),
             jalaliPat = new RegExp(that.pattern.jalali);
 
-        String.prototype.toEnglishDigits = function () {
-            let charCodeZero = '۰'.charCodeAt(0);
-            return this.replace(/[۰-۹]/g, function (w) {
-                return w.charCodeAt(0) - charCodeZero;
-            });
-        };
-        inputString = inputString.toEnglishDigits();
+        //String.prototype.toEnglishDigits = function () {
+        //    let charCodeZero = '۰'.charCodeAt(0);
+        //    return this.replace(/[۰-۹]/g, function (w) {
+        //        return w.charCodeAt(0) - charCodeZero;
+        //    });
+        //};
+        inputString = inputString //.toEnglishDigits();
         if (jalaliPat.test(inputString)) {
           /* eslint-disable no-useless-escape */
           persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);

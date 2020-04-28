@@ -741,13 +741,13 @@ class PersianDateParser {
             isoPat = new RegExp(that.pattern.iso),
             jalaliPat = new RegExp(that.pattern.jalali);
 
-        String.prototype.toEnglishDigits = function () {
-            let charCodeZero = '۰'.charCodeAt(0);
-            return this.replace(/[۰-۹]/g, function (w) {
-                return w.charCodeAt(0) - charCodeZero;
-            });
-        };
-        inputString = inputString.toEnglishDigits();
+        //String.prototype.toEnglishDigits = function () {
+        //    let charCodeZero = '۰'.charCodeAt(0);
+        //    return this.replace(/[۰-۹]/g, function (w) {
+        //        return w.charCodeAt(0) - charCodeZero;
+        //    });
+        //};
+        inputString = inputString; //.toEnglishDigits();
         if (jalaliPat.test(inputString)) {
           /* eslint-disable no-useless-escape */
           persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);
@@ -18886,7 +18886,8 @@ const config = writable(defaultconfig);
 const isDirty = writable(false);
 const selectedUnix = writable(nowUnix);
 const viewUnix = writable(nowUnix);
-const privateViewModeDerived = derived(config, ($config) => {
+const privateViewModeDerived = writable('day');
+const piiirivateViewModeDerived = derived(config, ($config) => {
    return ($config && $config.viewMode) ? $config.viewMode : 'day'
 }); // [date, month, year]
 const dateObject = writable(persianDate);
@@ -18924,6 +18925,7 @@ const actions = {
   setConfig (payload) {
     config.set(payload);
     this.onSetCalendar(get_store_value(config).calendarType);
+    this.setViewMode(payload.viewMode);
   },
   updateConfig (key) {
     let ob = {};
@@ -19031,6 +19033,7 @@ const actions = {
     config.set(lodash.merge(conf, {
       viewMode: mode
     }));
+    privateViewModeDerived.set(mode);
   },
   setViewModeToUpperAvailableLevel() {
     let currentViewMode = get_store_value(privateViewModeDerived);
@@ -20775,9 +20778,7 @@ function instance$2($$self, $$props, $$invalidate) {
 					transitionDirectionForward = false;
 				}
 
-				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
-
-				if (viewUnix) {
+				if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
 					$$invalidate("visible", visible = false);
 
 					setTimeout(
@@ -20787,6 +20788,8 @@ function instance$2($$self, $$props, $$invalidate) {
 						200
 					);
 				}
+
+				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
 			}
 		}
 	};
@@ -24183,34 +24186,52 @@ function create_fragment$8(ctx) {
 }
 
 function instance$8($$self, $$props, $$invalidate) {
+	let $selectedUnix;
 	let $config;
 	let $viewUnix;
-	let $selectedUnix;
 	let $privateViewModeDerived;
+	validate_store(selectedUnix, "selectedUnix");
+	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
 	validate_store(config, "config");
 	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
 	validate_store(viewUnix, "viewUnix");
 	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
-	validate_store(selectedUnix, "selectedUnix");
-	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
 	validate_store(privateViewModeDerived, "privateViewModeDerived");
 	component_subscribe($$self, privateViewModeDerived, $$value => $$invalidate("$privateViewModeDerived", $privateViewModeDerived = $$value));
+	let { options = {} } = $$props;
+	let { originalContainer = null } = $$props;
+	let { model = null } = $$props;
+
+	let { setModel = date => {
+		setSelectedDat(date);
+	} } = $$props;
+
 	const dispatch = createEventDispatcher();
 
 	const dispatcher = function (input) {
-		dispatch(input);
+		return event => {
+			dispatch(input, event);
 
-		if (options[input]) {
-			return event => options[input](event);
-		} else {
-			return event => {
+			if (options[input]) {
+				return event => options[input](event);
+			}
+
+			if (actions[input]) {
 				actions[input](event);
-			};
-		}
+			}
+		};
 	};
 
-	let { options = {} } = $$props;
-	let { originalContainer = null } = $$props;
+	let cashedoptions = options;
+
+	if (!options) {
+		$$invalidate("options", options = defaultconfig);
+	} else {
+		$$invalidate("options", options = lodash.merge(defaultconfig, options));
+	}
+
+	dispatcher("setConfig")(options);
+	let cashedSelectedDate = $selectedUnix;
 	let plotarea;
 	let isVisbile = false;
 
@@ -24233,7 +24254,9 @@ function instance$8($$self, $$props, $$invalidate) {
 		}
 	};
 
-	setvisibility({ detail: true });
+	if ($config.inline) {
+		setvisibility({ detail: true });
+	}
 
 	const setInitialValue = function (event) {
 		dispatcher("setFromDefaultValue")(event.detail);
@@ -24255,6 +24278,8 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ($config.autoClose) {
 			setvisibility({ detail: false });
 		}
+
+		dispatcher("onSelect")(event.detail);
 	};
 
 	const onSelectTime = function (event) {
@@ -24308,7 +24333,7 @@ function instance$8($$self, $$props, $$invalidate) {
 		}
 	};
 
-	const writable_props = ["options", "originalContainer"];
+	const writable_props = ["options", "originalContainer", "model", "setModel"];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -24323,17 +24348,23 @@ function instance$8($$self, $$props, $$invalidate) {
 	$$self.$set = $$props => {
 		if ("options" in $$props) $$invalidate("options", options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+		if ("model" in $$props) $$invalidate("model", model = $$props.model);
+		if ("setModel" in $$props) $$invalidate("setModel", setModel = $$props.setModel);
 	};
 
 	$$self.$capture_state = () => {
 		return {
 			options,
 			originalContainer,
+			model,
+			setModel,
+			cashedoptions,
+			cashedSelectedDate,
 			plotarea,
 			isVisbile,
+			$selectedUnix,
 			$config,
 			$viewUnix,
-			$selectedUnix,
 			$privateViewModeDerived
 		};
 	};
@@ -24341,24 +24372,39 @@ function instance$8($$self, $$props, $$invalidate) {
 	$$self.$inject_state = $$props => {
 		if ("options" in $$props) $$invalidate("options", options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+		if ("model" in $$props) $$invalidate("model", model = $$props.model);
+		if ("setModel" in $$props) $$invalidate("setModel", setModel = $$props.setModel);
+		if ("cashedoptions" in $$props) $$invalidate("cashedoptions", cashedoptions = $$props.cashedoptions);
+		if ("cashedSelectedDate" in $$props) $$invalidate("cashedSelectedDate", cashedSelectedDate = $$props.cashedSelectedDate);
 		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
 		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
+		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
 		if ("$config" in $$props) config.set($config = $$props.$config);
 		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
-		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
 		if ("$privateViewModeDerived" in $$props) privateViewModeDerived.set($privateViewModeDerived = $$props.$privateViewModeDerived);
 	};
 
-	$$self.$$.update = (changed = { options: 1 }) => {
-		if (changed.options) {
+	$$self.$$.update = (changed = { cashedoptions: 1, options: 1, model: 1, cashedSelectedDate: 1 }) => {
+		if (changed.cashedoptions || changed.options) {
 			 {
-				if (!options) {
-					$$invalidate("options", options = defaultconfig);
-				} else {
-					$$invalidate("options", options = lodash.merge(defaultconfig, options));
-				}
+				if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
+					if (!options) {
+						$$invalidate("options", options = defaultconfig);
+					} else {
+						$$invalidate("options", options = lodash.merge(defaultconfig, options));
+					}
 
-				dispatcher("setConfig")(options);
+					dispatcher("setConfig")(options);
+					$$invalidate("cashedoptions", cashedoptions = options);
+				}
+			}
+		}
+
+		if (changed.model || changed.cashedSelectedDate) {
+			 {
+				if (model && model !== cashedSelectedDate) {
+					dispatcher("onSelectDate")(parseInt(model));
+				}
 			}
 		}
 	};
@@ -24366,6 +24412,8 @@ function instance$8($$self, $$props, $$invalidate) {
 	return {
 		options,
 		originalContainer,
+		model,
+		setModel,
 		plotarea,
 		isVisbile,
 		setvisibility,
@@ -24381,9 +24429,9 @@ function instance$8($$self, $$props, $$invalidate) {
 		navPrev,
 		setViewModeToUpperAvailableLevel,
 		handleWheel,
+		$selectedUnix,
 		$config,
 		$viewUnix,
-		$selectedUnix,
 		$privateViewModeDerived,
 		div1_binding
 	};
@@ -24392,7 +24440,13 @@ function instance$8($$self, $$props, $$invalidate) {
 class App extends SvelteComponentDev {
 	constructor(options) {
 		super(options);
-		init(this, options, instance$8, create_fragment$8, safe_not_equal, { options: 0, originalContainer: 0 });
+
+		init(this, options, instance$8, create_fragment$8, safe_not_equal, {
+			options: 0,
+			originalContainer: 0,
+			model: 0,
+			setModel: 0
+		});
 
 		dispatch_dev("SvelteRegisterComponent", {
 			component: this,
@@ -24417,24 +24471,80 @@ class App extends SvelteComponentDev {
 	set originalContainer(value) {
 		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
 	}
+
+	get model() {
+		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	}
+
+	set model(value) {
+		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	}
+
+	get setModel() {
+		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	}
+
+	set setModel(value) {
+		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	}
 }
 
 var pluginVue = {
   render(createElement) {
     return createElement('div', {
       ref: "container",
-      props: this.$attrs
-    });
+      props: this.$attrs,
+    }, 
+      [
+        (this.$attrs.options && this.$attrs.options.inline) ? '' : createElement('input', { 
+          ref: "inputElement" ,
+          props: { value : this.value}
+        })
+      ]
+    );
   },
   data() {
     return {
       comp: null
     };
   },
+  props: {
+    value: {}
+  },
+  watch: {
+    value (next, old) {
+      if (this.comp && next !== old) {
+        this.comp.$set({
+          model: this.value
+        });
+      }
+    }
+  },
   mounted() {
+    let props = this.$attrs;
+    let mainElement = this.$refs.inputElement;
+    let container = document.body;
+    if (this.$attrs.options && this.$attrs.options.inline) {
+      mainElement = this.$refs.container;
+      container = this.$refs.container;
+    }
+    if (this.$attrs.options) {
+      props = this.$attrs;
+      props.originalContainer = mainElement;
+    } else {
+      props = {};
+      container = this.$refs.container;
+      props.originalContainer = mainElement;
+    }
     this.comp = new App({
-      target: this.$refs.container,
-      props: this.$attrs
+      target: container,
+      props: props,
+      accessors: true
+    });
+
+    this.comp.$on('onSelect', (e) => {
+      this.$emit('change', e.detail);
+      this.$emit('input', e.detail);
     });
 
     let watchers = [];

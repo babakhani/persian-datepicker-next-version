@@ -10,16 +10,19 @@
     </header>
     <div
       class="demo-box" >
+      <h5>{{ selectedDate }}</h5>
+      <input v-model="selectedDate" type="range" min="0" max="1589052600000" step="1000" />
       <Datepicker
+        v-model="selectedDate"
+        v-if="rerenderFlag"
         :options="datepickerConfig"
         @onSelectPrevView="onSelectPrevView"
         @onSelectTime="onSelectTime"
         />
     </div>
-        <h3>Settings</h3>
       <div
-        style="max-height: 85vh;overflow: auto;"
         class="config-area">
+        <h3>Settings</h3>
         <h4>General</h4>
         <ConfigSelect
           label="View Mode"
@@ -138,7 +141,7 @@
         <h4>Month Picker</h4>
         <ConfigSwitch 
           label="Month Picker Enabled"
-          v-model="datepickerConfig.yearPicker.enabled"/>  
+          v-model="datepickerConfig.monthPicker.enabled"/>  
         <ConfigText 
           label="Month Picker Title Format"
           v-model="datepickerConfig.monthPicker.titleFormat"/>  
@@ -241,6 +244,8 @@ export default {
   components: { Datepicker, ConfigSelect, ConfigSwitch, ConfigText },
   data () {
     return {
+      selectedDate: new Date().valueOf(),
+      rerenderFlag: true,
       datepickerConfig: {
         calendarType: 'persian', // DONE
         calendar: {
@@ -255,7 +260,7 @@ export default {
           }
         },
         responsive: true, // Deprecated
-        inline: false, // Deprected
+        inline: true, // Deprected
         initialValue: false,  // DONE
         initialValueType: 'persian', // Works but deprecated in next version
         persianDigit: true, // Deprected
@@ -267,7 +272,6 @@ export default {
         altField: '#containerAlt',  // DONE
         altFormat: 'g', // DONE
         altFieldFormatter: function (unixDate, dateObject) {
-          //console.log('user config alt formmater funciton')
           if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
             return new Date(unixDate)
           }
@@ -289,15 +293,15 @@ export default {
             'btnPrevText': '>' // Deprected
           },
           'onNext': function (datepickerObject) { // DONE
-            console.log('navigator.onNext')
-            console.log(datepickerObject)
+            // console.log('navigator.onNext')
+            // console.log(datepickerObject)
           },
           'onPrev': function (datepickerObject) { // DONE
-            console.log('navigator.onPrev')
-            console.log(datepickerObject)
+            // console.log('navigator.onPrev')
+            // console.log(datepickerObject)
           },
           'onSwitch': function (datepickerObject) { // DONE
-            console.log('navigator.onSwitch')
+            // console.log('navigator.onSwitch')
             //console.log(datepickerObject)
           }
         },
@@ -313,7 +317,7 @@ export default {
               en: 'submit'
             },
             onSubmit: function (datepickerObject) { // DONE
-              console.log('toolbox.onSubmit')
+              // console.log('toolbox.onSubmit')
             }
           },
           todayButton: {
@@ -323,14 +327,14 @@ export default {
               en: 'today'
             },
             onToday: function (datepickerObject) { // DONE
-              console.log('toolbox.onToday')
+              // console.log('toolbox.onToday')
             }
           },
           calendarSwitch: {
             enabled: true, // DONE
             format: 'MMMM', // DEPRECATED
             onSwitch: function (datepickerObject) { // DONE
-              console.log('toolbox.onSwitch')
+              // console.log('toolbox.onSwitch')
             }
           }
         },
@@ -371,7 +375,7 @@ export default {
             return new dateObject(unix).format(this.titleFormat)
           },
           'onSelect': function (selectedDayUnix) { // DONE
-            console.log('use event onSelect date')
+            // console.log('use event onSelect date')
           }
         },
         monthPicker: {
@@ -381,7 +385,7 @@ export default {
             return new dateObject(unix).format(this.titleFormat)
           },
           'onSelect': function (monthIndex) { // DONE
-            console.log('use event onSelect month')
+            // console.log('use event onSelect month')
           }
         },
         yearPicker: {
@@ -394,7 +398,7 @@ export default {
               dateObject(unix).year(startYear+ 11).format(this.titleFormat)
           },
           onSelect: function (year) { // DONE
-            console.log('use event onSelect year')
+            // console.log('use event onSelect year')
           }
         },
         infobox : {
@@ -416,13 +420,25 @@ export default {
       }
     }
   },
+  watch: {
+    datepickerConfig: {
+      deep: true,
+      handler () {
+        this.$forceUpdate()
+        this.rerenderFlag = false
+        setTimeout(() => {
+          this.rerenderFlag = true 
+        }, 100)
+      }
+    }
+  },
   methods: {
     onSelectTime(e) {
-      console.log('Vue handle onSelectTime')
-      console.log(e.detail)
+      // console.log('Vue handle onSelectTime')
+      // console.log(e.detail)
     },
     onSelectPrevView() {
-      console.log('Vue handle onSelectPrevView')
+      // console.log('Vue handle onSelectPrevView')
     },
     handleClick() {
       alert('alert from vue js')
@@ -439,37 +455,46 @@ header {
   display: block;
   width: 100%;
   float: left;
-  margin-bottom: 20px;
+  height: 80px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 header h1 {
   display: block;
   float: left;
-  margin-top: 30px;
+  margin-top: 10px;
   margin-left: 1em;
 }
 
 .platform-logo {
   float: left;
-  max-width: 120px;
-  max-height: 120px;
+  max-height: 60px;
 }
 
 .demo-box {
   display: block;
   float: left;
+  min-height: calc(100vh - 80px);
   width: 20%;
   padding: 0;
+  padding-top: 20px;
   margin: 0;
 }
+
 .config-area {
   display: block;
   float: left;
-  width: 70%;
-  padding: 0;
+  width: 80%;
+  padding:0 20px 20px 20px;
   margin: 0;
-  background: #f1f1f1;
-  padding: 20px;
+  background: rgba(250, 250, 250, 0.8);
+  padding-bottom: 20px;
+  overflow: auto;
+  max-height: calc(100vh - 80px);
 }
 
 h4 {

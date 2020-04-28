@@ -35,7 +35,6 @@ export default {
   },
   methods: {
     onChange (value) {
-      console.log( this.selected)
       this.$emit('change', this.selected)
       this.$emit('input', this.selected)
     }

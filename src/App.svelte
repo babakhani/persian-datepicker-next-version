@@ -93,38 +93,54 @@ originalContainer={originalContainer} />
 	import { config, actions, selectedUnix, viewUnix, privateViewModeDerived } from './stores.js'
 	import { createEventDispatcher } from 'svelte'
 	import lodash from 'lodash'
+
+	// Public props used in adapters
+	export let options = {}
+	export let originalContainer = null
+	export let model = null
+	export let setModel = (date) => {
+     setSelectedDat(date)
+	}
+
 	const dispatch = createEventDispatcher()
 	// Handle global event and store events
 	const dispatcher = function(input) {
-		dispatch(input)
-		if (options[input]) {
-			return event => options[input](event)
-		} else {
-			return event => {
+		return event => {
+			dispatch(input, event)
+			if (options[input]) {
+				return event => options[input](event)
+			} 
+			if (actions[input]) {
 				actions[input](event)
 			}
 		}
 	}
 
-	// Public props used in adapters
-	export let options = {}
-	export let originalContainer = null
-
-  
-	// merge user defined config with predefined config and commit to store
-	//if (!options) {
-	//	options = defaultconfig
-	//} else {
-	//	options = Object.assign(defaultconfig, options)
-	//}
-
+  let cashedoptions = options
+	if (!options) {
+		options = defaultconfig
+	} else {
+		options = lodash.merge(defaultconfig, options)
+	}
+	dispatcher('setConfig')(options)
 	$: {
-		if (!options) {
-			options = defaultconfig
-		} else {
-			options = lodash.merge(defaultconfig, options)
+		if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
+			if (!options) {
+				options = defaultconfig
+			} else {
+				options = lodash.merge(defaultconfig, options)
+			}
+			dispatcher('setConfig')(options)
+			cashedoptions = options
 		}
-	  dispatcher('setConfig')(options)
+	}
+ 
+	// Update DAtepicker Via from reactivity models, like v-model
+	let cashedSelectedDate = $selectedUnix
+	$: {
+		if (model && model !== cashedSelectedDate) {
+			dispatcher('onSelectDate')(parseInt(model))
+		}
 	}
 
 
@@ -147,7 +163,9 @@ originalContainer={originalContainer} />
 	}
 
 	// TODO: develop time
-	setvisibility({detail: true})
+	if ($config.inline) {
+	  setvisibility({detail: true})
+	}
 
 	const setInitialValue = function (event) {
 		dispatcher('setFromDefaultValue')(event.detail)
@@ -168,6 +186,7 @@ originalContainer={originalContainer} />
 		if ($config.autoClose)  {
 	    setvisibility({detail: false})
 		}
+		dispatcher('onSelect')(event.detail)
 	}
 
 	const onSelectTime = function(event) {

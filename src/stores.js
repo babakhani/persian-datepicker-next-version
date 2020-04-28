@@ -11,7 +11,8 @@ export const config = writable(Config)
 export const isDirty = writable(false)
 export const selectedUnix = writable(nowUnix)
 export const viewUnix = writable(nowUnix)
-export const privateViewModeDerived = derived(config, ($config) => {
+export const privateViewModeDerived = writable('day')
+export const piiirivateViewModeDerived = derived(config, ($config) => {
    return ($config && $config.viewMode) ? $config.viewMode : 'day'
 }) // [date, month, year]
 export const dateObject = writable(persianDate)
@@ -50,6 +51,7 @@ export const actions = {
   setConfig (payload) {
     config.set(payload)
     this.onSetCalendar(get(config).calendarType)
+    this.setViewMode(payload.viewMode)
   },
   updateConfig (key) {
     let ob = {}
@@ -157,6 +159,7 @@ export const actions = {
     config.set(lodash.merge(conf, {
       viewMode: mode
     }))
+    privateViewModeDerived.set(mode)
   },
   setViewModeToUpperAvailableLevel() {
     let currentViewMode = get(privateViewModeDerived)

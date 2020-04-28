@@ -170,18 +170,7 @@
 			f++
 		}
 		let weekindex = 0
-		//let cacheDate = null
 		days.forEach((item, index) => {
-			// Test rendering
-			//if (cacheDate == item.date()) {
-			//   console.log('ther is problem')
-			//}
-			//if (cacheDate && cacheDate > item.date()) {
-			//	if(item.date() !== 1) {
-			//    console.log('ther is problem')
-			//	}
-			//}
-			//cacheDate = item.date()
 			if (index % 7 == 0) {
 				groupedDay[weekindex] = []
 			}
@@ -195,13 +184,13 @@
 		} else {
 			transitionDirectionForward = false
 		}
-		cachedViewUnix = viewUnix
-		if (viewUnix) {
+		if (new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
 			visible = false
 			setTimeout(() => {
 				visible = true 
 			}, 200)
 		}
+		cachedViewUnix = viewUnix
 	}
 </script>
 
