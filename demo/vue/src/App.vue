@@ -29,6 +29,13 @@
         :maxDate="datepickerConfig.maxDate"
         :observer="datepickerConfig.observer"
         :calendarType="datepickerConfig.calendarType"
+        :options="datepickerConfig"
+        @onSet="eventHandler('onSet')"
+        @onSelect="eventHandler('onSelect')"
+        @onShow="eventHandler('onShow')"
+        @onHide="eventHandler('onHide')"
+        @onToggle="eventHandler('onToggle')"
+        @onDestroy="eventHandler('onDestroy')"
         />
       <!--<Datepicker-->
         <!--v-model="selectedDate"-->
@@ -305,6 +312,8 @@ export default {
         altFieldFormatter: function (unixDate, dateObject) {
           if (this.altFormat === 'gregorian' || this.altFormat === 'g') {
             return new Date(unixDate)
+          } else if (this.altFormat === 'unix' || this.altFormat === 'u') {
+            return unixDate
           } else {
             return new dateObject(unixDate).format(this.altFormat);
           }
@@ -465,6 +474,9 @@ export default {
     }
   },
   methods: {
+    eventHandler (eventName) {
+      console.log(`${eventName} Vue Compoenent Event`)
+    }
   }
 }
 </script>
