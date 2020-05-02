@@ -32,6 +32,9 @@ function is_function(thing) {
 function safe_not_equal(a, b) {
     return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
 }
+function not_equal(a, b) {
+    return a != a ? b == b : a !== b;
+}
 function validate_store(store, name) {
     if (!store || typeof store.subscribe !== 'function') {
         throw new Error(`'${name}' is not a store with a 'subscribe' method`);
@@ -739,13 +742,6 @@ class PersianDateParser {
             persianDateArray,
             isoPat = new RegExp(that.pattern.iso),
             jalaliPat = new RegExp(that.pattern.jalali);
-        String.prototype.toEnglishDigits = function () {
-            let charCodeZero = '۰'.charCodeAt(0);
-            return this.replace(/[۰-۹]/g, function (w) {
-                return w.charCodeAt(0) - charCodeZero;
-            });
-        };
-        inputString = inputString.toEnglishDigits();
         if (jalaliPat.test(inputString)) {
           persianDateArray = inputString.split(/\/|-|\,|\./).map(Number);
           return persianDateArray;
@@ -879,6 +875,8 @@ let Helper = {
   }
 };
 var defaultconfig = {
+    'animate': true,
+    'animateSpeed': 80,
     'calendarType': 'persian',
     'calendar': {
         'persian': {
@@ -977,6 +975,10 @@ var defaultconfig = {
     'timePicker': {
         'enabled': true,
         'step': 1,
+        'titleFormat': 'YYYY MMMM',
+        'titleFormatter': function (unix, dateObject) {
+            return new dateObject(unix).format(this.titleFormat)
+        },
         'hour': {
             'enabled': true,
             'step': null
@@ -6997,11 +6999,17 @@ const config = writable(defaultconfig);
 const isDirty = writable(false);
 const selectedUnix = writable(nowUnix);
 const viewUnix = writable(nowUnix);
-const privateViewModeDerived = derived(config, ($config) => {
+const privateViewModeDerived = writable('day');
+const piiirivateViewModeDerived = derived(config, ($config) => {
    return ($config && $config.viewMode) ? $config.viewMode : 'day'
 });
 const dateObject = writable(persianDate);
 const actions = {
+  setDate (unix) {
+    this.updateIsDirty(true);
+    viewUnix.set(unix);
+    selectedUnix.set(unix);
+  },
   parsInitialValue (inputString) {
     let pd = get_store_value(dateObject);
     let parse = new PersianDateParser();
@@ -7033,6 +7041,11 @@ const actions = {
   setConfig (payload) {
     config.set(payload);
     this.onSetCalendar(get_store_value(config).calendarType);
+    if (payload.onlyTimePicker) {
+      this.setViewMode('time');
+    } else {
+      this.setViewMode(payload.viewMode);
+    }
   },
   updateConfig (key) {
     let ob = {};
@@ -7092,8 +7105,9 @@ const actions = {
         new pd(get_store_value(viewUnix))
         .month(month)
       );
+    } else {
+      this.setViewModeToLowerAvailableLevel();
     }
-    this.setViewModeToLowerAvailableLevel();
     this.updateIsDirty(true);
   },
   onSelectYear(year) {
@@ -7108,8 +7122,9 @@ const actions = {
         new pd(get_store_value(selectedUnix))
         .year(year)
       );
+    } else {
+      this.setViewModeToLowerAvailableLevel();
     }
-    this.setViewModeToLowerAvailableLevel();
     this.updateIsDirty(true);
   },
   onSetHour(hour) {
@@ -7140,6 +7155,7 @@ const actions = {
     config.set(lodash.merge(conf, {
       viewMode: mode
     }));
+    privateViewModeDerived.set(mode);
   },
   setViewModeToUpperAvailableLevel() {
     let currentViewMode = get_store_value(privateViewModeDerived);
@@ -7229,7 +7245,98 @@ function get_each_context(ctx, list, i) {
 	return child_ctx;
 }
 
-// (5:2) {#each yearRange as year}
+// (1:0) {#if visible}
+function create_if_block(ctx) {
+	let div;
+	let div_intro;
+	let div_outro;
+	let current;
+	let each_value = ctx.yearRange;
+	let each_blocks = [];
+
+	for (let i = 0; i < each_value.length; i += 1) {
+		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+	}
+
+	const block = {
+		c: function create() {
+			div = element("div");
+
+			for (let i = 0; i < each_blocks.length; i += 1) {
+				each_blocks[i].c();
+			}
+
+			attr_dev(div, "class", "pwt-date-year-view");
+			add_location(div, file, 1, 0, 14);
+		},
+		m: function mount(target, anchor) {
+			insert_dev(target, div, anchor);
+
+			for (let i = 0; i < each_blocks.length; i += 1) {
+				each_blocks[i].m(div, null);
+			}
+
+			current = true;
+		},
+		p: function update(changed, ctx) {
+			if (changed.isDisable || changed.yearRange || changed.currentYear || changed.select) {
+				each_value = ctx.yearRange;
+				let i;
+
+				for (i = 0; i < each_value.length; i += 1) {
+					const child_ctx = get_each_context(ctx, each_value, i);
+
+					if (each_blocks[i]) {
+						each_blocks[i].p(changed, child_ctx);
+					} else {
+						each_blocks[i] = create_each_block(child_ctx);
+						each_blocks[i].c();
+						each_blocks[i].m(div, null);
+					}
+				}
+
+				for (; i < each_blocks.length; i += 1) {
+					each_blocks[i].d(1);
+				}
+
+				each_blocks.length = each_value.length;
+			}
+		},
+		i: function intro(local) {
+			if (current) return;
+
+			add_render_callback(() => {
+				if (div_outro) div_outro.end(1);
+				if (!div_intro) div_intro = create_in_transition(div, ctx.fadeIn, { duration: ctx.animateSpeed });
+				div_intro.start();
+			});
+
+			current = true;
+		},
+		o: function outro(local) {
+			if (div_intro) div_intro.invalidate();
+			div_outro = create_out_transition(div, ctx.fadeOut, { duration: ctx.animateSpeed });
+			current = false;
+		},
+		d: function destroy(detaching) {
+			if (detaching) detach_dev(div);
+			destroy_each(each_blocks, detaching);
+			if (detaching && div_outro) div_outro.end();
+		}
+	};
+
+	dispatch_dev("SvelteRegisterBlock", {
+		block,
+		id: create_if_block.name,
+		type: "if",
+		source: "(1:0) {#if visible}",
+		ctx
+	});
+
+	return block;
+}
+
+// (6:2) {#each yearRange as year}
 function create_each_block(ctx) {
 	let div;
 	let span;
@@ -7249,10 +7356,10 @@ function create_each_block(ctx) {
 			t0 = text(t0_value);
 			t1 = space();
 			attr_dev(span, "class", "pwt-text");
-			add_location(span, file, 9, 3, 311);
+			add_location(span, file, 10, 3, 325);
 			toggle_class(div, "disable", ctx.isDisable(ctx.year));
 			toggle_class(div, "selected", ctx.currentYear === ctx.year);
-			add_location(div, file, 5, 4, 153);
+			add_location(div, file, 6, 4, 167);
 
 			dispose = listen_dev(
 				div,
@@ -7293,7 +7400,7 @@ function create_each_block(ctx) {
 		block,
 		id: create_each_block.name,
 		type: "each",
-		source: "(5:2) {#each yearRange as year}",
+		source: "(6:2) {#each yearRange as year}",
 		ctx
 	});
 
@@ -7301,84 +7408,56 @@ function create_each_block(ctx) {
 }
 
 function create_fragment(ctx) {
-	let div;
-	let div_intro;
-	let div_outro;
+	let if_block_anchor;
 	let current;
-	let each_value = ctx.yearRange;
-	let each_blocks = [];
-
-	for (let i = 0; i < each_value.length; i += 1) {
-		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-	}
+	let if_block = ctx.visible && create_if_block(ctx);
 
 	const block = {
 		c: function create() {
-			div = element("div");
-
-			for (let i = 0; i < each_blocks.length; i += 1) {
-				each_blocks[i].c();
-			}
-
-			attr_dev(div, "class", "pwt-date-year-view");
-			add_location(div, file, 0, 0, 0);
+			if (if_block) if_block.c();
+			if_block_anchor = empty();
 		},
 		l: function claim(nodes) {
 			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
 		},
 		m: function mount(target, anchor) {
-			insert_dev(target, div, anchor);
-
-			for (let i = 0; i < each_blocks.length; i += 1) {
-				each_blocks[i].m(div, null);
-			}
-
+			if (if_block) if_block.m(target, anchor);
+			insert_dev(target, if_block_anchor, anchor);
 			current = true;
 		},
 		p: function update(changed, ctx) {
-			if (changed.isDisable || changed.yearRange || changed.currentYear || changed.select) {
-				each_value = ctx.yearRange;
-				let i;
-
-				for (i = 0; i < each_value.length; i += 1) {
-					const child_ctx = get_each_context(ctx, each_value, i);
-
-					if (each_blocks[i]) {
-						each_blocks[i].p(changed, child_ctx);
-					} else {
-						each_blocks[i] = create_each_block(child_ctx);
-						each_blocks[i].c();
-						each_blocks[i].m(div, null);
-					}
+			if (ctx.visible) {
+				if (if_block) {
+					if_block.p(changed, ctx);
+					transition_in(if_block, 1);
+				} else {
+					if_block = create_if_block(ctx);
+					if_block.c();
+					transition_in(if_block, 1);
+					if_block.m(if_block_anchor.parentNode, if_block_anchor);
 				}
+			} else if (if_block) {
+				group_outros();
 
-				for (; i < each_blocks.length; i += 1) {
-					each_blocks[i].d(1);
-				}
+				transition_out(if_block, 1, 1, () => {
+					if_block = null;
+				});
 
-				each_blocks.length = each_value.length;
+				check_outros();
 			}
 		},
 		i: function intro(local) {
 			if (current) return;
-
-			add_render_callback(() => {
-				if (div_outro) div_outro.end(1);
-				if (!div_intro) div_intro = create_in_transition(div, ctx.fadeIn, { duration: animateSpeed });
-				div_intro.start();
-			});
-
+			transition_in(if_block);
 			current = true;
 		},
 		o: function outro(local) {
-			if (div_intro) div_intro.invalidate();
-			div_outro = create_out_transition(div, ctx.fadeOut, { duration: animateSpeed });
+			transition_out(if_block);
 			current = false;
 		},
 		d: function destroy(detaching) {
-			if (detaching) detach_dev(div);
-			destroy_each(each_blocks, detaching);
-			if (detaching && div_outro) div_outro.end();
+			if (if_block) if_block.d(detaching);
+			if (detaching) detach_dev(if_block_anchor);
 		}
 	};
 
@@ -7392,8 +7471,6 @@ function create_fragment(ctx) {
 
 	return block;
 }
-
-let animateSpeed = 100;
 
 function instance($$self, $$props, $$invalidate) {
 	let $config;
@@ -7470,6 +7547,7 @@ function instance($$self, $$props, $$invalidate) {
 	let yearRange;
 	let startYear;
 	let visible = true;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["selectedUnix", "viewUnix"];
@@ -7509,7 +7587,7 @@ function instance($$self, $$props, $$invalidate) {
 		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
 		if ("yearRange" in $$props) $$invalidate("yearRange", yearRange = $$props.yearRange);
 		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
-		if ("visible" in $$props) visible = $$props.visible;
+		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
 		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
 		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
 		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
@@ -7522,7 +7600,7 @@ function instance($$self, $$props, $$invalidate) {
 	let currentYear;
 	let currentViewYear;
 
-	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, currentViewYear: 1, yearRange: 1, startYear: 1, cachedViewUnix: 1 }) => {
+	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, currentViewYear: 1, yearRange: 1, startYear: 1, cachedViewUnix: 1, $config: 1, animateSpeed: 1 }) => {
 		if (changed.$dateObject || changed.selectedUnix) {
 			 $$invalidate("currentYear", currentYear = new $dateObject(selectedUnix).year());
 		}
@@ -7531,7 +7609,7 @@ function instance($$self, $$props, $$invalidate) {
 			 $$invalidate("currentViewYear", currentViewYear = new $dateObject(viewUnix).year());
 		}
 
-		if (changed.currentViewYear || changed.yearRange || changed.startYear || changed.viewUnix || changed.cachedViewUnix) {
+		if (changed.currentViewYear || changed.yearRange || changed.startYear || changed.viewUnix || changed.cachedViewUnix || changed.$config || changed.animateSpeed) {
 			 {
 				$$invalidate("yearRange", yearRange = []);
 				$$invalidate("startYear", startYear = currentViewYear - currentViewYear % 12);
@@ -7549,14 +7627,17 @@ function instance($$self, $$props, $$invalidate) {
 				}
 
 				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
-				visible = false;
 
-				setTimeout(
-					() => {
-						visible = true;
-					},
-					200
-				);
+				if ($config.animate) {
+					$$invalidate("visible", visible = false);
+
+					setTimeout(
+						() => {
+							$$invalidate("visible", visible = true);
+						},
+						animateSpeed * 2
+					);
+				}
 			}
 		}
 	};
@@ -7569,6 +7650,8 @@ function instance($$self, $$props, $$invalidate) {
 		isDisable,
 		select,
 		yearRange,
+		visible,
+		animateSpeed,
 		currentYear,
 		click_handler
 	};
@@ -7625,7 +7708,98 @@ function get_each_context$1(ctx, list, i) {
 	return child_ctx;
 }
 
-// (5:2) {#each monthRange as month, index}
+// (1:0) {#if visible}
+function create_if_block$1(ctx) {
+	let div;
+	let div_intro;
+	let div_outro;
+	let current;
+	let each_value = ctx.monthRange;
+	let each_blocks = [];
+
+	for (let i = 0; i < each_value.length; i += 1) {
+		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
+	}
+
+	const block = {
+		c: function create() {
+			div = element("div");
+
+			for (let i = 0; i < each_blocks.length; i += 1) {
+				each_blocks[i].c();
+			}
+
+			attr_dev(div, "class", "pwt-date-month-view");
+			add_location(div, file$1, 1, 1, 15);
+		},
+		m: function mount(target, anchor) {
+			insert_dev(target, div, anchor);
+
+			for (let i = 0; i < each_blocks.length; i += 1) {
+				each_blocks[i].m(div, null);
+			}
+
+			current = true;
+		},
+		p: function update(changed, ctx) {
+			if (changed.isDisable || changed.currentViewYear || changed.currentMonth || changed.currentSelectedYear || changed.select || changed.monthRange) {
+				each_value = ctx.monthRange;
+				let i;
+
+				for (i = 0; i < each_value.length; i += 1) {
+					const child_ctx = get_each_context$1(ctx, each_value, i);
+
+					if (each_blocks[i]) {
+						each_blocks[i].p(changed, child_ctx);
+					} else {
+						each_blocks[i] = create_each_block$1(child_ctx);
+						each_blocks[i].c();
+						each_blocks[i].m(div, null);
+					}
+				}
+
+				for (; i < each_blocks.length; i += 1) {
+					each_blocks[i].d(1);
+				}
+
+				each_blocks.length = each_value.length;
+			}
+		},
+		i: function intro(local) {
+			if (current) return;
+
+			add_render_callback(() => {
+				if (div_outro) div_outro.end(1);
+				if (!div_intro) div_intro = create_in_transition(div, ctx.fadeIn, { duration: ctx.animateSpeed });
+				div_intro.start();
+			});
+
+			current = true;
+		},
+		o: function outro(local) {
+			if (div_intro) div_intro.invalidate();
+			div_outro = create_out_transition(div, ctx.fadeOut, { duration: ctx.animateSpeed });
+			current = false;
+		},
+		d: function destroy(detaching) {
+			if (detaching) detach_dev(div);
+			destroy_each(each_blocks, detaching);
+			if (detaching && div_outro) div_outro.end();
+		}
+	};
+
+	dispatch_dev("SvelteRegisterBlock", {
+		block,
+		id: create_if_block$1.name,
+		type: "if",
+		source: "(1:0) {#if visible}",
+		ctx
+	});
+
+	return block;
+}
+
+// (6:2) {#each monthRange as month, index}
 function create_each_block$1(ctx) {
 	let div;
 	let span;
@@ -7645,10 +7819,10 @@ function create_each_block$1(ctx) {
 			t0 = text(t0_value);
 			t1 = space();
 			attr_dev(span, "class", "pwt-text");
-			add_location(span, file$1, 9, 4, 422);
+			add_location(span, file$1, 10, 4, 436);
 			toggle_class(div, "disable", ctx.isDisable(ctx.currentViewYear, ctx.index + 1));
 			toggle_class(div, "selected", ctx.currentMonth - 1 === ctx.index && ctx.currentViewYear === ctx.currentSelectedYear);
-			add_location(div, file$1, 5, 3, 164);
+			add_location(div, file$1, 6, 3, 178);
 
 			dispose = listen_dev(
 				div,
@@ -7689,7 +7863,7 @@ function create_each_block$1(ctx) {
 		block,
 		id: create_each_block$1.name,
 		type: "each",
-		source: "(5:2) {#each monthRange as month, index}",
+		source: "(6:2) {#each monthRange as month, index}",
 		ctx
 	});
 
@@ -7697,84 +7871,56 @@ function create_each_block$1(ctx) {
 }
 
 function create_fragment$1(ctx) {
-	let div;
-	let div_intro;
-	let div_outro;
+	let if_block_anchor;
 	let current;
-	let each_value = ctx.monthRange;
-	let each_blocks = [];
-
-	for (let i = 0; i < each_value.length; i += 1) {
-		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
-	}
+	let if_block = ctx.visible && create_if_block$1(ctx);
 
 	const block = {
 		c: function create() {
-			div = element("div");
-
-			for (let i = 0; i < each_blocks.length; i += 1) {
-				each_blocks[i].c();
-			}
-
-			attr_dev(div, "class", "pwt-date-month-view");
-			add_location(div, file$1, 0, 1, 1);
+			if (if_block) if_block.c();
+			if_block_anchor = empty();
 		},
 		l: function claim(nodes) {
 			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
 		},
 		m: function mount(target, anchor) {
-			insert_dev(target, div, anchor);
-
-			for (let i = 0; i < each_blocks.length; i += 1) {
-				each_blocks[i].m(div, null);
-			}
-
+			if (if_block) if_block.m(target, anchor);
+			insert_dev(target, if_block_anchor, anchor);
 			current = true;
 		},
 		p: function update(changed, ctx) {
-			if (changed.isDisable || changed.currentViewYear || changed.currentMonth || changed.currentSelectedYear || changed.select || changed.monthRange) {
-				each_value = ctx.monthRange;
-				let i;
-
-				for (i = 0; i < each_value.length; i += 1) {
-					const child_ctx = get_each_context$1(ctx, each_value, i);
-
-					if (each_blocks[i]) {
-						each_blocks[i].p(changed, child_ctx);
-					} else {
-						each_blocks[i] = create_each_block$1(child_ctx);
-						each_blocks[i].c();
-						each_blocks[i].m(div, null);
-					}
+			if (ctx.visible) {
+				if (if_block) {
+					if_block.p(changed, ctx);
+					transition_in(if_block, 1);
+				} else {
+					if_block = create_if_block$1(ctx);
+					if_block.c();
+					transition_in(if_block, 1);
+					if_block.m(if_block_anchor.parentNode, if_block_anchor);
 				}
+			} else if (if_block) {
+				group_outros();
 
-				for (; i < each_blocks.length; i += 1) {
-					each_blocks[i].d(1);
-				}
+				transition_out(if_block, 1, 1, () => {
+					if_block = null;
+				});
 
-				each_blocks.length = each_value.length;
+				check_outros();
 			}
 		},
 		i: function intro(local) {
 			if (current) return;
-
-			add_render_callback(() => {
-				if (div_outro) div_outro.end(1);
-				if (!div_intro) div_intro = create_in_transition(div, ctx.fadeIn, { duration: animateSpeed$1 });
-				div_intro.start();
-			});
-
+			transition_in(if_block);
 			current = true;
 		},
 		o: function outro(local) {
-			if (div_intro) div_intro.invalidate();
-			div_outro = create_out_transition(div, ctx.fadeOut, { duration: animateSpeed$1 });
+			transition_out(if_block);
 			current = false;
 		},
 		d: function destroy(detaching) {
-			if (detaching) detach_dev(div);
-			destroy_each(each_blocks, detaching);
-			if (detaching && div_outro) div_outro.end();
+			if (if_block) if_block.d(detaching);
+			if (detaching) detach_dev(if_block_anchor);
 		}
 	};
 
@@ -7788,8 +7934,6 @@ function create_fragment$1(ctx) {
 
 	return block;
 }
-
-let animateSpeed$1 = 100;
 
 function instance$1($$self, $$props, $$invalidate) {
 	let $config;
@@ -7870,6 +8014,7 @@ function instance$1($$self, $$props, $$invalidate) {
 	}
 
 	let visible = true;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["selectedUnix", "viewUnix"];
@@ -7892,7 +8037,7 @@ function instance$1($$self, $$props, $$invalidate) {
 			selectedUnix,
 			viewUnix,
 			visible,
-			animateSpeed: animateSpeed$1,
+			animateSpeed,
 			cachedViewUnix,
 			transitionDirectionForward,
 			$config,
@@ -7907,8 +8052,8 @@ function instance$1($$self, $$props, $$invalidate) {
 	$$self.$inject_state = $$props => {
 		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
 		if ("viewUnix" in $$props) $$invalidate("viewUnix", viewUnix = $$props.viewUnix);
-		if ("visible" in $$props) visible = $$props.visible;
-		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$1 = $$props.animateSpeed);
+		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
+		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
 		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
 		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
 		if ("$config" in $$props) config.set($config = $$props.$config);
@@ -7924,7 +8069,7 @@ function instance$1($$self, $$props, $$invalidate) {
 	let currentSelectedYear;
 	let currentViewYear;
 
-	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, cachedViewUnix: 1 }) => {
+	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, viewUnix: 1, cachedViewUnix: 1, $config: 1, animateSpeed: 1 }) => {
 		if (changed.$dateObject) {
 			 $$invalidate("monthRange", monthRange = new $dateObject().rangeName().months);
 		}
@@ -7941,7 +8086,7 @@ function instance$1($$self, $$props, $$invalidate) {
 			 $$invalidate("currentViewYear", currentViewYear = new $dateObject(viewUnix).year());
 		}
 
-		if (changed.viewUnix || changed.cachedViewUnix) {
+		if (changed.viewUnix || changed.cachedViewUnix || changed.$config || changed.animateSpeed) {
 			 {
 				if (viewUnix > cachedViewUnix) {
 					transitionDirectionForward = true;
@@ -7950,14 +8095,17 @@ function instance$1($$self, $$props, $$invalidate) {
 				}
 
 				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
-				visible = false;
 
-				setTimeout(
-					() => {
-						visible = true;
-					},
-					200
-				);
+				if ($config.animate) {
+					$$invalidate("visible", visible = false);
+
+					setTimeout(
+						() => {
+							$$invalidate("visible", visible = true);
+						},
+						animateSpeed * 2
+					);
+				}
 			}
 		}
 	};
@@ -7969,6 +8117,8 @@ function instance$1($$self, $$props, $$invalidate) {
 		fadeIn,
 		isDisable,
 		select,
+		visible,
+		animateSpeed,
 		monthRange,
 		currentMonth,
 		currentSelectedYear,
@@ -8040,7 +8190,7 @@ function get_each_context_2(ctx, list, i) {
 	return child_ctx;
 }
 
-// (6:3) {#if groupedDay[1]}
+// (7:4) {#if groupedDay[1]}
 function create_if_block_4(ctx) {
 	let each_1_anchor;
 	let each_value_2 = ctx.groupedDay[1];
@@ -8099,14 +8249,14 @@ function create_if_block_4(ctx) {
 		block,
 		id: create_if_block_4.name,
 		type: "if",
-		source: "(6:3) {#if groupedDay[1]}",
+		source: "(7:4) {#if groupedDay[1]}",
 		ctx
 	});
 
 	return block;
 }
 
-// (7:4) {#each groupedDay[1] as day}
+// (8:5) {#each groupedDay[1] as day}
 function create_each_block_2(ctx) {
 	let th;
 	let span;
@@ -8120,8 +8270,8 @@ function create_each_block_2(ctx) {
 			span = element("span");
 			t0 = text(t0_value);
 			t1 = space();
-			add_location(span, file$2, 8, 6, 158);
-			add_location(th, file$2, 7, 5, 147);
+			add_location(span, file$2, 9, 7, 177);
+			add_location(th, file$2, 8, 6, 165);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, th, anchor);
@@ -8141,16 +8291,18 @@ function create_each_block_2(ctx) {
 		block,
 		id: create_each_block_2.name,
 		type: "each",
-		source: "(7:4) {#each groupedDay[1] as day}",
+		source: "(8:5) {#each groupedDay[1] as day}",
 		ctx
 	});
 
 	return block;
 }
 
-// (16:2) {#if visible}
-function create_if_block(ctx) {
-	let each_1_anchor;
+// (18:2) {#if visible}
+function create_if_block$2(ctx) {
+	let tbody;
+	let tbody_intro;
+	let tbody_outro;
 	let current;
 	let each_value = ctx.groupedDay;
 	let each_blocks = [];
@@ -8159,24 +8311,23 @@ function create_if_block(ctx) {
 		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
 	}
 
-	const out = i => transition_out(each_blocks[i], 1, 1, () => {
-		each_blocks[i] = null;
-	});
-
 	const block = {
 		c: function create() {
+			tbody = element("tbody");
+
 			for (let i = 0; i < each_blocks.length; i += 1) {
 				each_blocks[i].c();
 			}
 
-			each_1_anchor = empty();
+			add_location(tbody, file$2, 18, 3, 301);
 		},
 		m: function mount(target, anchor) {
+			insert_dev(target, tbody, anchor);
+
 			for (let i = 0; i < each_blocks.length; i += 1) {
-				each_blocks[i].m(target, anchor);
+				each_blocks[i].m(tbody, null);
 			}
 
-			insert_dev(target, each_1_anchor, anchor);
 			current = true;
 		},
 		p: function update(changed, ctx) {
@@ -8189,60 +8340,55 @@ function create_if_block(ctx) {
 
 					if (each_blocks[i]) {
 						each_blocks[i].p(changed, child_ctx);
-						transition_in(each_blocks[i], 1);
 					} else {
 						each_blocks[i] = create_each_block$2(child_ctx);
 						each_blocks[i].c();
-						transition_in(each_blocks[i], 1);
-						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
+						each_blocks[i].m(tbody, null);
 					}
 				}
 
-				group_outros();
-
-				for (i = each_value.length; i < each_blocks.length; i += 1) {
-					out(i);
+				for (; i < each_blocks.length; i += 1) {
+					each_blocks[i].d(1);
 				}
 
-				check_outros();
+				each_blocks.length = each_value.length;
 			}
 		},
 		i: function intro(local) {
 			if (current) return;
 
-			for (let i = 0; i < each_value.length; i += 1) {
-				transition_in(each_blocks[i]);
-			}
+			add_render_callback(() => {
+				if (tbody_outro) tbody_outro.end(1);
+				if (!tbody_intro) tbody_intro = create_in_transition(tbody, ctx.fadeIn, { duration: ctx.animateSpeed });
+				tbody_intro.start();
+			});
 
 			current = true;
 		},
 		o: function outro(local) {
-			each_blocks = each_blocks.filter(Boolean);
-
-			for (let i = 0; i < each_blocks.length; i += 1) {
-				transition_out(each_blocks[i]);
-			}
-
+			if (tbody_intro) tbody_intro.invalidate();
+			tbody_outro = create_out_transition(tbody, ctx.fadeOut, { duration: ctx.animateSpeed });
 			current = false;
 		},
 		d: function destroy(detaching) {
+			if (detaching) detach_dev(tbody);
 			destroy_each(each_blocks, detaching);
-			if (detaching) detach_dev(each_1_anchor);
+			if (detaching && tbody_outro) tbody_outro.end();
 		}
 	};
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_if_block.name,
+		id: create_if_block$2.name,
 		type: "if",
-		source: "(16:2) {#if visible}",
+		source: "(18:2) {#if visible}",
 		ctx
 	});
 
 	return block;
 }
 
-// (21:5) {#if week.length > 1}
+// (24:6) {#if week.length > 1}
 function create_if_block_1(ctx) {
 	let each_1_anchor;
 	let each_value_1 = ctx.week;
@@ -8301,14 +8447,14 @@ function create_if_block_1(ctx) {
 		block,
 		id: create_if_block_1.name,
 		type: "if",
-		source: "(21:5) {#if week.length > 1}",
+		source: "(24:6) {#if week.length > 1}",
 		ctx
 	});
 
 	return block;
 }
 
-// (30:8) {#if day && day.month && day.format && currentViewMonth === day.month()}
+// (33:9) {#if day && day.month && day.format && currentViewMonth === day.month()}
 function create_if_block_2(ctx) {
 	let span;
 	let t0_value = ctx.day.format("D") + "";
@@ -8325,7 +8471,7 @@ function create_if_block_2(ctx) {
 			if (if_block) if_block.c();
 			if_block_anchor = empty();
 			attr_dev(span, "class", "pwt-date-view-text");
-			add_location(span, file$2, 30, 9, 970);
+			add_location(span, file$2, 33, 10, 1028);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, span, anchor);
@@ -8362,14 +8508,14 @@ function create_if_block_2(ctx) {
 		block,
 		id: create_if_block_2.name,
 		type: "if",
-		source: "(30:8) {#if day && day.month && day.format && currentViewMonth === day.month()}",
+		source: "(33:9) {#if day && day.month && day.format && currentViewMonth === day.month()}",
 		ctx
 	});
 
 	return block;
 }
 
-// (34:9) {#if $config.calendar[$config.calendarType].showHint}
+// (37:10) {#if $config.calendar[$config.calendarType].showHint}
 function create_if_block_3(ctx) {
 	let span;
 	let t_value = ctx.getHintText(ctx.day) + "";
@@ -8380,7 +8526,7 @@ function create_if_block_3(ctx) {
 			span = element("span");
 			t = text(t_value);
 			attr_dev(span, "class", "pwt-date-view-hint");
-			add_location(span, file$2, 34, 10, 1122);
+			add_location(span, file$2, 37, 11, 1184);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, span, anchor);
@@ -8398,14 +8544,14 @@ function create_if_block_3(ctx) {
 		block,
 		id: create_if_block_3.name,
 		type: "if",
-		source: "(34:9) {#if $config.calendar[$config.calendarType].showHint}",
+		source: "(37:10) {#if $config.calendar[$config.calendarType].showHint}",
 		ctx
 	});
 
 	return block;
 }
 
-// (22:6) {#each week as day}
+// (25:7) {#each week as day}
 function create_each_block_1(ctx) {
 	let td;
 	let show_if = ctx.day && ctx.day.month && ctx.day.format && ctx.currentViewMonth === ctx.day.month();
@@ -8426,7 +8572,7 @@ function create_each_block_1(ctx) {
 			toggle_class(td, "disable", ctx.isDisable(ctx.day) || !ctx.checkDate(ctx.day));
 			toggle_class(td, "selected", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.selectedDay));
 			toggle_class(td, "today", ctx.day && ctx.day.isPersianDate && ctx.isSameDate(ctx.day.valueOf(), ctx.today));
-			add_location(td, file$2, 22, 7, 456);
+			add_location(td, file$2, 25, 8, 506);
 
 			dispose = listen_dev(
 				td,
@@ -8488,20 +8634,17 @@ function create_each_block_1(ctx) {
 		block,
 		id: create_each_block_1.name,
 		type: "each",
-		source: "(22:6) {#each week as day}",
+		source: "(25:7) {#each week as day}",
 		ctx
 	});
 
 	return block;
 }
 
-// (17:3) {#each groupedDay as week, i}
+// (22:4) {#each groupedDay as week, i}
 function create_each_block$2(ctx) {
 	let tr;
 	let t;
-	let tr_intro;
-	let tr_outro;
-	let current;
 	let if_block = ctx.week.length > 1 && create_if_block_1(ctx);
 
 	const block = {
@@ -8509,13 +8652,12 @@ function create_each_block$2(ctx) {
 			tr = element("tr");
 			if (if_block) if_block.c();
 			t = space();
-			add_location(tr, file$2, 17, 4, 299);
+			add_location(tr, file$2, 22, 5, 438);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, tr, anchor);
 			if (if_block) if_block.m(tr, null);
 			append_dev(tr, t);
-			current = true;
 		},
 		p: function update(changed, ctx) {
 			if (ctx.week.length > 1) {
@@ -8531,26 +8673,9 @@ function create_each_block$2(ctx) {
 				if_block = null;
 			}
 		},
-		i: function intro(local) {
-			if (current) return;
-
-			add_render_callback(() => {
-				if (tr_outro) tr_outro.end(1);
-				if (!tr_intro) tr_intro = create_in_transition(tr, ctx.fadeIn, { duration: animateSpeed$2 });
-				tr_intro.start();
-			});
-
-			current = true;
-		},
-		o: function outro(local) {
-			if (tr_intro) tr_intro.invalidate();
-			tr_outro = create_out_transition(tr, ctx.fadeOut, { duration: animateSpeed$2 });
-			current = false;
-		},
 		d: function destroy(detaching) {
 			if (detaching) detach_dev(tr);
 			if (if_block) if_block.d();
-			if (detaching && tr_outro) tr_outro.end();
 		}
 	};
 
@@ -8558,7 +8683,7 @@ function create_each_block$2(ctx) {
 		block,
 		id: create_each_block$2.name,
 		type: "each",
-		source: "(17:3) {#each groupedDay as week, i}",
+		source: "(22:4) {#each groupedDay as week, i}",
 		ctx
 	});
 
@@ -8568,22 +8693,25 @@ function create_each_block$2(ctx) {
 function create_fragment$2(ctx) {
 	let div;
 	let table;
+	let thead;
 	let tr;
 	let t;
 	let current;
 	let if_block0 = ctx.groupedDay[1] && create_if_block_4(ctx);
-	let if_block1 = ctx.visible && create_if_block(ctx);
+	let if_block1 = ctx.visible && create_if_block$2(ctx);
 
 	const block = {
 		c: function create() {
 			div = element("div");
 			table = element("table");
+			thead = element("thead");
 			tr = element("tr");
 			if (if_block0) if_block0.c();
 			t = space();
 			if (if_block1) if_block1.c();
-			add_location(tr, file$2, 4, 2, 81);
-			attr_dev(table, "class", "month-table next");
+			add_location(tr, file$2, 5, 3, 96);
+			add_location(thead, file$2, 4, 2, 85);
+			attr_dev(table, "class", "pwt-month-table next");
 			attr_dev(table, "border", "0");
 			add_location(table, file$2, 1, 1, 29);
 			attr_dev(div, "class", "pwt-date-view");
@@ -8595,7 +8723,8 @@ function create_fragment$2(ctx) {
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
 			append_dev(div, table);
-			append_dev(table, tr);
+			append_dev(table, thead);
+			append_dev(thead, tr);
 			if (if_block0) if_block0.m(tr, null);
 			append_dev(table, t);
 			if (if_block1) if_block1.m(table, null);
@@ -8620,7 +8749,7 @@ function create_fragment$2(ctx) {
 					if_block1.p(changed, ctx);
 					transition_in(if_block1, 1);
 				} else {
-					if_block1 = create_if_block(ctx);
+					if_block1 = create_if_block$2(ctx);
 					if_block1.c();
 					transition_in(if_block1, 1);
 					if_block1.m(table, null);
@@ -8661,8 +8790,6 @@ function create_fragment$2(ctx) {
 
 	return block;
 }
-
-let animateSpeed$2 = 100;
 
 function instance$2($$self, $$props, $$invalidate) {
 	let $dateObject;
@@ -8755,8 +8882,10 @@ function instance$2($$self, $$props, $$invalidate) {
 
 	let groupedDay = [];
 	let visible = true;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
+	let animateTimer = null;
 	const writable_props = ["viewUnix", "selectedUnix", "todayUnix"];
 
 	Object.keys($$props).forEach(key => {
@@ -8780,9 +8909,10 @@ function instance$2($$self, $$props, $$invalidate) {
 			todayUnix,
 			groupedDay,
 			visible,
-			animateSpeed: animateSpeed$2,
+			animateSpeed,
 			cachedViewUnix,
 			transitionDirectionForward,
+			animateTimer,
 			$dateObject,
 			$config,
 			selectedDay,
@@ -8797,9 +8927,10 @@ function instance$2($$self, $$props, $$invalidate) {
 		if ("todayUnix" in $$props) $$invalidate("todayUnix", todayUnix = $$props.todayUnix);
 		if ("groupedDay" in $$props) $$invalidate("groupedDay", groupedDay = $$props.groupedDay);
 		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
-		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$2 = $$props.animateSpeed);
+		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
 		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
 		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
+		if ("animateTimer" in $$props) $$invalidate("animateTimer", animateTimer = $$props.animateTimer);
 		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
 		if ("$config" in $$props) config.set($config = $$props.$config);
 		if ("selectedDay" in $$props) $$invalidate("selectedDay", selectedDay = $$props.selectedDay);
@@ -8811,7 +8942,7 @@ function instance$2($$self, $$props, $$invalidate) {
 	let today;
 	let currentViewMonth;
 
-	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1, cachedViewUnix: 1 }) => {
+	$$self.$$.update = (changed = { $dateObject: 1, selectedUnix: 1, todayUnix: 1, viewUnix: 1, $config: 1, startVisualDelta: 1, groupedDay: 1, cachedViewUnix: 1, animateTimer: 1, animateSpeed: 1 }) => {
 		if (changed.$dateObject || changed.selectedUnix) {
 			 $$invalidate("selectedDay", selectedDay = new $dateObject(selectedUnix).startOf("day"));
 		}
@@ -8824,7 +8955,7 @@ function instance$2($$self, $$props, $$invalidate) {
 			 $$invalidate("currentViewMonth", currentViewMonth = new $dateObject(viewUnix).month());
 		}
 
-		if (changed.$dateObject || changed.viewUnix || changed.$config || changed.groupedDay || changed.cachedViewUnix) {
+		if (changed.$dateObject || changed.viewUnix || changed.$config || changed.groupedDay || changed.cachedViewUnix || changed.animateTimer || changed.animateSpeed) {
 			 {
 				$$invalidate("groupedDay", groupedDay = []);
 				let days = [];
@@ -8884,18 +9015,19 @@ function instance$2($$self, $$props, $$invalidate) {
 					transitionDirectionForward = false;
 				}
 
-				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
-
-				if (viewUnix) {
+				if ($config.animate && new $dateObject(viewUnix).month() !== new $dateObject(cachedViewUnix).month()) {
 					$$invalidate("visible", visible = false);
+					clearTimeout(animateTimer);
 
-					setTimeout(
+					$$invalidate("animateTimer", animateTimer = setTimeout(
 						() => {
 							$$invalidate("visible", visible = true);
 						},
-						200
-					);
+						animateSpeed * 2
+					));
 				}
+
+				$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
 			}
 		}
 	};
@@ -8913,6 +9045,7 @@ function instance$2($$self, $$props, $$invalidate) {
 		getHintText,
 		groupedDay,
 		visible,
+		animateSpeed,
 		$config,
 		selectedDay,
 		today,
@@ -9241,7 +9374,7 @@ function create_if_block_1$1(ctx) {
 }
 
 // (95:1) {#if $config.timePicker.meridian.enabled}
-function create_if_block$1(ctx) {
+function create_if_block$3(ctx) {
 	let div;
 	let button0;
 	let svg0;
@@ -9317,7 +9450,7 @@ function create_if_block$1(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_if_block$1.name,
+		id: create_if_block$3.name,
 		type: "if",
 		source: "(95:1) {#if $config.timePicker.meridian.enabled}",
 		ctx
@@ -9334,7 +9467,7 @@ function create_fragment$3(ctx) {
 	let if_block0 = ctx.$config.timePicker.hour.enabled && create_if_block_3$1(ctx);
 	let if_block1 = ctx.$config.timePicker.minute.enabled && create_if_block_2$1(ctx);
 	let if_block2 = ctx.$config.timePicker.second.enabled && create_if_block_1$1(ctx);
-	let if_block3 = ctx.$config.timePicker.meridian.enabled && create_if_block$1(ctx);
+	let if_block3 = ctx.$config.timePicker.meridian.enabled && create_if_block$3(ctx);
 
 	const block = {
 		c: function create() {
@@ -9406,7 +9539,7 @@ function create_fragment$3(ctx) {
 				if (if_block3) {
 					if_block3.p(changed, ctx);
 				} else {
-					if_block3 = create_if_block$1(ctx);
+					if_block3 = create_if_block$3(ctx);
 					if_block3.c();
 					if_block3.m(div, null);
 				}
@@ -9707,7 +9840,7 @@ function create_if_block_3$2(ctx) {
 
 			add_render_callback(() => {
 				if (button_outro) button_outro.end(1);
-				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
+				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: ctx.animateSpeed });
 				button_intro.start();
 			});
 
@@ -9715,7 +9848,7 @@ function create_if_block_3$2(ctx) {
 		},
 		o: function outro(local) {
 			if (button_intro) button_intro.invalidate();
-			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+			button_outro = create_out_transition(button, ctx.fadeOut, { duration: ctx.animateSpeed });
 			current = false;
 		},
 		d: function destroy(detaching) {
@@ -9765,7 +9898,7 @@ function create_if_block_2$2(ctx) {
 
 			add_render_callback(() => {
 				if (button_outro) button_outro.end(1);
-				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3 });
+				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: ctx.animateSpeed });
 				button_intro.start();
 			});
 
@@ -9773,7 +9906,7 @@ function create_if_block_2$2(ctx) {
 		},
 		o: function outro(local) {
 			if (button_intro) button_intro.invalidate();
-			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+			button_outro = create_out_transition(button, ctx.fadeOut, { duration: ctx.animateSpeed });
 			current = false;
 		},
 		d: function destroy(detaching) {
@@ -9824,7 +9957,7 @@ function create_if_block_1$2(ctx) {
 
 			add_render_callback(() => {
 				if (button_outro) button_outro.end(1);
-				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
+				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: ctx.animateSpeed, delay: 10 });
 				button_intro.start();
 			});
 
@@ -9832,7 +9965,7 @@ function create_if_block_1$2(ctx) {
 		},
 		o: function outro(local) {
 			if (button_intro) button_intro.invalidate();
-			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+			button_outro = create_out_transition(button, ctx.fadeOut, { duration: ctx.animateSpeed });
 			current = false;
 		},
 		d: function destroy(detaching) {
@@ -9854,11 +9987,9 @@ function create_if_block_1$2(ctx) {
 }
 
 // (57:3) {#if viewMode === 'time' && visible}
-function create_if_block$2(ctx) {
+function create_if_block$4(ctx) {
 	let button;
-	let t0;
-	let t1;
-	let t2;
+	let t;
 	let button_intro;
 	let button_outro;
 	let current;
@@ -9867,30 +9998,25 @@ function create_if_block$2(ctx) {
 	const block = {
 		c: function create() {
 			button = element("button");
-			t0 = text(ctx.selectedMonth);
-			t1 = space();
-			t2 = text(ctx.selectedDate);
+			t = text(ctx.timeViewText);
 			attr_dev(button, "class", "pwt-date-navigator-button");
 			add_location(button, file$4, 57, 3, 1953);
 			dispose = listen_dev(button, "click", ctx.click_handler_2, false, false, false);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, button, anchor);
-			append_dev(button, t0);
-			append_dev(button, t1);
-			append_dev(button, t2);
+			append_dev(button, t);
 			current = true;
 		},
 		p: function update(changed, ctx) {
-			if (!current || changed.selectedMonth) set_data_dev(t0, ctx.selectedMonth);
-			if (!current || changed.selectedDate) set_data_dev(t2, ctx.selectedDate);
+			if (!current || changed.timeViewText) set_data_dev(t, ctx.timeViewText);
 		},
 		i: function intro(local) {
 			if (current) return;
 
 			add_render_callback(() => {
 				if (button_outro) button_outro.end(1);
-				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: animateSpeed$3, delay: 10 });
+				if (!button_intro) button_intro = create_in_transition(button, ctx.fadeIn, { duration: ctx.animateSpeed, delay: 10 });
 				button_intro.start();
 			});
 
@@ -9898,7 +10024,7 @@ function create_if_block$2(ctx) {
 		},
 		o: function outro(local) {
 			if (button_intro) button_intro.invalidate();
-			button_outro = create_out_transition(button, ctx.fadeOut, { duration: animateSpeed$3 });
+			button_outro = create_out_transition(button, ctx.fadeOut, { duration: ctx.animateSpeed });
 			current = false;
 		},
 		d: function destroy(detaching) {
@@ -9910,7 +10036,7 @@ function create_if_block$2(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_if_block$2.name,
+		id: create_if_block$4.name,
 		type: "if",
 		source: "(57:3) {#if viewMode === 'time' && visible}",
 		ctx
@@ -9931,7 +10057,7 @@ function create_fragment$4(ctx) {
 	let if_block1 = ctx.viewMode === "year" && ctx.visible && create_if_block_3$2(ctx);
 	let if_block2 = ctx.viewMode === "month" && ctx.visible && create_if_block_2$2(ctx);
 	let if_block3 = ctx.viewMode === "day" && ctx.visible && create_if_block_1$2(ctx);
-	let if_block4 = ctx.viewMode === "time" && ctx.visible && create_if_block$2(ctx);
+	let if_block4 = ctx.viewMode === "time" && ctx.visible && create_if_block$4(ctx);
 
 	const block = {
 		c: function create() {
@@ -10047,7 +10173,7 @@ function create_fragment$4(ctx) {
 					if_block4.p(changed, ctx);
 					transition_in(if_block4, 1);
 				} else {
-					if_block4 = create_if_block$2(ctx);
+					if_block4 = create_if_block$4(ctx);
 					if_block4.c();
 					transition_in(if_block4, 1);
 					if_block4.m(div0, null);
@@ -10097,8 +10223,6 @@ function create_fragment$4(ctx) {
 
 	return block;
 }
-
-let animateSpeed$3 = 200;
 
 function instance$4($$self, $$props, $$invalidate) {
 	let $dateObject;
@@ -10152,6 +10276,7 @@ function instance$4($$self, $$props, $$invalidate) {
 
 	let startYear;
 	let visible = true;
+	let animateSpeed = $config.animateSpeed;
 	let cachedViewUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["viewUnix", "viewMode"];
@@ -10175,7 +10300,7 @@ function instance$4($$self, $$props, $$invalidate) {
 			viewMode,
 			startYear,
 			visible,
-			animateSpeed: animateSpeed$3,
+			animateSpeed,
 			cachedViewUnix,
 			transitionDirectionForward,
 			selectedYear,
@@ -10185,6 +10310,7 @@ function instance$4($$self, $$props, $$invalidate) {
 			selectedDate,
 			dateViewText,
 			$config,
+			timeViewText,
 			monthViewText,
 			yearViewText
 		};
@@ -10195,16 +10321,17 @@ function instance$4($$self, $$props, $$invalidate) {
 		if ("viewMode" in $$props) $$invalidate("viewMode", viewMode = $$props.viewMode);
 		if ("startYear" in $$props) $$invalidate("startYear", startYear = $$props.startYear);
 		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
-		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$3 = $$props.animateSpeed);
+		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
 		if ("cachedViewUnix" in $$props) $$invalidate("cachedViewUnix", cachedViewUnix = $$props.cachedViewUnix);
 		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
 		if ("selectedYear" in $$props) $$invalidate("selectedYear", selectedYear = $$props.selectedYear);
 		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
 		if ("visualYear" in $$props) visualYear = $$props.visualYear;
-		if ("selectedMonth" in $$props) $$invalidate("selectedMonth", selectedMonth = $$props.selectedMonth);
-		if ("selectedDate" in $$props) $$invalidate("selectedDate", selectedDate = $$props.selectedDate);
+		if ("selectedMonth" in $$props) selectedMonth = $$props.selectedMonth;
+		if ("selectedDate" in $$props) selectedDate = $$props.selectedDate;
 		if ("dateViewText" in $$props) $$invalidate("dateViewText", dateViewText = $$props.dateViewText);
 		if ("$config" in $$props) config.set($config = $$props.$config);
+		if ("timeViewText" in $$props) $$invalidate("timeViewText", timeViewText = $$props.timeViewText);
 		if ("monthViewText" in $$props) $$invalidate("monthViewText", monthViewText = $$props.monthViewText);
 		if ("yearViewText" in $$props) yearViewText = $$props.yearViewText;
 	};
@@ -10214,10 +10341,11 @@ function instance$4($$self, $$props, $$invalidate) {
 	let selectedMonth;
 	let selectedDate;
 	let dateViewText;
+	let timeViewText;
 	let monthViewText;
 	let yearViewText;
 
-	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, $config: 1, selectedYear: 1, cachedViewUnix: 1 }) => {
+	$$self.$$.update = (changed = { $dateObject: 1, viewUnix: 1, $config: 1, selectedYear: 1, cachedViewUnix: 1, animateSpeed: 1 }) => {
 		if (changed.$dateObject || changed.viewUnix) {
 			 $$invalidate("selectedYear", selectedYear = new $dateObject(viewUnix).year());
 		}
@@ -10227,15 +10355,19 @@ function instance$4($$self, $$props, $$invalidate) {
 		}
 
 		if (changed.$dateObject || changed.viewUnix) {
-			 $$invalidate("selectedMonth", selectedMonth = new $dateObject(viewUnix).format("MMMM"));
+			 selectedMonth = new $dateObject(viewUnix).format("MMMM");
 		}
 
 		if (changed.$dateObject || changed.viewUnix) {
-			 $$invalidate("selectedDate", selectedDate = new $dateObject(viewUnix).format("DD"));
+			 selectedDate = new $dateObject(viewUnix).format("DD");
 		}
 
 		if (changed.$config || changed.viewUnix || changed.$dateObject) {
 			 $$invalidate("dateViewText", dateViewText = $config.dayPicker.titleFormatter(viewUnix, $dateObject));
+		}
+
+		if (changed.$config || changed.viewUnix || changed.$dateObject) {
+			 $$invalidate("timeViewText", timeViewText = $config.timePicker.titleFormatter(viewUnix, $dateObject));
 		}
 
 		if (changed.$config || changed.viewUnix || changed.$dateObject) {
@@ -10246,7 +10378,7 @@ function instance$4($$self, $$props, $$invalidate) {
 			 yearViewText = $config.yearPicker.titleFormatter(viewUnix, $dateObject);
 		}
 
-		if (changed.viewUnix || changed.selectedYear || changed.cachedViewUnix) {
+		if (changed.viewUnix || changed.selectedYear || changed.cachedViewUnix || changed.$config || changed.animateSpeed) {
 			 {
 				if (viewUnix) {
 					$$invalidate("startYear", startYear = selectedYear - selectedYear % 12);
@@ -10258,14 +10390,17 @@ function instance$4($$self, $$props, $$invalidate) {
 					}
 
 					$$invalidate("cachedViewUnix", cachedViewUnix = viewUnix);
-					$$invalidate("visible", visible = false);
 
-					setTimeout(
-						() => {
-							$$invalidate("visible", visible = true);
-						},
-						400
-					);
+					if ($config.animate) {
+						$$invalidate("visible", visible = false);
+
+						setTimeout(
+							() => {
+								$$invalidate("visible", visible = true);
+							},
+							animateSpeed * 2
+						);
+					}
 				}
 			}
 		}
@@ -10281,9 +10416,9 @@ function instance$4($$self, $$props, $$invalidate) {
 		prev,
 		startYear,
 		visible,
-		selectedMonth,
-		selectedDate,
+		animateSpeed,
 		dateViewText,
+		timeViewText,
 		monthViewText,
 		click_handler,
 		click_handler_1,
@@ -10336,7 +10471,7 @@ class Navigator extends SvelteComponentDev {
 const file$5 = "src/components/Infobox.svelte";
 
 // (3:1) {#if visible}
-function create_if_block$3(ctx) {
+function create_if_block$5(ctx) {
 	let span;
 	let t;
 	let span_intro;
@@ -10362,7 +10497,7 @@ function create_if_block$3(ctx) {
 
 			add_render_callback(() => {
 				if (span_outro) span_outro.end(1);
-				if (!span_intro) span_intro = create_in_transition(span, ctx.fadeIn, { duration: animateSpeed$4, offset: 10 });
+				if (!span_intro) span_intro = create_in_transition(span, ctx.fadeIn, { duration: ctx.animateSpeed, offset: 10 });
 				span_intro.start();
 			});
 
@@ -10370,7 +10505,7 @@ function create_if_block$3(ctx) {
 		},
 		o: function outro(local) {
 			if (span_intro) span_intro.invalidate();
-			span_outro = create_out_transition(span, ctx.fadeOut, { duration: animateSpeed$4, offset: 10 });
+			span_outro = create_out_transition(span, ctx.fadeOut, { duration: ctx.animateSpeed, offset: 10 });
 			current = false;
 		},
 		d: function destroy(detaching) {
@@ -10381,7 +10516,7 @@ function create_if_block$3(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_if_block$3.name,
+		id: create_if_block$5.name,
 		type: "if",
 		source: "(3:1) {#if visible}",
 		ctx
@@ -10396,7 +10531,7 @@ function create_fragment$5(ctx) {
 	let t0;
 	let t1;
 	let current;
-	let if_block = ctx.visible && create_if_block$3(ctx);
+	let if_block = ctx.visible && create_if_block$5(ctx);
 
 	const block = {
 		c: function create() {
@@ -10428,7 +10563,7 @@ function create_fragment$5(ctx) {
 					if_block.p(changed, ctx);
 					transition_in(if_block, 1);
 				} else {
-					if_block = create_if_block$3(ctx);
+					if_block = create_if_block$5(ctx);
 					if_block.c();
 					transition_in(if_block, 1);
 					if_block.m(div, null);
@@ -10469,8 +10604,6 @@ function create_fragment$5(ctx) {
 	return block;
 }
 
-let animateSpeed$4 = 100;
-
 function instance$5($$self, $$props, $$invalidate) {
 	let $config;
 	let $dateObject;
@@ -10507,6 +10640,7 @@ function instance$5($$self, $$props, $$invalidate) {
 	let { selectedUnix } = $$props;
 	let oldotherPart;
 	let visible;
+	let animateSpeed = $config.animateSpeed;
 	let cachedSelectedUnix = viewUnix;
 	let transitionDirectionForward = true;
 	const writable_props = ["viewUnix", "selectedUnix"];
@@ -10526,7 +10660,7 @@ function instance$5($$self, $$props, $$invalidate) {
 			selectedUnix,
 			oldotherPart,
 			visible,
-			animateSpeed: animateSpeed$4,
+			animateSpeed,
 			cachedSelectedUnix,
 			transitionDirectionForward,
 			title,
@@ -10541,7 +10675,7 @@ function instance$5($$self, $$props, $$invalidate) {
 		if ("selectedUnix" in $$props) $$invalidate("selectedUnix", selectedUnix = $$props.selectedUnix);
 		if ("oldotherPart" in $$props) oldotherPart = $$props.oldotherPart;
 		if ("visible" in $$props) $$invalidate("visible", visible = $$props.visible);
-		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed$4 = $$props.animateSpeed);
+		if ("animateSpeed" in $$props) $$invalidate("animateSpeed", animateSpeed = $$props.animateSpeed);
 		if ("cachedSelectedUnix" in $$props) $$invalidate("cachedSelectedUnix", cachedSelectedUnix = $$props.cachedSelectedUnix);
 		if ("transitionDirectionForward" in $$props) transitionDirectionForward = $$props.transitionDirectionForward;
 		if ("title" in $$props) $$invalidate("title", title = $$props.title);
@@ -10553,7 +10687,7 @@ function instance$5($$self, $$props, $$invalidate) {
 	let title;
 	let selectedDAte;
 
-	$$self.$$.update = (changed = { $config: 1, selectedUnix: 1, $dateObject: 1, selectedDAte: 1, cachedSelectedUnix: 1 }) => {
+	$$self.$$.update = (changed = { $config: 1, selectedUnix: 1, $dateObject: 1, selectedDAte: 1, cachedSelectedUnix: 1, animateSpeed: 1 }) => {
 		if (changed.$config || changed.selectedUnix || changed.$dateObject) {
 			 $$invalidate("title", title = $config.infobox.titleFormatter(selectedUnix, $dateObject));
 		}
@@ -10562,7 +10696,7 @@ function instance$5($$self, $$props, $$invalidate) {
 			 $$invalidate("selectedDAte", selectedDAte = $config.infobox.selectedDateFormatter(selectedUnix, $dateObject));
 		}
 
-		if (changed.selectedDAte || changed.selectedUnix || changed.cachedSelectedUnix) {
+		if (changed.selectedDAte || changed.selectedUnix || changed.cachedSelectedUnix || changed.$config || changed.animateSpeed) {
 			 if (selectedDAte) {
 				if (selectedUnix > cachedSelectedUnix) {
 					transitionDirectionForward = true;
@@ -10571,14 +10705,17 @@ function instance$5($$self, $$props, $$invalidate) {
 				}
 
 				$$invalidate("cachedSelectedUnix", cachedSelectedUnix = selectedUnix);
-				$$invalidate("visible", visible = false);
 
-				setTimeout(
-					() => {
-						$$invalidate("visible", visible = true);
-					},
-					200
-				);
+				if ($config.animate) {
+					$$invalidate("visible", visible = false);
+
+					setTimeout(
+						() => {
+							$$invalidate("visible", visible = true);
+						},
+						animateSpeed * 2
+					);
+				}
 			}
 		}
 	};
@@ -10589,6 +10726,7 @@ function instance$5($$self, $$props, $$invalidate) {
 		viewUnix,
 		selectedUnix,
 		visible,
+		animateSpeed,
 		title,
 		selectedDAte
 	};
@@ -10875,7 +11013,7 @@ function create_if_block_2$3(ctx) {
 }
 
 // (39:1) {#if $config.toolbox.submitButton.enabled}
-function create_if_block$4(ctx) {
+function create_if_block$6(ctx) {
 	let button;
 	let dispose;
 
@@ -10899,7 +11037,7 @@ function create_if_block$4(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_if_block$4.name,
+		id: create_if_block$6.name,
 		type: "if",
 		source: "(39:1) {#if $config.toolbox.submitButton.enabled}",
 		ctx
@@ -10918,7 +11056,7 @@ function create_fragment$6(ctx) {
 	let if_block1 = ctx.viewMode === "time" && create_if_block_5(ctx);
 	let if_block2 = ctx.$config.toolbox.todayButton.enabled && create_if_block_4$2(ctx);
 	let if_block3 = ctx.$config.toolbox.calendarSwitch.enabled && create_if_block_1$3(ctx);
-	let if_block4 = ctx.$config.toolbox.submitButton.enabled && create_if_block$4(ctx);
+	let if_block4 = ctx.$config.toolbox.submitButton.enabled && create_if_block$6(ctx);
 
 	const block = {
 		c: function create() {
@@ -11007,7 +11145,7 @@ function create_fragment$6(ctx) {
 				if (if_block4) {
 					if_block4.p(changed, ctx);
 				} else {
-					if_block4 = create_if_block$4(ctx);
+					if_block4 = create_if_block$6(ctx);
 					if_block4.c();
 					if_block4.m(div, null);
 				}
@@ -11226,9 +11364,8 @@ function instance$7($$self, $$props, $$invalidate) {
 	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
 	let { originalContainer } = $$props;
 	let { plotarea } = $$props;
-	const dispatch = createEventDispatcher();
 
-	let setPlotPostion = function () {
+	let { setPlotPostion = function () {
 		let configLeft = $config.position !== "auto" ? $config.position[0] : 0;
 		let configTop = $config.position !== "auto" ? $config.position[1] : 0;
 
@@ -11242,41 +11379,17 @@ function instance$7($$self, $$props, $$invalidate) {
 			}
 		};
 
-		setTimeout(
-			() => {
-				set();
-			},
-			100
-		);
+		set();
 
 		setTimeout(
 			() => {
 				set();
 			},
-			200
+			0
 		);
+	} } = $$props;
 
-		setTimeout(
-			() => {
-				set();
-			},
-			300
-		);
-
-		setTimeout(
-			() => {
-				set();
-			},
-			1000
-		);
-
-		setTimeout(
-			() => {
-				set();
-			},
-			1500
-		);
-	};
+	const dispatch = createEventDispatcher();
 
 	let initInputEvents = function () {
 		let bodyListener = e => {
@@ -11288,8 +11401,8 @@ function instance$7($$self, $$props, $$invalidate) {
 
 		if (originalContainer && originalContainer.tagName === "INPUT") {
 			originalContainer.addEventListener("focus", () => {
-				dispatch("setvisibility", true);
 				setPlotPostion();
+				dispatch("setvisibility", true);
 				document.addEventListener("click", bodyListener);
 			});
 		}
@@ -11356,7 +11469,7 @@ function instance$7($$self, $$props, $$invalidate) {
 		initInputObserver();
 	}
 
-	const writable_props = ["originalContainer", "plotarea"];
+	const writable_props = ["originalContainer", "plotarea", "setPlotPostion"];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Input> was created with unknown prop '${key}'`);
@@ -11365,6 +11478,7 @@ function instance$7($$self, $$props, $$invalidate) {
 	$$self.$set = $$props => {
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
 		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
+		if ("setPlotPostion" in $$props) $$invalidate("setPlotPostion", setPlotPostion = $$props.setPlotPostion);
 	};
 
 	$$self.$capture_state = () => {
@@ -11386,7 +11500,7 @@ function instance$7($$self, $$props, $$invalidate) {
 	$$self.$inject_state = $$props => {
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
 		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
-		if ("setPlotPostion" in $$props) setPlotPostion = $$props.setPlotPostion;
+		if ("setPlotPostion" in $$props) $$invalidate("setPlotPostion", setPlotPostion = $$props.setPlotPostion);
 		if ("initInputEvents" in $$props) initInputEvents = $$props.initInputEvents;
 		if ("initInputObserver" in $$props) initInputObserver = $$props.initInputObserver;
 		if ("updateInputs" in $$props) $$invalidate("updateInputs", updateInputs = $$props.updateInputs);
@@ -11407,13 +11521,22 @@ function instance$7($$self, $$props, $$invalidate) {
 		}
 	};
 
-	return { originalContainer, plotarea };
+	return {
+		originalContainer,
+		plotarea,
+		setPlotPostion
+	};
 }
 
 class Input extends SvelteComponentDev {
 	constructor(options) {
 		super(options);
-		init(this, options, instance$7, create_fragment$7, safe_not_equal, { originalContainer: 0, plotarea: 0 });
+
+		init(this, options, instance$7, create_fragment$7, safe_not_equal, {
+			originalContainer: 0,
+			plotarea: 0,
+			setPlotPostion: 0
+		});
 
 		dispatch_dev("SvelteRegisterComponent", {
 			component: this,
@@ -11435,27 +11558,38 @@ class Input extends SvelteComponentDev {
 	}
 
 	get originalContainer() {
-		throw new Error("<Input>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx.originalContainer;
 	}
 
-	set originalContainer(value) {
-		throw new Error("<Input>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set originalContainer(originalContainer) {
+		this.$set({ originalContainer });
+		flush();
 	}
 
 	get plotarea() {
-		throw new Error("<Input>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx.plotarea;
 	}
 
-	set plotarea(value) {
-		throw new Error("<Input>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set plotarea(plotarea) {
+		this.$set({ plotarea });
+		flush();
+	}
+
+	get setPlotPostion() {
+		return this.$$.ctx.setPlotPostion;
+	}
+
+	set setPlotPostion(setPlotPostion) {
+		this.$set({ setPlotPostion });
+		flush();
 	}
 }
 
-/* src/app.svelte generated by Svelte v3.15.0 */
-const file$7 = "src/app.svelte";
+/* src/App.svelte generated by Svelte v3.15.0 */
+const file$7 = "src/App.svelte";
 
 // (2:0) {#if isVisbile}
-function create_if_block$5(ctx) {
+function create_if_block$7(ctx) {
 	let div1;
 	let t0;
 	let t1;
@@ -11484,9 +11618,9 @@ function create_if_block$5(ctx) {
 			t3 = space();
 			if (if_block4) if_block4.c();
 			attr_dev(div0, "class", "pwt-datepicker-picker-section");
-			add_location(div0, file$7, 21, 3, 538);
+			add_location(div0, file$7, 21, 3, 569);
 			attr_dev(div1, "class", "pwt-datepicker");
-			add_location(div1, file$7, 2, 1, 39);
+			add_location(div1, file$7, 2, 1, 70);
 			dispose = listen_dev(div1, "wheel", ctx.handleWheel, false, false, false);
 		},
 		m: function mount(target, anchor) {
@@ -11636,7 +11770,7 @@ function create_if_block$5(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_if_block$5.name,
+		id: create_if_block$7.name,
 		type: "if",
 		source: "(2:0) {#if isVisbile}",
 		ctx
@@ -11897,7 +12031,7 @@ function create_if_block_6$1(ctx) {
 		c: function create() {
 			div = element("div");
 			create_component(yearview.$$.fragment);
-			add_location(div, file$7, 25, 6, 702);
+			add_location(div, file$7, 25, 6, 733);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -11965,7 +12099,7 @@ function create_if_block_5$1(ctx) {
 		c: function create() {
 			div = element("div");
 			create_component(monthview.$$.fragment);
-			add_location(div, file$7, 34, 6, 980);
+			add_location(div, file$7, 34, 6, 1011);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -12035,7 +12169,7 @@ function create_if_block_4$3(ctx) {
 		c: function create() {
 			div = element("div");
 			create_component(dateview.$$.fragment);
-			add_location(div, file$7, 43, 6, 1256);
+			add_location(div, file$7, 43, 6, 1287);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -12100,7 +12234,7 @@ function create_if_block_2$4(ctx) {
 		c: function create() {
 			div = element("div");
 			create_component(timeview.$$.fragment);
-			add_location(div, file$7, 55, 5, 1627);
+			add_location(div, file$7, 55, 5, 1658);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -12206,54 +12340,45 @@ function create_if_block_1$4(ctx) {
 }
 
 function create_fragment$8(ctx) {
-	let t0;
-	let t1;
-	let t2;
+	let t;
 	let current;
-	let if_block = ctx.isVisbile && create_if_block$5(ctx);
+	let if_block = ctx.isVisbile && create_if_block$7(ctx);
 
-	const input = new Input({
-			props: {
-				plotarea: ctx.plotarea,
-				originalContainer: ctx.originalContainer
-			},
-			$$inline: true
-		});
+	let input_props = {
+		plotarea: ctx.plotarea,
+		originalContainer: ctx.originalContainer
+	};
 
+	const input = new Input({ props: input_props, $$inline: true });
+	ctx.input_binding(input);
 	input.$on("setinitialvalue", ctx.setInitialValue);
 	input.$on("setvisibility", ctx.setvisibility);
 
 	const block = {
 		c: function create() {
-			t0 = text(ctx.originalContainer);
-			t1 = space();
 			if (if_block) if_block.c();
-			t2 = space();
+			t = space();
 			create_component(input.$$.fragment);
 		},
 		l: function claim(nodes) {
 			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
 		},
 		m: function mount(target, anchor) {
-			insert_dev(target, t0, anchor);
-			insert_dev(target, t1, anchor);
 			if (if_block) if_block.m(target, anchor);
-			insert_dev(target, t2, anchor);
+			insert_dev(target, t, anchor);
 			mount_component(input, target, anchor);
 			current = true;
 		},
 		p: function update(changed, ctx) {
-			if (!current || changed.originalContainer) set_data_dev(t0, ctx.originalContainer);
-
 			if (ctx.isVisbile) {
 				if (if_block) {
 					if_block.p(changed, ctx);
 					transition_in(if_block, 1);
 				} else {
-					if_block = create_if_block$5(ctx);
+					if_block = create_if_block$7(ctx);
 					if_block.c();
 					transition_in(if_block, 1);
-					if_block.m(t2.parentNode, t2);
+					if_block.m(t.parentNode, t);
 				}
 			} else if (if_block) {
 				group_outros();
@@ -12282,10 +12407,9 @@ function create_fragment$8(ctx) {
 			current = false;
 		},
 		d: function destroy(detaching) {
-			if (detaching) detach_dev(t0);
-			if (detaching) detach_dev(t1);
 			if (if_block) if_block.d(detaching);
-			if (detaching) detach_dev(t2);
+			if (detaching) detach_dev(t);
+			ctx.input_binding(null);
 			destroy_component(input, detaching);
 		}
 	};
@@ -12302,57 +12426,125 @@ function create_fragment$8(ctx) {
 }
 
 function instance$8($$self, $$props, $$invalidate) {
-	let $config;
-	let $viewUnix;
 	let $selectedUnix;
+	let $viewUnix;
+	let $config;
+	let $dateObject;
 	let $privateViewModeDerived;
-	validate_store(config, "config");
-	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
-	validate_store(viewUnix, "viewUnix");
-	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
 	validate_store(selectedUnix, "selectedUnix");
 	component_subscribe($$self, selectedUnix, $$value => $$invalidate("$selectedUnix", $selectedUnix = $$value));
+	validate_store(viewUnix, "viewUnix");
+	component_subscribe($$self, viewUnix, $$value => $$invalidate("$viewUnix", $viewUnix = $$value));
+	validate_store(config, "config");
+	component_subscribe($$self, config, $$value => $$invalidate("$config", $config = $$value));
+	validate_store(dateObject, "dateObject");
+	component_subscribe($$self, dateObject, $$value => $$invalidate("$dateObject", $dateObject = $$value));
 	validate_store(privateViewModeDerived, "privateViewModeDerived");
 	component_subscribe($$self, privateViewModeDerived, $$value => $$invalidate("$privateViewModeDerived", $privateViewModeDerived = $$value));
-	const dispatch = createEventDispatcher();
+	let plotarea;
+	let inputComp;
+	let isVisbile = false;
+	let { options = {} } = $$props;
+	let { originalContainer = null } = $$props;
+	let { model = null } = $$props;
 
-	const dispatcher = function (input) {
-		dispatch(input);
+	const setDate = function (unix) {
+		dispatcher("setDate")(unix);
+	};
 
-		if (options[input]) {
-			return event => options[input](event);
-		} else {
-			return event => {
-				actions[input](event);
-			};
+	const show = function () {
+		setvisibility({ detail: true });
+	};
+
+	const hide = function () {
+		setvisibility({ detail: false });
+	};
+
+	const toggle = function () {
+		setvisibility({ detail: !isVisbile });
+	};
+
+	const destroy = function () {
+		if (plotarea.parentNode && plotarea.parentNode.removeChild) {
+			plotarea.parentNode.removeChild(plotarea);
 		}
 	};
 
-	let { options = {} } = $$props;
-	let { originalContainer = null } = $$props;
-	let plotarea;
-	let isVisbile = false;
+	const getState = function () {
+		return {
+			selected: $selectedUnix,
+			view: $viewUnix,
+			config: $config,
+			dateObject: $dateObject
+		};
+	};
+
+	const setOptions = function (newOptions) {
+		dispatcher("setConfig")(lodash.merge($config, newOptions));
+	};
+
+	const getOptions = function () {
+		return $config;
+	};
+
+	const dispatch = createEventDispatcher();
+
+	const dispatcher = function (input) {
+		return event => {
+			dispatch(input, event);
+
+			if (options[input]) {
+				return event => options[input](event);
+			}
+
+			if (actions[input]) {
+				actions[input](event);
+			}
+		};
+	};
+
+	let cashedoptions = options;
+
+	if (!options) {
+		$$invalidate("options", options = defaultconfig);
+	} else {
+		$$invalidate("options", options = lodash.merge(defaultconfig, options));
+	}
+
+	dispatcher("setConfig")(options);
+	let cashedSelectedDate = $selectedUnix;
+
+	if (model) {
+		dispatcher("setDate")(parseInt(model));
+		$$invalidate("cashedSelectedDate", cashedSelectedDate = parseInt(model));
+	}
 
 	const setvisibility = function (payload) {
 		$$invalidate("isVisbile", isVisbile = payload.detail);
+
+		if (inputComp) {
+			inputComp.setPlotPostion();
+		}
 
 		setTimeout(
 			() => {
 				if (plotarea) {
 					$$invalidate("plotarea", plotarea.style.display = isVisbile ? "block" : "none", plotarea);
 				}
-			},
-			0
-		);
 
-		if (isVisbile) {
-			$config.onShow();
-		} else {
-			$config.onHide();
-		}
+				if (isVisbile) {
+					$config.onShow();
+				} else {
+					$config.onHide();
+				}
+			},
+			150
+		);
 	};
 
-	setvisibility({ detail: true });
+	if ($config.inline) {
+		setvisibility({ detail: true });
+	}
 
 	const setInitialValue = function (event) {
 		dispatcher("setFromDefaultValue")(event.detail);
@@ -12374,20 +12566,25 @@ function instance$8($$self, $$props, $$invalidate) {
 		if ($config.autoClose) {
 			setvisibility({ detail: false });
 		}
+
+		dispatcher("onSelect")($config.altFieldFormatter($selectedUnix, $dateObject));
 	};
 
 	const onSelectTime = function (event) {
 		dispatcher("onSelectTime")(event);
+		dispatcher("onSelect")($selectedUnix);
 	};
 
 	const onSelectMonth = function (event) {
 		dispatcher("onSelectMonth")(event.detail);
 		$config.monthPicker.onSelect(event.detail);
+		dispatcher("onSelect")($selectedUnix);
 	};
 
 	const onSelectYear = function (event) {
 		dispatcher("onSelectYear")(event.detail);
 		$config.yearPicker.onSelect(event.detail);
+		dispatcher("onSelect")($selectedUnix);
 	};
 
 	const today = event => {
@@ -12427,7 +12624,7 @@ function instance$8($$self, $$props, $$invalidate) {
 		}
 	};
 
-	const writable_props = ["options", "originalContainer"];
+	const writable_props = ["options", "originalContainer", "model"];
 
 	Object.keys($$props).forEach(key => {
 		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
@@ -12439,54 +12636,93 @@ function instance$8($$self, $$props, $$invalidate) {
 		});
 	}
 
+	function input_binding($$value) {
+		binding_callbacks[$$value ? "unshift" : "push"](() => {
+			$$invalidate("inputComp", inputComp = $$value);
+		});
+	}
+
 	$$self.$set = $$props => {
 		if ("options" in $$props) $$invalidate("options", options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
+		if ("model" in $$props) $$invalidate("model", model = $$props.model);
 	};
 
 	$$self.$capture_state = () => {
 		return {
+			plotarea,
+			inputComp,
+			isVisbile,
 			options,
 			originalContainer,
-			plotarea,
-			isVisbile,
-			$config,
-			$viewUnix,
+			model,
+			cashedoptions,
+			cashedSelectedDate,
 			$selectedUnix,
+			$viewUnix,
+			$config,
+			$dateObject,
 			$privateViewModeDerived
 		};
 	};
 
 	$$self.$inject_state = $$props => {
+		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
+		if ("inputComp" in $$props) $$invalidate("inputComp", inputComp = $$props.inputComp);
+		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
 		if ("options" in $$props) $$invalidate("options", options = $$props.options);
 		if ("originalContainer" in $$props) $$invalidate("originalContainer", originalContainer = $$props.originalContainer);
-		if ("plotarea" in $$props) $$invalidate("plotarea", plotarea = $$props.plotarea);
-		if ("isVisbile" in $$props) $$invalidate("isVisbile", isVisbile = $$props.isVisbile);
-		if ("$config" in $$props) config.set($config = $$props.$config);
-		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
+		if ("model" in $$props) $$invalidate("model", model = $$props.model);
+		if ("cashedoptions" in $$props) $$invalidate("cashedoptions", cashedoptions = $$props.cashedoptions);
+		if ("cashedSelectedDate" in $$props) $$invalidate("cashedSelectedDate", cashedSelectedDate = $$props.cashedSelectedDate);
 		if ("$selectedUnix" in $$props) selectedUnix.set($selectedUnix = $$props.$selectedUnix);
+		if ("$viewUnix" in $$props) viewUnix.set($viewUnix = $$props.$viewUnix);
+		if ("$config" in $$props) config.set($config = $$props.$config);
+		if ("$dateObject" in $$props) dateObject.set($dateObject = $$props.$dateObject);
 		if ("$privateViewModeDerived" in $$props) privateViewModeDerived.set($privateViewModeDerived = $$props.$privateViewModeDerived);
 	};
 
-	$$self.$$.update = (changed = { options: 1 }) => {
-		if (changed.options) {
+	$$self.$$.update = (changed = { cashedoptions: 1, options: 1, model: 1, cashedSelectedDate: 1, $selectedUnix: 1 }) => {
+		if (changed.cashedoptions || changed.options) {
 			 {
-				if (!options) {
-					$$invalidate("options", options = defaultconfig);
-				} else {
-					$$invalidate("options", options = lodash.merge(defaultconfig, options));
-				}
+				if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
+					if (!options) {
+						$$invalidate("options", options = defaultconfig);
+					} else {
+						$$invalidate("options", options = lodash.merge(defaultconfig, options));
+					}
 
-				dispatcher("setConfig")(options);
+					dispatcher("setConfig")(options);
+					$$invalidate("cashedoptions", cashedoptions = options);
+				}
+			}
+		}
+
+		if (changed.model || changed.cashedSelectedDate || changed.$selectedUnix) {
+			 {
+				if (model && model !== cashedSelectedDate) {
+					dispatcher("setDate")(parseInt(model));
+					$$invalidate("cashedSelectedDate", cashedSelectedDate = $selectedUnix);
+				}
 			}
 		}
 	};
 
 	return {
+		plotarea,
+		inputComp,
+		isVisbile,
 		options,
 		originalContainer,
-		plotarea,
-		isVisbile,
+		model,
+		setDate,
+		show,
+		hide,
+		toggle,
+		destroy,
+		getState,
+		setOptions,
+		getOptions,
 		setvisibility,
 		setInitialValue,
 		setViewMode,
@@ -12500,18 +12736,32 @@ function instance$8($$self, $$props, $$invalidate) {
 		navPrev,
 		setViewModeToUpperAvailableLevel,
 		handleWheel,
-		$config,
-		$viewUnix,
 		$selectedUnix,
+		$viewUnix,
+		$config,
 		$privateViewModeDerived,
-		div1_binding
+		div1_binding,
+		input_binding
 	};
 }
 
 class App extends SvelteComponentDev {
 	constructor(options) {
 		super(options);
-		init(this, options, instance$8, create_fragment$8, safe_not_equal, { options: 0, originalContainer: 0 });
+
+		init(this, options, instance$8, create_fragment$8, not_equal, {
+			options: 0,
+			originalContainer: 0,
+			model: 0,
+			setDate: 0,
+			show: 0,
+			hide: 0,
+			toggle: 0,
+			destroy: 0,
+			getState: 0,
+			setOptions: 0,
+			getOptions: 0
+		});
 
 		dispatch_dev("SvelteRegisterComponent", {
 			component: this,
@@ -12522,19 +12772,94 @@ class App extends SvelteComponentDev {
 	}
 
 	get options() {
-		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx.options;
 	}
 
-	set options(value) {
-		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set options(options) {
+		this.$set({ options });
+		flush();
 	}
 
 	get originalContainer() {
-		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+		return this.$$.ctx.originalContainer;
 	}
 
-	set originalContainer(value) {
-		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+	set originalContainer(originalContainer) {
+		this.$set({ originalContainer });
+		flush();
+	}
+
+	get model() {
+		return this.$$.ctx.model;
+	}
+
+	set model(model) {
+		this.$set({ model });
+		flush();
+	}
+
+	get setDate() {
+		return this.$$.ctx.setDate;
+	}
+
+	set setDate(value) {
+		throw new Error("<App>: Cannot set read-only property 'setDate'");
+	}
+
+	get show() {
+		return this.$$.ctx.show;
+	}
+
+	set show(value) {
+		throw new Error("<App>: Cannot set read-only property 'show'");
+	}
+
+	get hide() {
+		return this.$$.ctx.hide;
+	}
+
+	set hide(value) {
+		throw new Error("<App>: Cannot set read-only property 'hide'");
+	}
+
+	get toggle() {
+		return this.$$.ctx.toggle;
+	}
+
+	set toggle(value) {
+		throw new Error("<App>: Cannot set read-only property 'toggle'");
+	}
+
+	get destroy() {
+		return this.$$.ctx.destroy;
+	}
+
+	set destroy(value) {
+		throw new Error("<App>: Cannot set read-only property 'destroy'");
+	}
+
+	get getState() {
+		return this.$$.ctx.getState;
+	}
+
+	set getState(value) {
+		throw new Error("<App>: Cannot set read-only property 'getState'");
+	}
+
+	get setOptions() {
+		return this.$$.ctx.setOptions;
+	}
+
+	set setOptions(value) {
+		throw new Error("<App>: Cannot set read-only property 'setOptions'");
+	}
+
+	get getOptions() {
+		return this.$$.ctx.getOptions;
+	}
+
+	set getOptions(value) {
+		throw new Error("<App>: Cannot set read-only property 'getOptions'");
 	}
 }
 
