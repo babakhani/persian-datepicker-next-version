@@ -52,8 +52,8 @@ module.exports = {
     logo: image,
     sidebar: [
       ['/getting-started', 'Getting Started'],
-      ['/document', 'Document'],
       ['/example', 'Examples'],
+      ['/options', 'Options'],
       ['/changes', 'Changes'],
       ['/contributing', 'Contribution'],
     ],
