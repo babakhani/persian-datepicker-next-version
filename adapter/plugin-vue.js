@@ -1,4 +1,4 @@
-import SvelteApp from '../src/app.svelte'
+import SvelteApp from '../src/App.svelte'
 export default{
   render(createElement) {
     return createElement('div', {

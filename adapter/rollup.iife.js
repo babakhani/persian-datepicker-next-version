@@ -21,7 +21,7 @@ export default {
     sourcemap: false,
     format: 'iife',
     extend: true,
-    name: 'pwtdatepicker',
+    name: 'persianDatepicker',
     file: `dist/pwt-datepicker-iife.js`,
   },
   plugins: [

@@ -272,7 +272,7 @@
       onSet: function (unixDate) { console.log('user event onSet') },
       onDestroy: function (unixDate) { console.log('user event onDestroy') }
     }
-    window.datepicker = window['pwt-datepicker'](container, options)
+    window.datepicker = pwtdatepicker(container, options)
     // Check the datepicker instance
     console.log("Datepicker Instance")
     console.log(datepicker)

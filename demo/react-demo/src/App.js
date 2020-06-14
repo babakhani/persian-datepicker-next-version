@@ -8,6 +8,7 @@ export default class TodoApp extends React.Component {
     super(props)
     this.state = {
       calendarType: 'persian',
+      inline: true,
       viewMode: 'day',
       navigatorEnabled: true
     }
@@ -34,6 +35,7 @@ export default class TodoApp extends React.Component {
       <SveltePlugin
       options={{
         calendarType: this.state.calendarType,
+          inline: this.state.inline,
           viewMode: this.state.viewMode,
           navigator: {
             enabled: this.state.navigatorEnabled === 'true',
