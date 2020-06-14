@@ -8,7 +8,7 @@
  *     
  */
 
-this.zerounip = (function () {
+this.pwtdatepicker = (function () {
     'use strict';
 
     function noop() { }

@@ -269,9 +269,9 @@
   </div>
 </template>
 <script>
-import Datepicker from '../../../dist/zerounip-vue.js'
+import Datepicker from '../../../dist/pwt-datepicker-vue.js'
 // eslint-disable-next-line no-unused-vars
-import styles from '../../../dist/zerounip.css'
+import styles from '../../../dist/pwt-datepicker.css'
 import ConfigSelect from './Select.vue'
 import ConfigText from './Text.vue'
 import ConfigSwitch from './Switch.vue'

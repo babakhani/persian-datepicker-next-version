@@ -23,14 +23,14 @@ export default {
     format: 'esm',
     extend: true,
     name: pkg.name,
-    file: `dist/zerounip-react.js`,
+    file: `dist/pwt-datepicker-react.js`,
   },
   plugins: [
     svelte({
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`dist/zerounip.css`)
+        css.write(`dist/pwt-datepicker.css`)
       },
     }),
     resolve({

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
 	<title>IIFE Demo | Persian Datepicker </title>
-  <link rel="stylesheet" href="zerounip.css">
+  <link rel="stylesheet" href="pwt-datepicker.css">
   <script type="text/javascript" src="http://babakhani.github.io/PersianWebToolkit/doc/lib/persian-date/dist/persian-date.js" ></script>
-  <script type="text/javascript" src="./zerounip-iife.js" ></script>
+  <script type="text/javascript" src="./pwt-datepicker-iife.js" ></script>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
   <style>
     html {
@@ -272,7 +272,7 @@
       onSet: function (unixDate) { console.log('user event onSet') },
       onDestroy: function (unixDate) { console.log('user event onDestroy') }
     }
-    window.datepicker = zerounip(container, options)
+    window.datepicker = window['pwt-datepicker'](container, options)
     // Check the datepicker instance
     console.log("Datepicker Instance")
     console.log(datepicker)

@@ -1,8 +1,8 @@
 import React from 'react'
 import logo from './logo.svg'
 import './App.css'
-import SveltePlugin from './zerounip-react.js'
-import Styles from './zerounip.css'
+import SveltePlugin from './pwt-datepicker-react.js'
+import Styles from './pwt-datepicker.css'
 export default class TodoApp extends React.Component {
   constructor(props) {
     super(props)

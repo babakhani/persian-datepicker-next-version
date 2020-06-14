@@ -22,14 +22,14 @@ export default { input: 'adapter/main.js',
     format: 'iife',
     extend: true,
     name: pkg.name,
-    file: `dist/zerounip.js`,
+    file: `dist/pwt-datepicker.js`,
   },
   plugins: [
     svelte({
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`dist/zerounip.css`)
+        css.write(`dist/pwt-datepicker.css`)
       },
     }),
     resolve({

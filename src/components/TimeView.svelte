@@ -173,7 +173,6 @@
 		.pwt-date-time-section {
 			display: block;
 			height: 100%;
-			width: 25%;
 			float: left;
 			// outline: 1px solid red !important;
 			position: relative;

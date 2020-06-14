@@ -116,18 +116,18 @@
 	function selectDate(payload) { dispatch('selectDate', payload) }
 
 	$: selectedDay = new $dateObject(selectedUnix).startOf('day');
-  
+
 
 	const getHintText = function (day) {
 		let out
 		if ($config.calendarType === 'persian') {
-		  $dateObject.toCalendar('gregorian')
-		  out = new $dateObject(day.valueOf()).format('D')
+			$dateObject.toCalendar('gregorian')
+			out = new $dateObject(day.valueOf()).format('D')
 			$dateObject.toCalendar('persian')
 		}
 		if ($config.calendarType === 'gregorian') {
 			$dateObject.toCalendar('persian')
-		  out = new $dateObject(day.valueOf()).format('D')
+			out = new $dateObject(day.valueOf()).format('D')
 			$dateObject.toCalendar('gregorian')
 		}
 		return out

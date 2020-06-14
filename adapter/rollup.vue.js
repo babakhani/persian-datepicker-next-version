@@ -22,14 +22,14 @@ export default {
     format: 'cjs',
     extend: true,
     name: pkg.name,
-    file: `dist/zerounip-vue.js`,
+    file: `dist/pwt-datepicker-vue.js`,
   },
   plugins: [
     svelte({
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`dist/zerounip.css`)
+        css.write(`dist/pwt-datepicker.css`)
       },
     }),
     resolve({
