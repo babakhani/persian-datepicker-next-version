@@ -42,6 +42,24 @@ npm run install-react-demo
 npm run react 
 ```
 
+#### Start doc server
+
+```
+npm run docs:dev 
+```
+
+#### Build the documents
+
+```
+npm run docs:build 
+```
+
+#### Build the projects 
+
+```
+npm run build 
+```
+
 #### Kill node process on ports
 
 ```
