@@ -4,10 +4,10 @@
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width'>
 	<title>Svelte Demo | Persian Datepicker </title>
-	<link rel='stylesheet' href='/zerounip.css'>
-	<script defer src='/zerounip.js?11'></script>
+	<link rel='stylesheet' href='/pwt-datepicker.css'>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
   <script type="text/javascript" src="http://babakhani.github.io/PersianWebToolkit/doc/lib/persian-date/dist/persian-date.js" ></script>
+	<script defer src='/pwt-datepicker.js'></script>
   <style>
     html {
       font-family: 'Open Sans', sans-serif;
@@ -81,6 +81,11 @@
     </h1>
   </header>
   <div
+    inline="true"
+    calendar-type="persian"
+    min-date="1593425713933"
+    min-date="1593425713933"
+    view-mode="day"
     class="demo-box"
     id="container"></div>
   <div

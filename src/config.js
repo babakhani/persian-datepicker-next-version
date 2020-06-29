@@ -161,7 +161,7 @@ export default {
      * @type {string}
      * @default 'day'
      */
-    'viewMode': 'month',
+    'viewMode': 'day',
 
 
     /**
