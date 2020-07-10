@@ -2,13 +2,37 @@ context('Continues dates', () => {
   beforeEach(() => {
     cy.visit('http://localhost:8000/test.html')
 
+    const waitTime1 = 100
+    const waitTime2 = 500
+
     // go to 1/1/1300
+    // open month picker
     cy.get('.pwt-date-navigator-button').click()
-    cy.wait(300)
+    // open year picker
+    cy.wait(waitTime1)
     cy.get('.pwt-date-navigator-button').click()
-    cy.wait(300)
-    cy.contains('1400').click()
-    cy.wait(300)
+
+    // navigate previous years
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+    cy.wait(waitTime1)
+    cy.get('.pwt-date-navigator-next').click()
+
+    cy.wait(waitTime2)
+    cy.contains('1300').click()
+    cy.wait(waitTime2)
     cy.contains('فروردین').click()
   })
 
