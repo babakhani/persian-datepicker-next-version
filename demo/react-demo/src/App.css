@@ -5,50 +5,75 @@ header {
   display: block;
   width: 100%;
   float: left;
-  margin-bottom: 20px;
+  height: 80px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 header h1 {
   display: block;
   float: left;
-  margin-top: 30px;
+  margin-top: 10px;
   margin-left: 1em;
 }
 
 .platform-logo {
   float: left;
-  max-width: 120px;
-  max-height: 120px;
+  max-height: 60px;
 }
 
 .demo-box {
   display: block;
   float: left;
+  min-height: calc(100vh - 80px);
   width: 20%;
   padding: 0;
+  padding-top: 20px;
   margin: 0;
 }
+
 .config-area {
   display: block;
   float: left;
-  width: 70%;
-  padding: 0;
+  width: 80%;
+  padding:0 20px 20px 20px;
   margin: 0;
-  background: #f1f1f1;
-  padding: 20px;
+  background: rgba(250, 250, 250, 0.8);
+  padding-bottom: 20px;
+  overflow: auto;
+  max-height: calc(100vh - 80px);
+}
+
+h4 {
+  display: block;
+  width: 100%;
+  float: left;
+  margin-top: 1.2em;
+}
+
+.config-selector-element {
+  display: block;
+  width: 100%;
+  float: left;
+  border-bottom: 1px solid #cccccc;
+  padding-bottom: 10px;
 }
 
 label {
   display: block;
   float: left;
-  width: 100%;
+  width: 20%;
+  max-width: 200px;
+  margin-top: 10px;
 }
 
 input,
 select {
   display: block;
   float: left;
-  clear: both;
   width: 250px;
   height: 38px;
   margin-top: 10px;
@@ -56,3 +81,69 @@ select {
   background: #fff;
   font-size: 1.1em;
 }
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .1s;
+  transition: .1s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .1s;
+  transition: .1s;
+  border-radius: 34px;
+}
+
+input:checked + .slider {
+  background-color: #00A693;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:disabled + .slider {
+  opacity: 0.4;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* react custom css */
+
+.help-description {
+  color: gray;
+  position: relative;
+  top: 1rem;
+  left: 1rem;
+  font-style: italic;
+}
+
