@@ -5384,9 +5384,9 @@ inherits@2.0.3:
   integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
 ini@^1.3.4, ini@^1.3.5, ini@~1.3.0:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
-  integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.7.tgz#a09363e1911972ea16d7a8851005d84cf09a9a84"
+  integrity sha512-iKpRpXP+CrP2jyrxvg1kMUpXDyRUFDWurxbnVT1vQPx+Wz9uCYsMIqYuSBLV+PAaZG/d7kRLKRFc9oDMsH+mFQ==
 
 inquirer@^7.0.0:
   version "7.0.4"
@@ -10085,15 +10085,9 @@ svelte-preprocess@^3.2.1:
     strip-indent "^3.0.0"
 
 svelte-swipe@^1.5.0:
-<<<<<<< HEAD
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/svelte-swipe/-/svelte-swipe-1.6.1.tgz#cdc5ba162565d979d833aaccd0b8eb7cfe3ad069"
-  integrity sha512-ia2riTAsduD6xjAPlzs/GFxMmUR2S9KYzngo2HtSRFrV+WmAmFAIeR19M5fYDnF7NUrY5n1cxqPevNa5CS64VQ==
-=======
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/svelte-swipe/-/svelte-swipe-1.7.1.tgz#b204d2ae0c1798b52193f677a1b94fc07ab903f7"
   integrity sha512-kHMDbfysE+QVcBAxv1b2Y0a85ZtPIomJ5SfjjcvuJ0T+rSxJ5LNhMssaRTvxLKtbwdMOQqRb0y+mK6QrC/BR6A==
->>>>>>> master
 
 svelte@^3.0.0:
   version "3.18.2"
@@ -10132,14 +10126,11 @@ swiper@^5.3.7:
     dom7 "^2.1.5"
     ssr-window "^2.0.0"
 
-<<<<<<< HEAD
 symbol-observable@^1.1.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
   integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
 
-=======
->>>>>>> master
 table@^5.2.3, table@^5.4.6:
   version "5.4.6"
   resolved "https://registry.yarnpkg.com/table/-/table-5.4.6.tgz#1292d19500ce3f86053b05f0e8e7e4a3bb21079e"
