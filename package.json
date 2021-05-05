@@ -47,7 +47,7 @@
   },
   "scripts": {
     "clear": "kill-port --port 8000,8001,8002,8003",
-    "svelte:build": "rollup -c",
+    "svelte:build": "rollup -c ./adapter/rollup.svelte.js",
     "build": "npm run lint; npm-run-all -p svelte:build vue:build react:build iife:build",
     "dev": "rollup -c ./adapter/rollup.svelte.js  -w",
     "install-vue": "cd ./demo/vue; npm install; cd ../../",

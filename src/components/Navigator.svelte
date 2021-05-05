@@ -29,12 +29,12 @@
 	<div
 		class="pwt-date-navigator-center">
 		{#if viewMode === 'year' && visible}
-			<button 
+			<span
 				out:fadeOut="{{duration: animateSpeed}}" 
 				in:fadeIn="{{duration: animateSpeed}}" 
-				class="pwt-date-navigator-button">
-				{startYear} - {startYear + 11}
-			</button>
+				class="pwt-date-navigator-text">
+				{visualStartYear} - {visualEndYear}
+			</span>
     {/if}
 		{#if viewMode === 'month' && visible}
 			<button 
@@ -106,7 +106,8 @@
 	function prev(payload) { dispatch('prev', payload) }
 
 	$: selectedYear = new $dateObject(viewUnix).year()
-	$: visualYear = new $dateObject(viewUnix).format('YYYY')
+	$: visualStartYear = new $dateObject(viewUnix).format('YYYY')
+	$: visualEndYear = new $dateObject([selectedYear+12]).format('YYYY')
 	$: selectedMonth = new $dateObject(viewUnix).format('MMMM')
 	$: selectedDate = new $dateObject(viewUnix).format('DD')
 	$: dateViewText = $config.dayPicker.titleFormatter(viewUnix, $dateObject)
@@ -153,6 +154,14 @@
 			left: 0;
 			width: 60%;
 			text-align: left;
+
+			.pwt-date-navigator-text {
+				display: block;
+				line-height: 40px;
+				font-size: .9em;
+				margin-left: .8em;
+			}
+
 			.pwt-date-navigator-button {
 				font-size: .9em;
 				cursor: pointer;

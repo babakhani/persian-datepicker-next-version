@@ -12,7 +12,7 @@ export default {
       * @since 2.0.0
       */
     'animate': true,
-    'animateSpeed': 80,
+    'animateSpeed': 180,
 
 
     /**
@@ -583,6 +583,15 @@ export default {
          */
         'enabled': true,
 
+
+        /**
+         * @description  if true timepicker will be sow after select day
+         * @type boolean
+         * @default true
+         * @Since 2.0.0
+         */
+        'showAsLastStep': true,
+
         /**
          * @description The amount that increases or decreases by pressing the button
          * @type number
@@ -596,7 +605,7 @@ export default {
          * @link http://babakhani.github.io/PersianWebToolkit/doc/persian-date/#format
          * @Since 2.0.0
          */
-        'titleFormat': 'YYYY MMMM',
+        'titleFormat': 'MMMM DD',
 
         /**
          * @description daypicker title formatter function
@@ -822,9 +831,13 @@ export default {
       'titleFormatter': function (unix, dateObject) {
         return new dateObject(unix).format(this.titleFormat)
       },
-      'selectedDateFormat': ' dddd DD MMMM',
+      'selectedDateFormat': 'dddd DD MMMM',
       'selectedDateFormatter': function (unix, dateObject) {
         return new dateObject(unix).format(this.selectedDateFormat)
+      },
+      'selectedTimeFormat': 'hh:mm:ss a',
+      'selectedTimeFormatter': function (unix, dateObject) {
+        return new dateObject(unix).format(this.selectedTimeFormat)
       }
     },
 

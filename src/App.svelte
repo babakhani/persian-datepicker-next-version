@@ -15,34 +15,34 @@
 					on:today="{today}"
 					on:next="{navNext}"
 					on:prev="{navPrev}"
-					viewMode="{$privateViewModeDerived}"
+					viewMode="{$privateViewMode}"
 					viewUnix="{$viewUnix}"
 					selectedUnix="{$selectedUnix}" />
 			{/if}
 			<div
 				class="pwt-datepicker-picker-section">
 				{#if !$config.onlyTimePicker}
-					{#if $privateViewModeDerived === 'year' && $config.yearPicker.enabled}
+					{#if $privateViewMode === 'year' && $config.yearPicker.enabled}
 						<div
-							transition:fade={{duration: 0}}>
+							transition:fade={{duration: animateSpeed}}>
 							<YearView
 								on:select="{onSelectYear}"
 								viewUnix="{$viewUnix}"
 								selectedUnix="{$selectedUnix}" />
 						</div>
 					{/if}
-					{#if $privateViewModeDerived === 'month' && $config.monthPicker.enabled}
+					{#if $privateViewMode === 'month' && $config.monthPicker.enabled}
 						<div
-							transition:fade={{duration: 0}}>
+							transition:fade={{duration: animateSpeed}}>
 							<MonthView
 								on:select="{onSelectMonth}"
 								viewUnix="{$viewUnix}"
 								selectedUnix="{$selectedUnix}" />
 						</div>
 					{/if}
-					{#if $privateViewModeDerived === 'day' && $config.dayPicker.enabled}
+					{#if $privateViewMode === 'day' && $config.dayPicker.enabled}
 						<div
-							transition:fade={{duration: 0}}>
+							transition:fade={{duration: animateSpeed}}>
 							<DateView
 								on:prev="{navPrev}"
 								on:next="{navNext}"
@@ -52,9 +52,9 @@
 						</div>
 					{/if}
 				{/if}
-				{#if ($privateViewModeDerived === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
+				{#if ($privateViewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
 					<div
-						in:fade={{duration: 500}}>
+							transition:fade={{duration: animateSpeed}}>
 						<TimeView 
 							on:selectTime="{onSelectTime}"
 							selectedUnix="{$selectedUnix}" />
@@ -68,7 +68,7 @@
 				on:today="{today}"
 				on:next="{navNext}"
 				on:prev="{navPrev}"
-				viewMode="{$privateViewModeDerived}"
+				viewMode="{$privateViewMode}"
 				viewUnix="{$viewUnix}"
 				selectedUnix="{$selectedUnix}" />
 		{/if}
@@ -92,13 +92,14 @@ originalContainer={originalContainer} />
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
-	import { config, actions, selectedUnix, viewUnix, privateViewModeDerived, dateObject } from './stores.js'
+	import { config, actions, selectedUnix, viewUnix, privateViewMode, dateObject } from './stores.js'
 	import { createEventDispatcher } from 'svelte'
 	import lodash from 'lodash'
 
 	let plotarea
 	let inputComp
 	let isVisbile = false
+	let animateSpeed = $config.animate ? $config.animateSpeed : 0
 
 	// Public props used in adapters
 	export let options = {}

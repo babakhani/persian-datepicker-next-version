@@ -119,7 +119,7 @@
 		div {
 			margin: auto;
 			width: 33.33%;
-			height: 25%; 
+			height: 24%; 
 			vertical-align: middle;
 			text-align: center;
 			float: left;

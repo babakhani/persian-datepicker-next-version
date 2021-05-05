@@ -1,7 +1,7 @@
 // TODO get default value from config by more priority
 import PersianDateParser from './parser'
 import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
-import { writable, derived, get } from 'svelte/store'
+import { writable, get } from 'svelte/store'
 import Config from './config.js'
 import lodash from 'lodash'
 
@@ -11,10 +11,8 @@ export const config = writable(Config)
 export const isDirty = writable(false)
 export const selectedUnix = writable(nowUnix)
 export const viewUnix = writable(nowUnix)
-export const privateViewModeDerived = writable('day')
-export const piiirivateViewModeDerived = derived(config, ($config) => {
-   return ($config && $config.viewMode) ? $config.viewMode : 'day'
-}) // [date, month, year]
+export const privateViewMode = writable('day')
+// [date, month, year]
 export const dateObject = writable(persianDate)
 export const currentCalendar = writable('persian') // [persian, gregorian]
 
@@ -170,10 +168,10 @@ export const actions = {
     config.set(lodash.merge(conf, {
       viewMode: mode
     }))
-    privateViewModeDerived.set(mode)
+    privateViewMode.set(mode)
   },
   setViewModeToUpperAvailableLevel() {
-    let currentViewMode = get(privateViewModeDerived)
+    let currentViewMode = get(privateViewMode)
     let $config = get(config)
     if (currentViewMode === 'time') {
        if ($config.dayPicker.enabled) {
@@ -196,7 +194,7 @@ export const actions = {
     }
   },
   setViewModeToLowerAvailableLevel() {
-    let currentViewMode = get(privateViewModeDerived)
+    let currentViewMode = get(privateViewMode)
     let $config = get(config)
     if (currentViewMode === 'year') {
        if ($config.monthPicker.enabled) {
@@ -222,24 +220,24 @@ export const actions = {
     isDirty.set(value)
   },
   onSelectNextView() {
-    if (get(privateViewModeDerived) === 'day') {
+    if (get(privateViewMode) === 'day') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
     }
-    if (get(privateViewModeDerived) === 'month') {
+    if (get(privateViewMode) === 'month') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 1)))
     }
-    if (get(privateViewModeDerived) === 'year') {
+    if (get(privateViewMode) === 'year') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 12)))
     }
   },
   onSelectPrevView() {
-    if (get(privateViewModeDerived) === 'day') {
+    if (get(privateViewMode) === 'day') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
     }
-    if (get(privateViewModeDerived) === 'month') {
+    if (get(privateViewMode) === 'month') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 1)))
     }
-    if (get(privateViewModeDerived) === 'year') {
+    if (get(privateViewMode) === 'year') {
       viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 12)))
     }
   },
