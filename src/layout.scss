@@ -1,7 +1,6 @@
 .pwt-datepicker {
   box-sizing: border-box;
   display: none;
-  font-family: "IRANSansWeb", tahoma;
   direction: ltr;
   color: #333333;
   background: #ffffff;
@@ -34,13 +33,14 @@
     position: relative;
     width: 100%;
     float: left;
+    overflow: hidden;
   }
 
   .pwt-date-year-view,
   .pwt-date-month-view,
   .pwt-date-time,
   .pwt-date-view {
-    background: white;
+    position: absolute;
     width: 100%;
   }
 
@@ -65,9 +65,10 @@
 
   > .pwt-date-time,
   > .pwt-datepicker-picker-section {
+    position: relative;
+    display: block;
+    overflow: hidden;
     width: 100%;
-    padding-right: 10px;
-    padding-left: 10px;
     float: left;
     height: 280px;
   }
@@ -117,7 +118,6 @@
         display: block;
         margin: auto;
         width: 36px;
-        //height: 36px;
         line-height: 42px;
       }
     }

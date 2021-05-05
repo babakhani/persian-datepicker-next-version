@@ -934,7 +934,7 @@ var defaultconfig = {
     'initialValue': true,
     'initialValueType': 'gregorian',
     'persianDigit': true,
-    'viewMode': 'month',
+    'viewMode': 'day',
     'format': 'LLLL',
     'formatter': function (unixDate, dateObject) {
        return new dateObject(unixDate).format(this.format);

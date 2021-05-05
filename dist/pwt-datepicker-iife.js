@@ -8,7 +8,7 @@
  *     
  */
 
-this.pwtdatepicker = (function () {
+this.persianDatepicker = (function () {
     'use strict';
 
     function noop() { }
@@ -1089,7 +1089,7 @@ this.pwtdatepicker = (function () {
          * @type {string}
          * @default 'day'
          */
-        'viewMode': 'month',
+        'viewMode': 'day',
 
 
         /**

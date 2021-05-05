@@ -9,7 +9,7 @@
 			class:disable="{isDisable(year)}"
       class:selected="{currentYear === year}">
 			<span class="pwt-text">
-        {year}
+        {getPersianYear(year)}
 			</span>
     </div>
   {/each}
@@ -88,12 +88,15 @@
 	let animateSpeed = $config.animateSpeed 
 	let cachedViewUnix = viewUnix
 	let transitionDirectionForward = true
+	let getPersianYear = function (i) {
+		return new $dateObject([i]).format('YYYY')
+	}
   $: {
     yearRange = []
     startYear = currentViewYear - (currentViewYear % 12)
     let i = 0
     while (i < 12) {
-      yearRange.push(startYear + i)
+			yearRange.push(startYear + i)
       i++
     }
 		if (viewUnix >  cachedViewUnix) {

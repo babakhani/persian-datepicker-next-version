@@ -24,7 +24,7 @@
 				{#if !$config.onlyTimePicker}
 					{#if $privateViewMode === 'year' && $config.yearPicker.enabled}
 						<div
-							transition:fade={{duration: 0}}>
+							transition:fade={{duration: animateSpeed}}>
 							<YearView
 								on:select="{onSelectYear}"
 								viewUnix="{$viewUnix}"
@@ -33,7 +33,7 @@
 					{/if}
 					{#if $privateViewMode === 'month' && $config.monthPicker.enabled}
 						<div
-							transition:fade={{duration: 0}}>
+							transition:fade={{duration: animateSpeed}}>
 							<MonthView
 								on:select="{onSelectMonth}"
 								viewUnix="{$viewUnix}"
@@ -42,7 +42,7 @@
 					{/if}
 					{#if $privateViewMode === 'day' && $config.dayPicker.enabled}
 						<div
-							transition:fade={{duration: 0}}>
+							transition:fade={{duration: animateSpeed}}>
 							<DateView
 								on:prev="{navPrev}"
 								on:next="{navNext}"
@@ -54,7 +54,7 @@
 				{/if}
 				{#if ($privateViewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
 					<div
-						in:fade={{duration: 500}}>
+							transition:fade={{duration: animateSpeed}}>
 						<TimeView 
 							on:selectTime="{onSelectTime}"
 							selectedUnix="{$selectedUnix}" />
@@ -99,6 +99,7 @@ originalContainer={originalContainer} />
 	let plotarea
 	let inputComp
 	let isVisbile = false
+	let animateSpeed = $config.animate ? $config.animateSpeed : 0
 
 	// Public props used in adapters
 	export let options = {}
