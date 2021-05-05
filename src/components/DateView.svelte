@@ -194,7 +194,7 @@
 			clearTimeout(animateTimer)
 			animateTimer = setTimeout(() => {
 				visible = true 
-			}, animateSpeed * 2)
+			}, animateSpeed)
 		}
 		cachedViewUnix = viewUnix
 	}
