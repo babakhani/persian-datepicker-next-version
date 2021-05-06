@@ -51,14 +51,16 @@
 								selectedUnix="{$selectedUnix}"/>
 						</div>
 					{/if}
-				{/if}
-				{#if ($privateViewMode === 'time' && $config.timePicker.enabled) || $config.onlyTimePicker}
-					<div
-							transition:fade={{duration: animateSpeed}}>
+					{#if $privateViewMode === 'time'}
 						<TimeView 
 							on:selectTime="{onSelectTime}"
 							selectedUnix="{$selectedUnix}" />
-					</div>
+					{/if}
+				{/if}
+				{#if $config.onlyTimePicker}
+						<TimeView 
+							on:selectTime="{onSelectTime}"
+							selectedUnix="{$selectedUnix}" />
 				{/if}
 			</div>
 			{#if $config.toolbox.enabled}

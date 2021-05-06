@@ -1,17 +1,19 @@
 <div class="pwt-date-toolbox">
-	{#if viewMode !== 'time'}
-		<button 
-			class="pwt-date-toolbox-button"
-			on:click={() => setViewMode("time")}>
-			Time
-		</button>
-	{/if}
-	{#if viewMode === 'time'}
-		<button 
-			class="pwt-date-toolbox-button"
-			on:click={() => setViewMode("day")}>
-			Date
-		</button>
+	{#if $config.timePicker.enabled && !$config.onlyTimePicker}
+		{#if viewMode !== 'time'}
+			<button 
+				class="pwt-date-toolbox-button"
+				on:click={() => setViewMode("time")}>
+				Time
+			</button>
+		{/if}
+		{#if viewMode === 'time'}
+			<button 
+				class="pwt-date-toolbox-button"
+				on:click={() => setViewMode("day")}>
+				Date
+			</button>
+		{/if}
 	{/if}
 	{#if $config.toolbox.todayButton.enabled}
 	<button 
