@@ -96,6 +96,6 @@
     "lodash": "^4.17.15",
     "persian-date": "^1.1.0",
     "svelte-swipe": "^1.5.0",
-    "swiper": "^5.3.7"
+    "swiper": "^6.5.1"
   }
 }
