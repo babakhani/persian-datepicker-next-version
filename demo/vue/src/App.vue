@@ -69,6 +69,10 @@
           ]"
           v-model="datepickerConfig.viewMode"/>
         <ConfigSwitch 
+          label="Overlay"
+          help="if true datepicker render overlay"
+          v-model="datepickerConfig.overlay"/>  
+        <ConfigSwitch 
           label="Inline"
           help="if true datepicker render inline"
           v-model="datepickerConfig.inline"/>  

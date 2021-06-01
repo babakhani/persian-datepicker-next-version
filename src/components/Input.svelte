@@ -6,11 +6,11 @@
 	export let originalContainer
 	export let plotarea
 	export let setPlotPostion = function () {
-		let configLeft = $config.position !== 'auto' ? $config.position[0] : 0
-		let configTop = $config.position !== 'auto' ? $config.position[1] : 0
-		let set = () => {
-			if (plotarea) {
-				if (originalContainer && originalContainer.tagName === 'INPUT' ) {
+		if (!config.overlay) {
+			let configLeft = $config.position !== 'auto' ? $config.position[0] : 0
+			let configTop = $config.position !== 'auto' ? $config.position[1] : 0
+			let set = () => {
+				if (plotarea && originalContainer && originalContainer.tagName === 'INPUT' ) {
 					plotarea.style.position = "absolute"	
 					plotarea.style.left = originalContainer.offsetLeft + configLeft + 'px'
 					plotarea.style.top =  (parseInt(originalContainer.offsetTop) +
@@ -18,11 +18,10 @@
 						parseInt(originalContainer.clientHeight) + document.body.scrollTop) + 'px'
 				}
 			}
+			setTimeout(() => {
+				set()
+			}, 0)
 		}
-	  set()
-		setTimeout(() => {
-			set()
-		}, 0)
 	}
 
 	const dispatch = createEventDispatcher()
@@ -48,7 +47,9 @@
 			originalContainer.addEventListener('focus', () => {
 				setPlotPostion()
 				dispatch('setvisibility', true)
-				document.addEventListener('click', bodyListener)
+				setTimeout(() => {
+				  document.addEventListener('click', bodyListener)
+				}, 200)
 			})
 		}
 	}

@@ -1,69 +1,73 @@
 <svelte:options accessors={true} immutable={true} />
 {#if isVisbile}
+	{#if $config.overlay}
+		<div class="pwt-datepicker-overlay-bg"></div>
+	{/if}
 	<div 
 		bind:this={plotarea}
 		on:wheel={handleWheel}
-		class="pwt-datepicker">
+		class="{ $config.overlay ? 'pwt-datepicker pwt-datepicker--overlay' :
+		'pwt-datepicker' }">
 		{#if $config.infobox.enabled}
 			<Infobox
 				viewUnix="{$viewUnix}"
 				selectedUnix="{$selectedUnix}" />
 		{/if}
-			{#if $config.navigator.enabled}
-				<Navigator 
-					on:selectmode="{setViewModeToUpperAvailableLevel}"
-					on:today="{today}"
-					on:next="{navNext}"
-					on:prev="{navPrev}"
-					viewMode="{$privateViewMode}"
-					viewUnix="{$viewUnix}"
+		{#if $config.navigator.enabled}
+			<Navigator 
+				on:selectmode="{setViewModeToUpperAvailableLevel}"
+				on:today="{today}"
+				on:next="{navNext}"
+				on:prev="{navPrev}"
+				viewMode="{$privateViewMode}"
+				viewUnix="{$viewUnix}"
+				selectedUnix="{$selectedUnix}" />
+		{/if}
+		<div
+			class="pwt-datepicker-picker-section">
+			{#if !$config.onlyTimePicker}
+				{#if $privateViewMode === 'year' && $config.yearPicker.enabled}
+					<div
+						transition:fade={{duration: animateSpeed}}>
+						<YearView
+							on:select="{onSelectYear}"
+							viewUnix="{$viewUnix}"
+							selectedUnix="{$selectedUnix}" />
+					</div>
+				{/if}
+				{#if $privateViewMode === 'month' && $config.monthPicker.enabled}
+					<div
+						transition:fade={{duration: animateSpeed}}>
+						<MonthView
+							on:select="{onSelectMonth}"
+							viewUnix="{$viewUnix}"
+							selectedUnix="{$selectedUnix}" />
+					</div>
+				{/if}
+				{#if $privateViewMode === 'day' && $config.dayPicker.enabled}
+					<div
+						transition:fade={{duration: animateSpeed}}>
+						<DateView
+							on:prev="{navPrev}"
+							on:next="{navNext}"
+							on:selectDate="{onSelectDate}"
+							viewUnix="{$viewUnix}"
+							selectedUnix="{$selectedUnix}"/>
+					</div>
+				{/if}
+				{#if $privateViewMode === 'time'}
+					<TimeView 
+						on:selectTime="{onSelectTime}"
+						selectedUnix="{$selectedUnix}" />
+				{/if}
+			{/if}
+			{#if $config.onlyTimePicker}
+				<TimeView 
+					on:selectTime="{onSelectTime}"
 					selectedUnix="{$selectedUnix}" />
 			{/if}
-			<div
-				class="pwt-datepicker-picker-section">
-				{#if !$config.onlyTimePicker}
-					{#if $privateViewMode === 'year' && $config.yearPicker.enabled}
-						<div
-							transition:fade={{duration: animateSpeed}}>
-							<YearView
-								on:select="{onSelectYear}"
-								viewUnix="{$viewUnix}"
-								selectedUnix="{$selectedUnix}" />
-						</div>
-					{/if}
-					{#if $privateViewMode === 'month' && $config.monthPicker.enabled}
-						<div
-							transition:fade={{duration: animateSpeed}}>
-							<MonthView
-								on:select="{onSelectMonth}"
-								viewUnix="{$viewUnix}"
-								selectedUnix="{$selectedUnix}" />
-						</div>
-					{/if}
-					{#if $privateViewMode === 'day' && $config.dayPicker.enabled}
-						<div
-							transition:fade={{duration: animateSpeed}}>
-							<DateView
-								on:prev="{navPrev}"
-								on:next="{navNext}"
-								on:selectDate="{onSelectDate}"
-								viewUnix="{$viewUnix}"
-								selectedUnix="{$selectedUnix}"/>
-						</div>
-					{/if}
-					{#if $privateViewMode === 'time'}
-						<TimeView 
-							on:selectTime="{onSelectTime}"
-							selectedUnix="{$selectedUnix}" />
-					{/if}
-				{/if}
-				{#if $config.onlyTimePicker}
-						<TimeView 
-							on:selectTime="{onSelectTime}"
-							selectedUnix="{$selectedUnix}" />
-				{/if}
-			</div>
-			{#if $config.toolbox.enabled}
+		</div>
+		{#if $config.toolbox.enabled}
 			<Toolbox 
 				on:setcalendar="{setcalendar}"
 				on:selectmode="{setViewMode}"

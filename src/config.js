@@ -11,7 +11,8 @@ export default {
      /**
       * @since 2.0.0
       */
-    'animate': true,
+    'overlay': false,
+    'animate': false,
     'animateSpeed': 180,
 
 

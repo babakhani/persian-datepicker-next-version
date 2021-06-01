@@ -1,3 +1,16 @@
+.pwt-datepicker-overlay-bg {
+  display: block;
+  z-index: 100;
+  width: 100%;
+  height: 100vh;
+  content: '';
+  background: rgba(0, 0, 0, 0.6);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .pwt-datepicker {
   box-sizing: border-box;
   display: none;
@@ -13,6 +26,16 @@
   overflow: hidden;
   margin: 0 auto;
   padding: 0;
+
+  &.pwt-datepicker--overlay {
+    position: fixed !important;
+    z-index: 101 !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+
 	*:active,
 	*:focus,
   *:hover {
