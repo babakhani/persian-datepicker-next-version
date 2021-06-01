@@ -218,7 +218,7 @@ originalContainer={originalContainer} />
 		}
 		document.removeEventListener('mousedown', bodyListener)
 		setTimeout(() => {
-			if (isVisible) {
+			if (!$config.inline && isVisible) {
 				setTimeout(() => {
 					document.addEventListener('mousedown', bodyListener)
 				}, 100)

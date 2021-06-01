@@ -87,8 +87,9 @@
   </header>
   <div
     class="demo-box">
-  <input id="container" />
-  <input id="containerAlt" />
+  <div id="container" />
+  <div id="containerAlt" />
+  <div id="anotherContainer" />
   </div>
   <div
     class="config-area" >
@@ -96,6 +97,7 @@
   </div>
   <script>
     var container = document.getElementById('container')
+    var anotherContainer = document.getElementById('anotherContainer')
     var options = {
       calendarType: 'persian', // DONE
       calendar: {
@@ -110,9 +112,9 @@
         }
       },
       animate: true,    
-      overlay: true,    
+      overlay: false,    
       responsive: true, // Deprecated
-      inline: false, // Deprected
+      inline: true, // Deprected
       initialValue: false,  // DONE
       initialValueType: 'persian', // Works but deprecated in next version
       persianDigit: true, // Deprected
@@ -276,6 +278,12 @@
       onDestroy: function (unixDate) { console.log('user event onDestroy') }
     }
     window.datepicker = persianDatepicker(container, options)
+    window.datepicker = persianDatepicker(anotherContainer, {
+      animate: true,    
+      overlay: false,    
+      responsive: true, // Deprecated
+      inline: true, // Deprected
+    })
     // Check the datepicker instance
     console.log("Datepicker Instance")
     console.log(datepicker)

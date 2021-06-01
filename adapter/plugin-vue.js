@@ -2,6 +2,7 @@ import SvelteApp from '../src/App.svelte'
 export default{
   render(createElement) {
     return createElement('div', {
+      class: 'pwt-datepicker-container',
       ref: "container",
     }, 
       [
