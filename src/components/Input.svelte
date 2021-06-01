@@ -27,29 +27,10 @@
 	const dispatch = createEventDispatcher()
 
 	let initInputEvents = function () {
-		let bodyListener = (e) => {
-			if (
-				plotarea && plotarea.contains(e.target) 
-				|| 
-				e.target == originalContainer 
-				|| 
-				e.target.className === 'pwt-date-navigator-button'
-				|| 
-				e.target.className === 'pwt-date-toolbox-button'
-			) {
-
-			} else {
-				dispatch('setvisibility', false)
-				document.removeEventListener('click', bodyListener)
-			}
-		}
 		if (originalContainer && originalContainer.tagName === 'INPUT') {
 			originalContainer.addEventListener('focus', () => {
 				setPlotPostion()
 				dispatch('setvisibility', true)
-				setTimeout(() => {
-				  document.addEventListener('click', bodyListener)
-				}, 200)
 			})
 		}
 	}

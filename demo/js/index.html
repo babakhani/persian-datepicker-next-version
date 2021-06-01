@@ -109,6 +109,8 @@
           showHint: true  // DONE
         }
       },
+      animate: true,    
+      overlay: false,    
       responsive: true, // Deprecated
       inline: false, // Deprected
       initialValue: false,  // DONE
@@ -165,6 +167,7 @@
                 en: 'submit'
             },
             onSubmit: function (datepickerObject) { // DONE
+              datepicker.hide()
               console.log('toolbox.onSubmit')
             }
           },
@@ -198,7 +201,7 @@
         return true;
       },
       'timePicker': {
-        'enabled': true, // DONE
+        'enabled': false, // DONE
         'step': 1, // DONE
         'hour': {
           'enabled': true, // DONE
@@ -272,7 +275,7 @@
       onSet: function (unixDate) { console.log('user event onSet') },
       onDestroy: function (unixDate) { console.log('user event onDestroy') }
     }
-    window.datepicker = pwtdatepicker(container, options)
+    window.datepicker = persianDatepicker(container, options)
     // Check the datepicker instance
     console.log("Datepicker Instance")
     console.log(datepicker)

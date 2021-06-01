@@ -17,8 +17,8 @@
 		</thead>
 		{#if visible}
 			<tbody
-				out:fadeOut="{{duration: animateSpeed}}" 
-				in:fadeIn="{{duration: animateSpeed}}" >
+				out:fadeOut="{{duration: animateSpeed / 2}}" 
+				in:fadeIn="{{duration: animateSpeed / 2}}" >
 				{#each groupedDay as week, i}
 					<tr>
 						{#if week.length > 1}

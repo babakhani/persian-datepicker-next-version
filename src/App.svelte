@@ -1,5 +1,5 @@
 <svelte:options accessors={true} immutable={true} />
-{#if isVisbile}
+{#if isVisible}
 	{#if $config.overlay}
 		<div class="pwt-datepicker-overlay-bg"></div>
 	{/if}
@@ -104,7 +104,7 @@ originalContainer={originalContainer} />
 
 	let plotarea
 	let inputComp
-	let isVisbile = false
+	let isVisible = false
 	let animateSpeed = $config.animate ? $config.animateSpeed : 0
 
 	// Public props used in adapters
@@ -115,13 +115,13 @@ originalContainer={originalContainer} />
 		dispatcher('setDate')(unix)
   }	
 	export const show = function() {
-		setvisibility({detail: true})
+		setvisibility(true)
   }	
 	export const hide = function() {
-		setvisibility({detail: false})
+		setvisibility(false)
   }	
 	export const toggle = function() {
-		setvisibility({detail: !isVisbile})
+		setvisibility(!isVisible)
   }	
 	export const destroy = function() {
 		if(plotarea.parentNode && plotarea.parentNode.removeChild) {
@@ -193,17 +193,37 @@ originalContainer={originalContainer} />
 		}
 	}
 
+	const bodyListener = (e) => {
+		if (
+			plotarea && plotarea.contains(e.target) 
+			|| 
+			e.target == originalContainer 
+			|| 
+			e.target.className === 'pwt-date-navigator-button'
+			|| 
+			e.target.className === 'pwt-date-toolbox-button'
+		) {
+
+		} else {
+			document.removeEventListener('click', bodyListener)
+			setvisibility(false)
+		}
+	}
+
 	// Methods that would called by component events
 	const setvisibility = function(payload) {
-		isVisbile = payload.detail
+		isVisible = payload
 		if (inputComp) {
       inputComp.setPlotPostion()
 		}
+		document.removeEventListener('click', bodyListener)
 		setTimeout(() => {
-			if (plotarea) {
-				plotarea.style.display = isVisbile ? 'block' : 'none'
+			if (isVisible) {
+				setTimeout(() => {
+					document.addEventListener('click', bodyListener)
+				}, 0)
 			}
-			if (isVisbile) {
+			if (isVisible) {
 				$config.onShow()
 			} else {
 				$config.onHide()
@@ -212,7 +232,7 @@ originalContainer={originalContainer} />
 	}
 
 	if ($config.inline) {
-	  setvisibility({detail: true})
+	  setvisibility(true)
 	}
 
 	const setInitialValue = function (event) {
@@ -232,7 +252,7 @@ originalContainer={originalContainer} />
 		dispatcher('onSelectDate')(event.detail)
 		$config.dayPicker.onSelect(event.detail)
 		if ($config.autoClose)  {
-	    setvisibility({detail: false})
+	    setvisibility(false)
 		}
 		dispatcher('onSelect')($config.altFieldFormatter($selectedUnix, $dateObject))
 	}

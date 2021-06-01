@@ -41,7 +41,7 @@
 	{#if $config.toolbox.submitButton.enabled}
 	<button 
 	  class="pwt-date-toolbox-button"
-		on:click="{() => {alert('Please implement submit button')}}">
+		on:click="{$config.toolbox.submitButton.onSubmit}">
 	   Submit	
 	</button>
 	{/if}
