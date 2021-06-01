@@ -28,6 +28,9 @@
   padding: 0;
 
   &.pwt-datepicker--overlay {
+    width: 400px;
+    max-width: 95%;
+    max-height: 80vh;
     position: fixed !important;
     z-index: 101 !important;
     top: 50% !important;

@@ -216,12 +216,12 @@ originalContainer={originalContainer} />
 		if (inputComp) {
       inputComp.setPlotPostion()
 		}
-		document.removeEventListener('click', bodyListener)
+		document.removeEventListener('mousedown', bodyListener)
 		setTimeout(() => {
 			if (isVisible) {
 				setTimeout(() => {
-					document.addEventListener('click', bodyListener)
-				}, 0)
+					document.addEventListener('mousedown', bodyListener)
+				}, 100)
 			}
 			if (isVisible) {
 				$config.onShow()
