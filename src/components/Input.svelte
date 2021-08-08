@@ -1,7 +1,11 @@
 <svelte:options accessors={true} />
 <script>
 	import { createEventDispatcher } from 'svelte'
-	import { isDirty, selectedUnix, config, dateObject } from '../stores.js'
+	import { getContext } from 'svelte'
+	const dateObject = getContext('dateObject')
+	const config = getContext('config')
+	const isDirty = getContext('isDirty')
+	const selectedUnix = getContext('selectedUnix')
 
 	export let originalContainer
 	export let plotarea

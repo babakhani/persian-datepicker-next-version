@@ -17,7 +17,9 @@
 {/if}
 <script>
   import { createEventDispatcher } from 'svelte'
-	import { config, dateObject } from '../stores.js'
+	import { getContext } from 'svelte'
+	const config = getContext('config')
+	const dateObject = getContext('dateObject')
 
   export let selectedUnix
   export let viewUnix

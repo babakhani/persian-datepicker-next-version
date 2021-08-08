@@ -49,7 +49,8 @@
 
 <script>
   import { createEventDispatcher } from 'svelte'
-	import { config  } from '../stores.js'
+	import { getContext } from 'svelte'
+	const config = getContext('config')
 
 	export let viewUnix
 	export let viewMode

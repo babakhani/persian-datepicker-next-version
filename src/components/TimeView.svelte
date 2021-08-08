@@ -134,9 +134,11 @@
 </div>
 
 <script>
-	import { afterUpdate } from 'svelte'
-	import { config, dateObject } from '../stores.js'
 	import { createEventDispatcher } from 'svelte'
+	import { afterUpdate } from 'svelte'
+	import { getContext } from 'svelte'
+	const dateObject = getContext('dateObject')
+	const config = getContext('config')
 
 	const dispatch = createEventDispatcher()
 	export let selectedUnix

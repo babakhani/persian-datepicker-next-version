@@ -88,7 +88,8 @@ plotarea={plotarea}
 originalContainer={originalContainer} />
 
 <script>
-	import { fade } from 'svelte/transition';
+	import { setContext } from 'svelte'
+	import { fade } from 'svelte/transition'
 	import YearView from './components/YearView.svelte'
 	import MonthView from './components/MonthView.svelte'
 	import DateView from './components/DateView.svelte'
@@ -98,9 +99,266 @@ originalContainer={originalContainer} />
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
 	import defaultconfig from './config.js'
-	import { config, actions, selectedUnix, viewUnix, privateViewMode, dateObject } from './stores.js'
 	import { createEventDispatcher } from 'svelte'
 	import lodash from 'lodash'
+	import PersianDateParser from './parser'
+	import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
+	import { writable, get } from 'svelte/store'
+	import Config from './config.js'
+
+
+	const nowUnix = persianDateToUnix(new persianDate())
+	const _config = new writable(Config)
+	const _isDirty = new writable(false)
+	const _selectedUnix = new writable(nowUnix)
+	const _viewUnix = new writable(nowUnix)
+	const _privateViewMode = new writable('day')
+	const _dateObject = new writable(persianDate)
+	const _actions = {
+		setDate (unix) {
+			this.updateIsDirty(true)
+			_viewUnix.set(unix)
+			_selectedUnix.set(unix)
+		},
+		parsInitialValue (inputString) {
+			let pd = get(_dateObject)
+			let parse = new PersianDateParser()
+			if (parse.parse(inputString) !== undefined) {
+				pd.toCalendar(get(_config).initialValueType)
+				let unix = new pd(parse.parse(inputString))
+				this.updateIsDirty(true)
+				_viewUnix.set(unix.valueOf())
+				this.setSelectedDate(unix)
+				pd.toCalendar(get(_config).calendarType)
+			}
+		},
+		setFromDefaultValue (data) {
+			this.parsInitialValue(data)
+		},
+		onSetCalendar (payload) {
+			_config.set({
+				...get(_config),
+				calendarType: payload
+			})
+			let currentLocale = get(_config).calendar[payload].locale
+			let obj = persianDate
+			obj.toCalendar(payload)
+			obj.toLocale(currentLocale)
+			obj.toLeapYearMode(get(_config).calendar.persian.leapYearMode)
+			_dateObject.set( obj )
+			_viewUnix.set(get(_selectedUnix))
+		},
+		setConfig (payload) {
+			_config.set(payload)
+			this.onSetCalendar(get(_config).calendarType)
+			if (payload.onlyTimePicker) {
+				this.setViewMode('time')
+			} else {
+				this.setViewMode(payload.viewMode)
+			}
+		},
+		updateConfig (key) {
+			let ob = {}
+			ob[key[0]] = key[1] 
+			let conf = JSON.stringify(get(_config))
+			conf = JSON.parse(conf)
+			conf[key[0]] = key[1]
+			_config.update(() => {
+				return {
+					...get(_config),
+					...ob
+				}
+			})
+			this.onSetCalendar(get(_config).calendarType)
+		},
+		onSelectTime (pDate) {
+			const pd = get(_dateObject)
+			const date = pDate.detail
+			const { hour, minute, second } = getHourMinuteSecond(date)
+			const calced = new pd(get(_selectedUnix)).hour(hour).minute(minute).second(second)
+			this.updateIsDirty(true)
+			this.setSelectedDate(calced)
+		},
+		onSelectDate(pDate) {
+			const pd = get(_dateObject)
+			const { hour, minute, second } = getHourMinuteSecond(get(_selectedUnix))
+			const date = new pd(pDate)
+			const cashedDate = date.date()
+			const cashedMonth = date.month()
+			const cashedYear = date.year()
+			date
+				.hour(hour)
+				.minute(minute)
+				.second(second)
+				.date(cashedDate)
+				.month(cashedMonth)
+				.year(cashedYear)
+			this.setSelectedDate(date)
+			this.updateIsDirty(true)
+		},
+		setSelectedDate(pDate) {
+			const pd = get(_dateObject)
+			const unix = new pd(pDate).valueOf()
+			_selectedUnix.set(unix)
+			this.setViewModeToLowerAvailableLevel()
+			get(_config).onSelect(unix)
+		},
+		onSelectMonth(month) {
+			const pd = get(_dateObject)
+			_viewUnix.set(
+				new pd(get(_viewUnix))
+				.month(month)
+				.valueOf()
+			)
+			if (!get(_config).onlySelectOnDate) {
+				this.setSelectedDate(
+					new pd(get(_viewUnix))
+					.month(month)
+				)
+			} else {
+				this.setViewModeToLowerAvailableLevel()
+			}
+			this.updateIsDirty(true)
+		},
+		onSelectYear(year) {
+			const pd = get(_dateObject)
+			_viewUnix.set(
+				new pd(get(_selectedUnix))
+				.year(year)
+				.valueOf()
+			)
+			if (!get(_config).onlySelectOnDate) {
+				this.setSelectedDate(
+					new pd(get(_selectedUnix))
+					.year(year)
+				)
+			} else {
+				this.setViewModeToLowerAvailableLevel()
+			}
+			this.updateIsDirty(true)
+		},
+		onSetHour(hour) {
+			const pd = get(_dateObject)
+			this.setSelectedDate(
+				new pd(get(_selectedUnix))
+				.hour(hour)
+			)
+			this.updateIsDirty(true)
+		},
+		onSetMinute(minute) {
+			const pd = get(_dateObject)
+			this.setSelectedDate(
+				new pd(get(_selectedUnix))
+				.minute(minute)
+			)
+			this.updateIsDirty(true)
+		},
+		setSecond(second) {
+			const pd = get(_dateObject)
+			this.setSelectedDate(
+				new pd(get(_selectedUnix))
+				.second(second)
+			)
+		},
+		setViewMode(mode) {
+			let conf = get(_config)
+			_config.set(lodash.merge(conf, {
+				viewMode: mode
+			}))
+			_privateViewMode.set(mode)
+		},
+		setViewModeToUpperAvailableLevel() {
+			let currentViewMode = get(_privateViewMode)
+			let $_config = get(_config)
+			if (currentViewMode === 'time') {
+				if ($_config.dayPicker.enabled) {
+					this.setViewMode('day')
+				} else if ($_config.monthPicker.enabled) {
+					this.setViewMode('month')
+				} else if ($_config.yearPicker.enabled) {
+					this.setViewMode('year')
+				}
+			} else if (currentViewMode === 'day') {
+				if ($_config.monthPicker.enabled) {
+					this.setViewMode('month')
+				} else if ($_config.yearPicker.enabled) {
+					this.setViewMode('year')
+				}
+			} else if (currentViewMode === 'month') {
+				if ($_config.yearPicker.enabled) {
+					this.setViewMode('year')
+				}
+			}
+		},
+		setViewModeToLowerAvailableLevel() {
+			let currentViewMode = get(_privateViewMode)
+			let $_config = get(_config)
+			if (currentViewMode === 'year') {
+				if ($_config.monthPicker.enabled) {
+					this.setViewMode('month')
+				} else if ($_config.dayPicker.enabled) {
+					this.setViewMode('day')
+				} else if ($_config.timePicker.enabled) {
+					this.setViewMode('time')
+				}
+			} else if (currentViewMode === 'month') {
+				if ($_config.dayPicker.enabled) {
+					this.setViewMode('day')
+				} else if ($_config.timePicker.enabled) {
+					this.setViewMode('time')
+				}
+			} else if (currentViewMode === 'day') {
+				if ($_config.timePicker.enabled && $_config.timePicker.showAsLastStep) {
+					this.setViewMode('time')
+				}
+			}
+		},
+		updateIsDirty(value) {
+			_isDirty.set(value)
+		},
+		onSelectNextView() {
+			if (get(_privateViewMode) === 'day') {
+				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).add('month', 1)))
+			}
+			if (get(_privateViewMode) === 'month') {
+				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).add('year', 1)))
+			}
+			if (get(_privateViewMode) === 'year') {
+				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).add('year', 12)))
+			}
+		},
+		onSelectPrevView() {
+			if (get(_privateViewMode) === 'day') {
+				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).subtract('month', 1)))
+			}
+			if (get(_privateViewMode) === 'month') {
+				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).subtract('year', 1)))
+			}
+			if (get(_privateViewMode) === 'year') {
+				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).subtract('year', 12)))
+			}
+		},
+		setViewUnix(pDate) {
+			_viewUnix.set(persianDateToUnix(pDate))
+		},
+		onSelectToday() {
+			_viewUnix.set(persianDateToUnix(new persianDate().startOf('day')))
+		}
+	}
+
+  setContext('config',_config) 
+  setContext('actions',_actions) 
+  setContext('selectedUnix',_selectedUnix) 
+  setContext('viewUnix',_viewUnix) 
+  setContext('privateViewMode',_privateViewMode) 
+  setContext('dateObject',_dateObject) 
+
+  const config = _config
+  const actions = _actions
+  const selectedUnix = _selectedUnix
+  const viewUnix = _viewUnix
+  const privateViewMode = _privateViewMode
+  const dateObject = _dateObject
 
 	let plotarea
 	let inputComp
@@ -195,16 +453,14 @@ originalContainer={originalContainer} />
 
 	const bodyListener = (e) => {
 		if (
-			plotarea && plotarea.contains(e.target) 
+			!(plotarea && plotarea.contains(e.target) 
 			|| 
 			e.target == originalContainer 
 			|| 
 			e.target.className === 'pwt-date-navigator-button'
 			|| 
 			e.target.className === 'pwt-date-toolbox-button'
-		) {
-
-		} else {
+			)) {
 			document.removeEventListener('click', bodyListener)
 			setvisibility(false)
 		}

@@ -68,7 +68,9 @@
 
 <script>
 	import { createEventDispatcher } from 'svelte'
-	import { config, dateObject } from '../stores.js'
+	import { getContext } from 'svelte'
+	const dateObject = getContext('dateObject')
+	const config = getContext('config')
 
 	function fadeOut(node, { duration, delay }) {
 		return {
