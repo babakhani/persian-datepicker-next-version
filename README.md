@@ -5,9 +5,8 @@ Persian Date Picker
 
 ### Whats changed in v2.0.0
 
-#### jQuery Removed (No Decencies)
+#### jQuery Removed
 #### Officially Support Vue, React, Svelte and Pure Javascript 
-
 
 This Date picker work with Iranian calendar.
 
