@@ -1,7 +1,7 @@
 Persian Date Picker
 ==============
 
-### Version 2.0.0-alpha (Under Development, Don't use in production)
+### Version 2.0.0-alpha (Under Development, Don't use it in production)
 
 ### Whats changed in v2.0.0
 
