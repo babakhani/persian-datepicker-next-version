@@ -16,13 +16,13 @@ const preprocess = sveltePreprocess({
 })
 const production = !process.env.ROLLUP_WATCH
 export default {
-  input: 'adapter/plugin-vue.js',
+  input: 'adapter/plugin-vue2.js',
   output: {
     sourcemap: true,
     format: 'es',
     extend: true,
     name: pkg.name,
-    file: `dist/pwt-datepicker-vue.js`,
+    file: `dist/pwt-datepicker-vue2.js`,
   },
   plugins: [
     svelte({

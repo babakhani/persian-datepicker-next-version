@@ -1,12 +1,12 @@
 import SvelteApp from '../src/App.svelte'
 export default{
-  render() {
-    return h('div', {
+  render(createElement) {
+    return createElement('div', {
       class: 'pwt-datepicker-container',
       ref: "container",
     }, 
       [
-        (this.$attrs.options && this.$attrs.options.inline) | this.$attrs.inline ? '' : h('input', { 
+        (this.$attrs.options && this.$attrs.options.inline) | this.$attrs.inline ? '' : createElement('input', { 
           ref: "inputElement" ,
           props: { value : this.value}
         })
@@ -19,13 +19,13 @@ export default{
     }
   },
   props: {
-    modelValue: {}
+    value: {}
   },
   watch: {
-    modelValue (next, old) {
+    value (next, old) {
       if (this.comp && next !== old) {
         this.comp.$set({
-          model: this.modelValue
+          model: this.value
         })
       }
     }
@@ -97,10 +97,10 @@ export default{
       }
     }
   },
-  onUpdated() {
+  updated() {
     this.comp.$set(this.$attrs)
   },
-  onUnmounted() {
+  destroyed() {
     this.comp.$destroy()
   }
 }
