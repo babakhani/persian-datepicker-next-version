@@ -177,6 +177,7 @@
 				top: 5px;
 				bottom: 5px;
 				height: 32px;
+				line-height: 32px;
 				text-align: left;
 				border-radius: 6px;
 				&:hover {
