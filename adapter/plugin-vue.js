@@ -65,8 +65,7 @@ export default{
     })
 
     this.comp.$on('onSelect', (e) => {
-      this.$emit('change', e.detail)
-      this.$emit('input', e.detail)
+      this.$emit('update:modelValue', e.detail)
     })
 
     let watchers = []
