@@ -6,7 +6,8 @@ let Helper = {
 /**
  * @description persian-datepicker configuration document
  */
-export default {
+export default function () {
+return {
      
      /**
       * @since 2.0.0
@@ -949,4 +950,5 @@ export default {
      * @default 800
      */
     'inputDelay': 800
-};
+}
+}

@@ -8,7 +8,7 @@ export default{
       [
         (this.$attrs.options && this.$attrs.options.inline) | this.$attrs.inline ? '' : h('input', { 
           ref: "inputElement" ,
-          props: { value : this.value}
+          props: { value : this.modelValue}
         })
       ]
     )
@@ -58,7 +58,7 @@ export default{
       }
       container = this.$refs.container
     }
-    props.model = this.value
+    props.model = this.modelValue
     this.comp = new SvelteApp({
       target: container,
       props: props

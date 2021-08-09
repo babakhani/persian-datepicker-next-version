@@ -98,17 +98,17 @@ originalContainer={originalContainer} />
 	import Infobox from './components/Infobox.svelte'
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
-	import defaultconfig from './config.js'
+	import Defaultconfig from './config.js'
 	import { createEventDispatcher } from 'svelte'
 	import lodash from 'lodash'
 	import PersianDateParser from './parser'
 	import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
 	import { writable, get } from 'svelte/store'
-	import Config from './config.js'
-
+   
+	const defaultconfig = Defaultconfig()
 
 	const nowUnix = persianDateToUnix(new persianDate())
-	const _config = new writable(Config)
+	const _config = new writable(defaultconfig)
 	const _isDirty = new writable(false)
 	const _selectedUnix = new writable(nowUnix)
 	const _viewUnix = new writable(nowUnix)

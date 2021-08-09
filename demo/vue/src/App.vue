@@ -1,8 +1,12 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
-  <pre>{{ selectedDate }}</pre>
   <Datepicker
+    :options="datepickerConfig"
     v-model="selectedDate">
+  </Datepicker>
+  <Datepicker
+    :options="{inline: true}"
+    v-model="selectedDate2">
   </Datepicker>
 </template>
 
@@ -17,6 +21,7 @@ export default {
   data () {
     return {
       selectedDate: new Date().valueOf(),
+      selectedDate2: new Date().valueOf(),
       rerenderFlag: true,
       datepickerConfig: {
         animate: true,
@@ -122,8 +127,8 @@ export default {
         checkYear: function (y) { // DONE
           return true;
         },
-        'timePicker': {
-          'enabled': true, // DONE
+        timePicker: {
+          'enabled': false, // DONE
           'step': 1, // DONE
           'titleFormat': 'YYYY MMMM',
           'titleFormatter': function (unix, dateObject) {
@@ -179,7 +184,7 @@ export default {
           }
         },
         infobox : {
-          enabled: true, // DONE
+          enabled: false, // DONE
           'titleFormat': 'YYYY', // DONE
           'titleFormatter': function (unix, dateObject) { // DONE
             return new dateObject(unix).format(this.titleFormat)
@@ -200,14 +205,3 @@ export default {
 }
 
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
