@@ -114,7 +114,7 @@ originalContainer={originalContainer} />
 	// Reactive Context
 	const privateViewMode = new writable(options.viewMode)
 	const config = new writable(options)
-	const isDirty = new writable(false)
+	const isDirty = new writable(null)
 	const selectedUnix = new writable(initialDate)
 	const viewUnix = new writable(initialDate)
 	const dateObject = new writable(persianDate)

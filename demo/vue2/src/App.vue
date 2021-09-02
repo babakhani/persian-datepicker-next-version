@@ -5,7 +5,7 @@
        class="platform-logo" 
        src="../public/logo.png"/>
       <h1>
-        Persian Datepicker, Vue Demo
+        Persian Datepicker, Vue 2 Demo
       </h1>
     </header>
     <div

@@ -190,6 +190,7 @@
 	@import './theme.scss';
 	.pwt-date-time {
 		display: flex;
+		background: white;
 		justify-content: center;
 		width: 100%;
 		height: 100%;

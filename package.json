@@ -7,6 +7,7 @@
   "homepage": "",
   "repository": "",
   "devDependencies": {
+    "cypress": "^8.3.1",
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-conventional": "^8.2.0",
     "autoprefixer": "^9.7.0",
@@ -46,15 +47,19 @@
     "vuepress": "^1.2.0"
   },
   "scripts": {
-    "clear": "kill-port --port 8000,8001,8002,8003",
+    "clear": "kill-port --port 8000,8001,8002,8003,8004",
     "svelte:build": "rollup -c ./adapter/rollup.svelte.js",
     "build": "npm run lint; npm-run-all -p svelte:build vue:build react:build iife:build",
     "dev": "rollup -c ./adapter/rollup.svelte.js  -w",
-    "install-vue": "cd ./demo/vue; npm install; cd ../../",
+    "install-vue": "cd ./demo/vue2; npm install; cd ../../",
     "vue:build": "rollup -c ./adapter/rollup.vue.js",
     "vue:dev": "rollup -c ./adapter/rollup.vue.js -w",
-    "vue:serve": "cd ./demo/vue; npm run serve; cd ../../",
+    "vue:serve": "cd ./demo/vue; npm run dev;",
     "vue": "npm-run-all -p vue:serve vue:dev",
+    "vue2:build": "rollup -c ./adapter/rollup.vue2.js",
+    "vue2:dev": "rollup -c ./adapter/rollup.vue2.js -w",
+    "vue2:serve": "cd ./demo/vue2; npm run serve; cd ../../",
+    "vue2": "npm-run-all -p vue2:serve vue2:dev",
     "install-react": "cd ./demo/react-demo; npm install; cd ../../",
     "react:build": "rollup -c ./adapter/rollup.react.js",
     "react:dev": "rollup -c ./adapter/rollup.react.js -w",
@@ -94,7 +99,6 @@
     "singleQuote": true
   },
   "dependencies": {
-    "cypress": "^8.3.1",
     "lodash": "^4.17.15",
     "persian-date": "^1.1.0",
     "svelte-swipe": "^1.5.0",

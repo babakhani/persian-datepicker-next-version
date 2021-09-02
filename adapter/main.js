@@ -25,12 +25,11 @@ Object.keys(attrs).forEach((value) => {
   options[toCamelCase(attrs[value].name)] = sanitizedValue
 })
 
-console.log('------------')
-console.log(options)
-
+const target = document.getElementById('container')
 const app = new App({
-  target: document.getElementById('container'),
+  target: target,
   props: {
+    originalContainer: target,
     options: options
   },
 })

@@ -2,9 +2,9 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import { getContext } from 'svelte'
+
 	const dateObject = getContext('dateObject')
 	const config = getContext('config')
-	const isDirty = getContext('isDirty')
 	const selectedUnix = getContext('selectedUnix')
 
 	export let originalContainer
@@ -55,7 +55,7 @@
 	}
 
 	let updateInputs = function () {
-		if (originalContainer && originalContainer.tagName === 'INPUT' && $config.initialValue || $isDirty) {
+		if (originalContainer && originalContainer.tagName === 'INPUT' && $config.initialValue) {
 		  let selected = $config.formatter($selectedUnix, $dateObject)
 			if (originalContainer && originalContainer.tagName === 'INPUT') {
 			  originalContainer.value = selected
