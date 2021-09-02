@@ -75,11 +75,13 @@
     "lint": "npm run lint:eslint; npm run lint:style",
     "lint:eslint": "eslint -c .eslintrc.js ./src/**.js ./src/**.svelte",
     "lint:style": "stylelint **/*.{css,html,js,md,mjs,svelte,ts}",
-    "cypress": "cypress open --config-file ./cypress.json"
+    "cypress": "cypress open --config-file ./cypress.json",
+    "tests": "cypress run --config-file ./cypress.json"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint",
+      "pre-push":  "npm run lint; npm run tests",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
