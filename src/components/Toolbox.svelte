@@ -50,33 +50,17 @@
 <script>
   import { createEventDispatcher } from 'svelte'
 	import { getContext } from 'svelte'
+
 	const config = getContext('config')
-
-	export let viewUnix
-	export let viewMode
-
   const dispatch = createEventDispatcher()
+
+	export let viewMode
 
 	function setViewMode(payload) { dispatch('selectmode', payload) }
 	function setcalendar(payload) { dispatch('setcalendar', payload) }
   function today(payload) { dispatch('today', payload) }
   function next(payload) { dispatch('next', payload) }
   function prev(payload) { dispatch('prev', payload) }
-
-  $: selectedYear = new persianDate(viewUnix).year()
-  $: selectedMonth = new persianDate(viewUnix).format('MMMM')
-
-  let yearRange
-  let startYear
-  $: {
-    yearRange = []
-    startYear = selectedYear - (selectedYear % 12)
-    let i = 0
-    while (i < 12) {
-      yearRange.push(startYear + i)
-      i++
-    }
-  }
 </script>
 
 <style global lang="scss">

@@ -1,8 +1,10 @@
 <svelte:options accessors={true} immutable={true} />
+
+{#if isVisible && $config.overlay}
+	<div class="pwt-datepicker-overlay-bg"></div>
+{/if}
+
 {#if isVisible}
-	{#if $config.overlay}
-		<div class="pwt-datepicker-overlay-bg"></div>
-	{/if}
 	<div 
 		bind:this={plotarea}
 		on:wheel={handleWheel}
@@ -13,10 +15,10 @@
 				viewUnix="{$viewUnix}"
 				selectedUnix="{$selectedUnix}" />
 		{/if}
+
 		{#if $config.navigator.enabled}
 			<Navigator 
 				on:selectmode="{setViewModeToUpperAvailableLevel}"
-				on:today="{today}"
 				on:next="{navNext}"
 				on:prev="{navPrev}"
 				viewMode="{$privateViewMode}"
@@ -27,8 +29,7 @@
 			class="pwt-datepicker-picker-section">
 			{#if !$config.onlyTimePicker}
 				{#if $privateViewMode === 'year' && $config.yearPicker.enabled}
-					<div
-						transition:fade={{duration: animateSpeed}}>
+					<div>
 						<YearView
 							on:select="{onSelectYear}"
 							viewUnix="{$viewUnix}"
@@ -36,8 +37,7 @@
 					</div>
 				{/if}
 				{#if $privateViewMode === 'month' && $config.monthPicker.enabled}
-					<div
-						transition:fade={{duration: animateSpeed}}>
+					<div>
 						<MonthView
 							on:select="{onSelectMonth}"
 							viewUnix="{$viewUnix}"
@@ -45,8 +45,7 @@
 					</div>
 				{/if}
 				{#if $privateViewMode === 'day' && $config.dayPicker.enabled}
-					<div
-						transition:fade={{duration: animateSpeed}}>
+					<div>
 						<DateView
 							on:prev="{navPrev}"
 							on:next="{navNext}"
@@ -72,14 +71,11 @@
 				on:setcalendar="{setcalendar}"
 				on:selectmode="{setViewMode}"
 				on:today="{today}"
-				on:next="{navNext}"
-				on:prev="{navPrev}"
-				viewMode="{$privateViewMode}"
-				viewUnix="{$viewUnix}"
-				selectedUnix="{$selectedUnix}" />
+				viewMode="{$privateViewMode}"/>
 		{/if}
 	</div>
 {/if}
+
 <Input 
 bind:this={inputComp}
 on:setinitialvalue="{setInitialValue}"
@@ -88,8 +84,13 @@ plotarea={plotarea}
 originalContainer={originalContainer} />
 
 <script>
-	import { setContext } from 'svelte'
-	import { fade } from 'svelte/transition'
+	import { createEventDispatcher, setContext } from 'svelte'
+	import { writable, get } from 'svelte/store'
+	import lodash from 'lodash'
+
+	import PersianDateParser from './parser'
+	import {mergeOptionsWithDefaultConfig, getInitialValue, persianDateToUnix, getHourMinuteSecond } from './helpers.js'
+
 	import YearView from './components/YearView.svelte'
 	import MonthView from './components/MonthView.svelte'
 	import DateView from './components/DateView.svelte'
@@ -98,90 +99,79 @@ originalContainer={originalContainer} />
 	import Infobox from './components/Infobox.svelte'
 	import Toolbox from './components/Toolbox.svelte'
 	import Input from './components/Input.svelte'
-	import Defaultconfig from './config.js'
-	import { createEventDispatcher } from 'svelte'
-	import lodash from 'lodash'
-	import PersianDateParser from './parser'
-	import { persianDateToUnix, getHourMinuteSecond } from './helpers.js'
-	import { writable, get } from 'svelte/store'
-   
-	const defaultconfig = Defaultconfig()
 
-	const nowUnix = persianDateToUnix(new persianDate())
-	const _config = new writable(defaultconfig)
-	const _isDirty = new writable(false)
-	const _selectedUnix = new writable(nowUnix)
-	const _viewUnix = new writable(nowUnix)
-	const _privateViewMode = new writable('day')
-	const _dateObject = new writable(persianDate)
-	const _actions = {
+	// Plugin Options
+	export let options = {}
+	export let model = null
+	export let originalContainer = null
+
+	// Merge config
+	options = mergeOptionsWithDefaultConfig(options)
+
+	// Get Initial Value
+	let initialDate = getInitialValue(originalContainer)
+  
+	// Reactive Context
+	const privateViewMode = new writable(options.viewMode)
+	const config = new writable(options)
+	const isDirty = new writable(false)
+	const selectedUnix = new writable(initialDate)
+	const viewUnix = new writable(initialDate)
+	const dateObject = new writable(persianDate)
+	const actions = {
 		setDate (unix) {
 			this.updateIsDirty(true)
-			_viewUnix.set(unix)
-			_selectedUnix.set(unix)
+			viewUnix.set(unix)
+			selectedUnix.set(unix)
 		},
 		parsInitialValue (inputString) {
-			let pd = get(_dateObject)
+			let pd = get(dateObject)
 			let parse = new PersianDateParser()
 			if (parse.parse(inputString) !== undefined) {
-				pd.toCalendar(get(_config).initialValueType)
+				pd.toCalendar(get(config).initialValueType)
 				let unix = new pd(parse.parse(inputString))
 				this.updateIsDirty(true)
-				_viewUnix.set(unix.valueOf())
+				viewUnix.set(unix.valueOf())
 				this.setSelectedDate(unix)
-				pd.toCalendar(get(_config).calendarType)
+				pd.toCalendar(get(config).calendarType)
 			}
 		},
 		setFromDefaultValue (data) {
 			this.parsInitialValue(data)
 		},
 		onSetCalendar (payload) {
-			_config.set({
-				...get(_config),
+			config.set({
+				...get(config),
 				calendarType: payload
 			})
-			let currentLocale = get(_config).calendar[payload].locale
+			let currentLocale = get(config).calendar[payload].locale
 			let obj = persianDate
 			obj.toCalendar(payload)
 			obj.toLocale(currentLocale)
-			obj.toLeapYearMode(get(_config).calendar.persian.leapYearMode)
-			_dateObject.set( obj )
-			_viewUnix.set(get(_selectedUnix))
+			obj.toLeapYearMode(get(config).calendar.persian.leapYearMode)
+			dateObject.set( obj )
+			viewUnix.set(get(selectedUnix))
 		},
 		setConfig (payload) {
-			_config.set(payload)
-			this.onSetCalendar(get(_config).calendarType)
+			config.set(payload)
+			this.onSetCalendar(get(config).calendarType)
 			if (payload.onlyTimePicker) {
 				this.setViewMode('time')
 			} else {
 				this.setViewMode(payload.viewMode)
 			}
 		},
-		updateConfig (key) {
-			let ob = {}
-			ob[key[0]] = key[1] 
-			let conf = JSON.stringify(get(_config))
-			conf = JSON.parse(conf)
-			conf[key[0]] = key[1]
-			_config.update(() => {
-				return {
-					...get(_config),
-					...ob
-				}
-			})
-			this.onSetCalendar(get(_config).calendarType)
-		},
 		onSelectTime (pDate) {
-			const pd = get(_dateObject)
+			const pd = get(dateObject)
 			const date = pDate.detail
 			const { hour, minute, second } = getHourMinuteSecond(date)
-			const calced = new pd(get(_selectedUnix)).hour(hour).minute(minute).second(second)
+			const calced = new pd(get(selectedUnix)).hour(hour).minute(minute).second(second)
 			this.updateIsDirty(true)
 			this.setSelectedDate(calced)
 		},
 		onSelectDate(pDate) {
-			const pd = get(_dateObject)
-			const { hour, minute, second } = getHourMinuteSecond(get(_selectedUnix))
+			const pd = get(dateObject)
+			const { hour, minute, second } = getHourMinuteSecond(get(selectedUnix))
 			const date = new pd(pDate)
 			const cashedDate = date.date()
 			const cashedMonth = date.month()
@@ -197,22 +187,22 @@ originalContainer={originalContainer} />
 			this.updateIsDirty(true)
 		},
 		setSelectedDate(pDate) {
-			const pd = get(_dateObject)
+			const pd = get(dateObject)
 			const unix = new pd(pDate).valueOf()
-			_selectedUnix.set(unix)
+			selectedUnix.set(unix)
 			this.setViewModeToLowerAvailableLevel()
-			get(_config).onSelect(unix)
+			get(config).onSelect(unix)
 		},
 		onSelectMonth(month) {
-			const pd = get(_dateObject)
-			_viewUnix.set(
-				new pd(get(_viewUnix))
+			const pd = get(dateObject)
+			viewUnix.set(
+				new pd(get(viewUnix))
 				.month(month)
 				.valueOf()
 			)
-			if (!get(_config).onlySelectOnDate) {
+			if (!get(config).onlySelectOnDate) {
 				this.setSelectedDate(
-					new pd(get(_viewUnix))
+					new pd(get(viewUnix))
 					.month(month)
 				)
 			} else {
@@ -221,15 +211,15 @@ originalContainer={originalContainer} />
 			this.updateIsDirty(true)
 		},
 		onSelectYear(year) {
-			const pd = get(_dateObject)
-			_viewUnix.set(
-				new pd(get(_selectedUnix))
+			const pd = get(dateObject)
+			viewUnix.set(
+				new pd(get(selectedUnix))
 				.year(year)
 				.valueOf()
 			)
-			if (!get(_config).onlySelectOnDate) {
+			if (!get(config).onlySelectOnDate) {
 				this.setSelectedDate(
-					new pd(get(_selectedUnix))
+					new pd(get(selectedUnix))
 					.year(year)
 				)
 			} else {
@@ -238,137 +228,125 @@ originalContainer={originalContainer} />
 			this.updateIsDirty(true)
 		},
 		onSetHour(hour) {
-			const pd = get(_dateObject)
+			const pd = get(dateObject)
 			this.setSelectedDate(
-				new pd(get(_selectedUnix))
+				new pd(get(selectedUnix))
 				.hour(hour)
 			)
 			this.updateIsDirty(true)
 		},
 		onSetMinute(minute) {
-			const pd = get(_dateObject)
+			const pd = get(dateObject)
 			this.setSelectedDate(
-				new pd(get(_selectedUnix))
+				new pd(get(selectedUnix))
 				.minute(minute)
 			)
 			this.updateIsDirty(true)
 		},
 		setSecond(second) {
-			const pd = get(_dateObject)
+			const pd = get(dateObject)
 			this.setSelectedDate(
-				new pd(get(_selectedUnix))
+				new pd(get(selectedUnix))
 				.second(second)
 			)
 		},
 		setViewMode(mode) {
-			let conf = get(_config)
-			_config.set(lodash.merge(conf, {
+			let conf = get(config)
+			config.set(lodash.merge(conf, {
 				viewMode: mode
 			}))
-			_privateViewMode.set(mode)
+			privateViewMode.set(mode)
 		},
 		setViewModeToUpperAvailableLevel() {
-			let currentViewMode = get(_privateViewMode)
-			let $_config = get(_config)
+			let currentViewMode = get(privateViewMode)
+			let $config = get(config)
 			if (currentViewMode === 'time') {
-				if ($_config.dayPicker.enabled) {
+				if ($config.dayPicker.enabled) {
 					this.setViewMode('day')
-				} else if ($_config.monthPicker.enabled) {
+				} else if ($config.monthPicker.enabled) {
 					this.setViewMode('month')
-				} else if ($_config.yearPicker.enabled) {
+				} else if ($config.yearPicker.enabled) {
 					this.setViewMode('year')
 				}
 			} else if (currentViewMode === 'day') {
-				if ($_config.monthPicker.enabled) {
+				if ($config.monthPicker.enabled) {
 					this.setViewMode('month')
-				} else if ($_config.yearPicker.enabled) {
+				} else if ($config.yearPicker.enabled) {
 					this.setViewMode('year')
 				}
 			} else if (currentViewMode === 'month') {
-				if ($_config.yearPicker.enabled) {
+				if ($config.yearPicker.enabled) {
 					this.setViewMode('year')
 				}
 			}
 		},
 		setViewModeToLowerAvailableLevel() {
-			let currentViewMode = get(_privateViewMode)
-			let $_config = get(_config)
+			let currentViewMode = get(privateViewMode)
+			let $config = get(config)
 			if (currentViewMode === 'year') {
-				if ($_config.monthPicker.enabled) {
+				if ($config.monthPicker.enabled) {
 					this.setViewMode('month')
-				} else if ($_config.dayPicker.enabled) {
+				} else if ($config.dayPicker.enabled) {
 					this.setViewMode('day')
-				} else if ($_config.timePicker.enabled) {
+				} else if ($config.timePicker.enabled) {
 					this.setViewMode('time')
 				}
 			} else if (currentViewMode === 'month') {
-				if ($_config.dayPicker.enabled) {
+				if ($config.dayPicker.enabled) {
 					this.setViewMode('day')
-				} else if ($_config.timePicker.enabled) {
+				} else if ($config.timePicker.enabled) {
 					this.setViewMode('time')
 				}
 			} else if (currentViewMode === 'day') {
-				if ($_config.timePicker.enabled && $_config.timePicker.showAsLastStep) {
+				if ($config.timePicker.enabled && $config.timePicker.showAsLastStep) {
 					this.setViewMode('time')
 				}
 			}
 		},
 		updateIsDirty(value) {
-			_isDirty.set(value)
+			isDirty.set(value)
 		},
 		onSelectNextView() {
-			if (get(_privateViewMode) === 'day') {
-				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).add('month', 1)))
+			if (get(privateViewMode) === 'day') {
+				viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('month', 1)))
 			}
-			if (get(_privateViewMode) === 'month') {
-				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).add('year', 1)))
+			if (get(privateViewMode) === 'month') {
+				viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 1)))
 			}
-			if (get(_privateViewMode) === 'year') {
-				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).add('year', 12)))
+			if (get(privateViewMode) === 'year') {
+				viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).add('year', 12)))
 			}
 		},
 		onSelectPrevView() {
-			if (get(_privateViewMode) === 'day') {
-				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).subtract('month', 1)))
+			if (get(privateViewMode) === 'day') {
+				viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('month', 1)))
 			}
-			if (get(_privateViewMode) === 'month') {
-				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).subtract('year', 1)))
+			if (get(privateViewMode) === 'month') {
+				viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 1)))
 			}
-			if (get(_privateViewMode) === 'year') {
-				_viewUnix.set(persianDateToUnix(new persianDate(get(_viewUnix)).subtract('year', 12)))
+			if (get(privateViewMode) === 'year') {
+				viewUnix.set(persianDateToUnix(new persianDate(get(viewUnix)).subtract('year', 12)))
 			}
-		},
-		setViewUnix(pDate) {
-			_viewUnix.set(persianDateToUnix(pDate))
 		},
 		onSelectToday() {
-			_viewUnix.set(persianDateToUnix(new persianDate().startOf('day')))
+			viewUnix.set(persianDateToUnix(new persianDate().startOf('day')))
 		}
 	}
 
-  setContext('config',_config) 
-  setContext('actions',_actions) 
-  setContext('selectedUnix',_selectedUnix) 
-  setContext('viewUnix',_viewUnix) 
-  setContext('privateViewMode',_privateViewMode) 
-  setContext('dateObject',_dateObject) 
+  setContext('privateViewMode',privateViewMode) 
+  setContext('config',config) 
+  setContext('selectedUnix',selectedUnix) 
+  setContext('viewUnix',viewUnix) 
+  setContext('dateObject',dateObject) 
+  setContext('actions',actions) 
 
-  const config = _config
-  const actions = _actions
-  const selectedUnix = _selectedUnix
-  const viewUnix = _viewUnix
-  const privateViewMode = _privateViewMode
-  const dateObject = _dateObject
+	actions.setConfig(options)
 
 	let plotarea
 	let inputComp
 	let isVisible = false
-	let animateSpeed = $config.animate ? $config.animateSpeed : 0
 
 	// Public props used in adapters
-	export let options = {}
-	export let originalContainer = null
-	export let model = null
 	export const setDate = function(unix) {
 		dispatcher('setDate')(unix)
   }	
@@ -419,25 +397,6 @@ originalContainer={originalContainer} />
 		}
 	}
 
-  let cashedoptions = options
-	if (!options) {
-		options = defaultconfig
-	} else {
-		options = lodash.merge(defaultconfig, options)
-	}
-	dispatcher('setConfig')(options)
-	$: {
-		if (JSON.stringify(cashedoptions) !== JSON.stringify(options)) {
-			if (!options) {
-				options = defaultconfig
-			} else {
-				options = lodash.merge(defaultconfig, options)
-			}
-			dispatcher('setConfig')(options)
-			cashedoptions = options
-		}
-	}
- 
 	// Update DAtepicker Via from reactivity models, like v-model
 	let cashedSelectedDate = $selectedUnix
 	if (model) {

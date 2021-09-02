@@ -5,8 +5,8 @@
 		class="pwt-date-month-view">
 		{#each monthRange as month, index}
 			<div
-				on:click="{(event) => { if (!isDisable(currentViewYear, index + 1)) select(index + 1) }}"
-			  class:disable="{isDisable(currentViewYear, index + 1)}"
+				on:click="{(event) => { if (!isDisabled(currentViewYear, index + 1)) select(index + 1) }}"
+			  class:disable="{isDisabled(currentViewYear, index + 1)}"
 				class:selected="{currentMonth - 1 === index && currentViewYear === currentSelectedYear}">
 				<span class="pwt-text">
 					{month}
@@ -18,6 +18,7 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import { getContext } from 'svelte'
+
 	const dateObject = getContext('dateObject')
 	const config = getContext('config')
 
@@ -51,7 +52,7 @@
 			};
 	}
 
-	const isDisable = (y, month) => {
+	const isDisabled = (y, month) => {
 		let startYear 
 		let startMonth
 		let endYear
@@ -86,9 +87,9 @@
 
 	const dispatch = createEventDispatcher()
 
-	function select(payload) { dispatch('select', payload) }
+	const select = function (payload) { dispatch('select', payload) }
 
-	$:  monthRange = new $dateObject().rangeName().months
+	$: monthRange = new $dateObject().rangeName().months
 	$: currentMonth = new $dateObject(selectedUnix).month()
 	$: currentSelectedYear = new $dateObject(selectedUnix).year()
 	$: currentViewYear = new $dateObject(viewUnix).year()

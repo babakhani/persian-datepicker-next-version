@@ -24,10 +24,10 @@
 						{#if week.length > 1}
 							{#each week as day}
 								<td
-									on:click="{(event) => { if (!isDisable(day) && day.month &&
+									on:click="{(event) => { if (!isDisabled(day) && day.month &&
 									currentViewMonth === day.month()) selectDate(day.valueOf()) }}"
 									class:othermonth="{!day.month}"
-									class:disable="{isDisable(day) || !checkDate(day)}"
+									class:disable="{isDisabled(day) || !checkDate(day)}"
 									class:selected="{day && day.isPersianDate && isSameDate(day.valueOf(), selectedDay)}"
 									class:today="{day && day.isPersianDate && isSameDate(day.valueOf(), today)}">
 									{#if day && day.month && day.format && currentViewMonth === day.month()}
@@ -51,11 +51,16 @@
 </div>
 
 <script>
-	import { getContext } from 'svelte'
+	import { createEventDispatcher, getContext } from 'svelte'
+
+	export let viewUnix
+	export let selectedUnix
+
+	const emit = createEventDispatcher()
 	const dateObject = getContext('dateObject')
 	const config = getContext('config')
 
-	function fadeOut(node, { duration, delay }) {
+	const fadeOut = function(node, { duration, delay }) {
 		return {
 			duration,
 			delay,
@@ -68,7 +73,8 @@
 			}
 		};
 	}
-	function fadeIn(node, { duration, delay }) {
+
+	const fadeIn = function(node, { duration, delay }) {
 		return {
 			duration,
 			delay,
@@ -89,7 +95,7 @@
 		return day.valueOf && $config.checkDate(day.valueOf())
 	}
 
-	const isDisable = (day) => {
+	const isDisabled = (day) => {
 		if (day.valueOf) {
 			let unixtimespan  = day.valueOf()
 			if ($config.minDate && $config.maxDate) {
@@ -108,17 +114,9 @@
 		}
 	}
 
-	export let viewUnix
-	export let selectedUnix
-	export let todayUnix
-
-	import { createEventDispatcher } from 'svelte'
-	const dispatch = createEventDispatcher()
-
-	function selectDate(payload) { dispatch('selectDate', payload) }
-
-	$: selectedDay = new $dateObject(selectedUnix).startOf('day');
-
+	const selectDate = (payload) => {
+		emit('selectDate', payload)
+	}
 
 	const getHintText = function (day) {
 		let out
@@ -135,10 +133,11 @@
 		return out
 	}
 
-	let groupedDay = []
-
-	$: today = new $dateObject(todayUnix)
+	$: today = new $dateObject()
+	$: selectedDay = new $dateObject(selectedUnix).startOf('day');
 	$: currentViewMonth = new $dateObject(viewUnix).month()
+
+	let groupedDay = []
 	let visible = true
 	let animateSpeed = $config.animateSpeed
 	let cachedViewUnix = viewUnix

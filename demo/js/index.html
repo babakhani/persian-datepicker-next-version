@@ -87,17 +87,12 @@
   </header>
   <div
     class="demo-box">
-  <div id="container" />
-  <div id="containerAlt" />
-  <div id="anotherContainer" />
-  </div>
-  <div
-    class="config-area" >
-    <h3>Settings</h3>
+    <input 
+      value="1616272200000"
+      id="container" />
   </div>
   <script>
     var container = document.getElementById('container')
-    var anotherContainer = document.getElementById('anotherContainer')
     var options = {
       calendarType: 'persian', // DONE
       calendar: {
@@ -114,7 +109,7 @@
       animate: true,    
       overlay: false,    
       responsive: true, // Deprecated
-      inline: true, // Deprected
+      inline: false, // Deprected
       initialValue: false,  // DONE
       initialValueType: 'persian', // Works but deprecated in next version
       persianDigit: true, // Deprected
@@ -277,29 +272,49 @@
       onSet: function (unixDate) { console.log('user event onSet') },
       onDestroy: function (unixDate) { console.log('user event onDestroy') }
     }
-    window.datepicker = persianDatepicker(container, options)
-    window.datepicker = persianDatepicker(anotherContainer, {
-      animate: true,    
-      overlay: false,    
-      responsive: true, // Deprecated
-      inline: true, // Deprected
-    })
-    // Check the datepicker instance
-    console.log("Datepicker Instance")
-    console.log(datepicker)
-    // Check API
-    // Test setDate, set selected date to 5 days after today
-    datepicker.setDate(new Date().valueOf() + (86400000 * 5))
-    // This will auto update datepicker
-    // New in 2.0.0
-    datepicker.setOptions({
-      calendarType: 'gregorian',
+
+    window.datepicker = persianDatepicker(container, {
+      animate: false,
+      toolbox: {
+        enabled: true
+      },    
+      navigator: {
+        enabled: true
+      },    
+      infobox: {
+        enabled: true 
+      },    
+      timePicker: {
+        enabled: false
+      },
+      yearPicker: {
+        enabled: false
+      },    
+      monthPicker: {
+        enabled: false
+      },    
+      format: 'YYYY/MM/DD HH:mm:ss' ,   
+      calendarType: 'persian',
       viewMode: 'day'
     })
+
+    //window.datepicker = persianDatepicker(container, options)
+    // Check the datepicker instance
+    //console.log("Datepicker Instance")
+    //console.log(datepicker)
+    // Check API
+    // Test setDate, set selected date to 5 days after today
+    //datepicker.setDate(new Date().valueOf() + (86400000000 * 5))
+    // This will auto update datepicker
     // New in 2.0.0
-    console.log("Datepicker Instance Options")
-    console.log(datepicker.getOptions())
-    console.log(datepicker.getState())
+    //datepicker.setOptions({
+    //  calendarType: 'gregorian',
+    //  viewMode: 'year'
+    //})
+    // New in 2.0.0
+    //console.log("Datepicker Instance Options")
+    //console.log(datepicker.getOptions())
+    //console.log(datepicker.getState())
     datepicker.show()
   </script>
 </body>

@@ -5,8 +5,8 @@
   class="pwt-date-year-view">
   {#each yearRange as year}
     <div
-			on:click="{(event) => { if (!isDisable(year)) select(year) }}"
-			class:disable="{isDisable(year)}"
+			on:click="{(event) => { if (!isDisabled(year)) select(year) }}"
+			class:disable="{isDisabled(year)}"
       class:selected="{currentYear === year}">
 			<span class="pwt-text">
         {getPersianYear(year)}
@@ -15,6 +15,7 @@
   {/each}
 </div>
 {/if}
+
 <script>
   import { createEventDispatcher } from 'svelte'
 	import { getContext } from 'svelte'
@@ -34,8 +35,8 @@
 				transform: translate(${transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
 				opacity: ${t};
 				`
-				}
-		};
+			}
+		}
 	}
 	function fadeIn(node, { duration, delay }) {
 		return {
@@ -43,14 +44,14 @@
 			delay,
 			css: t => {
 				return `
-				transform: translate(${!transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0);
-				opacity: ${t};
+				transform: translate(${!transitionDirectionForward ?  '-' : ''}${20 - (t * 20)}px, 0)
+				opacity: ${t}
 				`
 			}
-			};
+		}
 	}
 
-	const isDisable = (y) => {
+	const isDisabled = (y) => {
 		let startYear 
 		let endYear
 		if ($config.checkYear(y)) {
@@ -58,17 +59,17 @@
 				startYear = new $dateObject($config.minDate).year()
 				endYear = new $dateObject($config.maxDate).year()
 				if (y > endYear || y < startYear) {
-					return true;
+					return true
 				}
 			} else if ($config.maxDate) {
 				endYear = new $dateObject($config.maxDate).year()
 				if (y > endYear) {
-					return true;
+					return true
 				}
 			} else if ($config.minDate) {
 				startYear = new $dateObject($config.minDate).year()
 				if (y < startYear) {
-					return true;
+					return true
 				}
 			}
 		}

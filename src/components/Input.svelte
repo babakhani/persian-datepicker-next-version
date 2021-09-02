@@ -84,7 +84,6 @@
 		}
 	}
 
-  getInputInitialValue()
 	setPlotPostion()
 	initInputEvents()
 	if ($config.observer) {

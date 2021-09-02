@@ -137,10 +137,11 @@
 	import { createEventDispatcher } from 'svelte'
 	import { afterUpdate } from 'svelte'
 	import { getContext } from 'svelte'
+
 	const dateObject = getContext('dateObject')
 	const config = getContext('config')
-
 	const dispatch = createEventDispatcher()
+
 	export let selectedUnix
 
 	$: currentHour = new $dateObject(selectedUnix).format('hh')
@@ -148,8 +149,7 @@
 	$: currentSecond = new $dateObject(selectedUnix).format('ss')
 	$: currentMeridian = new $dateObject(selectedUnix).format('a')
 
-	let tempDate = $dateObject
-	$: currentGregorianMeridian = new tempDate(selectedUnix).toLocale('en').format('a')
+	$: currentGregorianMeridian = new $dateObject(selectedUnix).toLocale('en').format('a')
 
 	const handleWheel = (e, timeKey) => {
 		if ($config.navigator.scroll.enabled) {
@@ -179,10 +179,10 @@
 				selectedObj = selectedObj.subtract(mode, step).clone()
 			}
 		}
-		selectDate(selectedObj)
+		select(selectedObj)
 	}
 
-	function selectDate(payload) { dispatch('selectTime', payload) }
+	const select = function(payload) { dispatch('selectTime', payload) }
 
 </script>
 

@@ -69,8 +69,12 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import { getContext } from 'svelte'
+
 	const dateObject = getContext('dateObject')
 	const config = getContext('config')
+
+	export let viewUnix
+	export let viewMode
 
 	function fadeOut(node, { duration, delay }) {
 		return {
@@ -97,25 +101,18 @@
 		};
 	}
 
-	export let viewUnix
-	export let viewMode
-
 	const dispatch = createEventDispatcher()
 
 	function setViewMode(payload) { dispatch('selectmode', payload) }
-	function today(payload) { dispatch('today', payload) }
 	function next(payload) { dispatch('next', payload) }
 	function prev(payload) { dispatch('prev', payload) }
 
 	$: selectedYear = new $dateObject(viewUnix).year()
 	$: visualStartYear = new $dateObject(viewUnix).format('YYYY')
 	$: visualEndYear = new $dateObject([selectedYear+12]).format('YYYY')
-	$: selectedMonth = new $dateObject(viewUnix).format('MMMM')
-	$: selectedDate = new $dateObject(viewUnix).format('DD')
 	$: dateViewText = $config.dayPicker.titleFormatter(viewUnix, $dateObject)
 	$: timeViewText =  $config.timePicker.titleFormatter(viewUnix, $dateObject)
 	$: monthViewText = $config.monthPicker.titleFormatter(viewUnix, $dateObject)
-	$: yearViewText = $config.yearPicker.titleFormatter(viewUnix, $dateObject)
 
 	let startYear
 	let visible = true

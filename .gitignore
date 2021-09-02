@@ -8,6 +8,7 @@ lerna-debug.log*
 .vscode
 cypress/integration/examples
 cypress/videos
+tests/e2e/videos
 cypress/screenshots
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
