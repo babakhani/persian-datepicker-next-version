@@ -41,7 +41,7 @@
     "rollup-plugin-terser": "^5.1.2",
     "sirv-cli": "^0.4.4",
     "stylelint": "^12.0.0",
-    "svelte": "^3.0.0",
+    "svelte": "^3.49.0",
     "svelte-adapter": "https://github.com/babakhani/svelte-adapter",
     "svelte-preprocess": "^3.2.1",
     "vuepress": "^1.2.0"
