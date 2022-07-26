@@ -29,7 +29,7 @@ export default {
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`dist/pwt-datepicker.css`)
+        css.write(`pwt-datepicker.css`)
       },
     }),
     resolve({

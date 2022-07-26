@@ -22,7 +22,9 @@ export function getInitialValue(target) {
   if (target && target.tagName === 'INPUT') {
     out = parseInt(target.value)
   } else {
-    out = target.getAttribute("data-date")
+    if (target && target.getAttribute) {
+      out = target.getAttribute("data-date")
+    }
   }
   return out
 }

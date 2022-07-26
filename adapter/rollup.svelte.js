@@ -29,7 +29,7 @@ export default { input: 'adapter/main.js',
       dev: !production,
       preprocess,
       css: css => {
-        css.write(`dist/pwt-datepicker.css`)
+        css.write(`pwt-datepicker.css`)
       },
     }),
     resolve({
