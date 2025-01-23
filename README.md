@@ -1,6 +1,12 @@
 Persian Date Picker
 ==============
 
+Important Notice: Project Deprecation
+I will no longer be maintaining or supporting this package. While the code remains accessible, please be advised that you use it at your own risk.
+
+------------------------
+
+
 ### Version 2.0.0-alpha (Under Development, Don't use it in production)
 
 ### Whats changed in v2.0.0
